@@ -13,11 +13,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const router = useRouter()
+const userStore = useUserStore()
 
 async function login() {
     const res = await fetch('http://localhost:8080/api/login', {
@@ -29,6 +31,7 @@ async function login() {
 
     if (res.ok) {
         const data = await res.json()
+        userStore.setUser(data.user)
         router.push(`/profile/${data.user.id}`)
     } else {
         const msg = await res.text()

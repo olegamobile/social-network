@@ -3,8 +3,15 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import { createPinia } from 'pinia'
+import { useUserStore } from './stores/user'
 
-createApp(App).use(router).mount('#app')
+const app = createApp(App)
+app.use(createPinia())
+app.use(router)
+app.mount('#app')
+
+const userStore = useUserStore()
 
 fetch('http://localhost:8080/api/me', {
     credentials: 'include'
@@ -17,7 +24,7 @@ fetch('http://localhost:8080/api/me', {
         }
     })
     .then(user => {
-        storeUser(user)  // Set to your Vue store or global state
+        userStore.setUser(user)
         router.push('/') // Go to home
     })
     .catch(() => {

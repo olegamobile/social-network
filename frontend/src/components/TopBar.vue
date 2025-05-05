@@ -15,6 +15,9 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 defineProps({
     userId: Number,
@@ -28,6 +31,7 @@ function logout() {
         method: 'POST',
         credentials: 'include'
     }).then(() => {
+        userStore.clearUser()
         router.push('/login')
     })
 }

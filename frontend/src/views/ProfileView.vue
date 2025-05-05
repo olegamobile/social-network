@@ -48,22 +48,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     height: 100vh;
-}
-
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #333;
-    color: white;
-    padding: 0.5rem 1rem;
-}
-
-.nav-icons a,
-.profile-link {
-    margin-left: 1rem;
-    color: white;
-    text-decoration: none;
+    width: 100vw;
 }
 
 .content {
