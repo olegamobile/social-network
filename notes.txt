@@ -1,15 +1,13 @@
-Run with docker:
+* Run with docker: *
 
 docker compose build
 docker compose up
 
-Run without Docker:
+ * Run without Docker: *
 
-go run main.go
+in backend/:
+- go run main.go
 
-npm install   # only once, to install dependencies
-npm run dev
-
-Make sure your frontend API calls use the full backend address, like:
-
-fetch('http://localhost:8080/api/login', ...)
+in frontend/:
+- npm install   # only once, to install dependencies
+- npm run dev

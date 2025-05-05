@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:23-slim
 
 WORKDIR /app
 COPY . .
@@ -8,4 +8,4 @@ RUN npm run build
 
 RUN npm install -g serve
 EXPOSE 5173
-CMD ["serve", "-s", "dist"]
+CMD ["serve", "-s", "dist", "-l", "5173"]
