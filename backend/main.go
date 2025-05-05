@@ -188,9 +188,9 @@ func runInitSQL(db *sql.DB, filepath string) error {
 		return err
 	}
 
-	// Split statements on semicolon (rough/simple split)
-	queries := strings.Split(string(sqlBytes), ";")
-	for _, query := range queries {
+	// Split statements on semicolon
+	queries := strings.SplitSeq(string(sqlBytes), ";")
+	for query := range queries {
 		query = strings.TrimSpace(query)
 		if query == "" {
 			continue
@@ -215,10 +215,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to run init.sql: %v", err)
 	}
-
-	//http.HandleFunc("/api/users", getUsers)
-	//http.HandleFunc("/api/posts", getPosts)
-	//http.HandleFunc("/api/login", handleLogin)
 
 	// CORS to allow developement on same address
 	http.HandleFunc("/api/users", withCORS(getUsers))
