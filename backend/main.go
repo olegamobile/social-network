@@ -27,6 +27,7 @@ type User struct {
 type Post struct {
 	ID        int    `json:"id"`
 	UserID    int    `json:"user_id"`
+	Username  string `json:"username"`
 	Content   string `json:"content"`
 	CreatedAt string `json:"created_at"`
 }
@@ -165,15 +166,29 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func getPosts(w http.ResponseWriter, r *http.Request) {
-	rows, _ := db.Query("SELECT id, user_id, content, created_at FROM posts")
+	rows, err := db.Query(`
+		SELECT posts.id, posts.user_id, users.username, posts.content, posts.created_at
+		FROM posts
+		JOIN users ON posts.user_id = users.id
+	`)
+	if err != nil {
+		http.Error(w, "Failed to query posts", http.StatusInternalServerError)
+		return
+	}
 	defer rows.Close()
 
 	var posts []Post
 	for rows.Next() {
 		var p Post
-		rows.Scan(&p.ID, &p.UserID, &p.Content, &p.CreatedAt)
+		err := rows.Scan(&p.ID, &p.UserID, &p.Username, &p.Content, &p.CreatedAt)
+		if err != nil {
+			http.Error(w, "Failed to scan post row", http.StatusInternalServerError)
+			return
+		}
 		posts = append(posts, p)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }
 
@@ -184,8 +199,9 @@ func runInitSQL(db *sql.DB, filepath string) error {
 	}
 
 	// Split statements on semicolon
-	queries := strings.SplitSeq(string(sqlBytes), ";")
-	for query := range queries {
+	//queries := strings.SplitSeq(string(sqlBytes), ";")
+	queries := strings.Split(string(sqlBytes), ";")
+	for _, query := range queries {
 		query = strings.TrimSpace(query)
 		if query == "" {
 			continue

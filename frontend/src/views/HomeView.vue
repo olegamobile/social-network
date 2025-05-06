@@ -24,10 +24,7 @@
 
             <main class="main-content">
                 <h2>Home Feed</h2>
-                <div v-for="post in posts" :key="post.id" class="post">
-                    <p>{{ post.content }}</p>
-                    <small>Posted by user ID {{ post.user_id }} on {{ post.created_at }}</small>
-                </div>
+                <PostsList :posts="posts"/>
             </main>
         </div>
     </div>
@@ -36,6 +33,7 @@
 <script setup>
 import TopBar from '../components/TopBar.vue'
 import { ref, onMounted } from 'vue'
+import PostsList from '@/components/PostsList.vue'
 
 const posts = ref([])
 
