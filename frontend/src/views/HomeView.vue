@@ -1,6 +1,6 @@
 <template>
     <div class="layout">
-        <TopBar :userId="userId" :username="username" />
+        <TopBar />
 
         <div class="content">
             <aside class="sidebar">
@@ -36,9 +36,6 @@
 <script setup>
 import TopBar from '../components/TopBar.vue'
 import { ref, onMounted } from 'vue'
-
-const userId = 1
-const username = 'Alice'
 
 const posts = ref([])
 

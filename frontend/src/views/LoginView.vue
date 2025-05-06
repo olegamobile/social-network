@@ -31,6 +31,7 @@ async function login() {
 
     if (res.ok) {
         const data = await res.json()
+        console.log("User in login view:", data.user)
         userStore.setUser(data.user)
         router.push(`/profile/${data.user.id}`)
     } else {

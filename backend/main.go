@@ -63,8 +63,10 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user User
-	err := db.QueryRow(`SELECT id, username, email, password FROM users WHERE email = ?`, req.Email).
-		Scan(&user.ID, &user.Username, &user.Email, &user.Password)
+	err := db.QueryRow(`
+	SELECT id, username, email, first_name, last_name, birthday, password
+	FROM users WHERE email = ?`, req.Email).
+		Scan(&user.ID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &user.Password)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusUnauthorized)
 		return
@@ -134,14 +136,7 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user struct {
-		ID        int    `json:"id"`
-		Username  string `json:"username"`
-		Email     string `json:"email"`
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Birthday  string `json:"birthday"`
-	}
+	var user User
 	err = db.QueryRow(`
 		SELECT id, username, email, first_name, last_name, birthday
 		FROM users WHERE id = ?`, userID).

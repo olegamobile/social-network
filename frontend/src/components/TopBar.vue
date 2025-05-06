@@ -7,7 +7,10 @@
             <router-link to="#">💬</router-link>
             <router-link to="#">📅</router-link>
             <router-link to="#">🔔</router-link>
-            <router-link :to="`/profile/${userId}`" class="profile-link">{{ username }}</router-link>
+            <!-- v-if="user" condition avoids errors if the user is null before login. -->
+            <router-link v-if="user" :to="`/profile/${user.id}`" class="profile-link">
+                {{ user.username }}
+            </router-link>
             <button class="logout-button" @click="logout">🚪</button>
         </div>
     </nav>
@@ -15,27 +18,22 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user'
 
-const userStore = useUserStore()
-
-defineProps({
-    userId: Number,
-    username: String
-})
-
 const router = useRouter()
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reactive when destructured
 
 function logout() {
     fetch('http://localhost:8080/api/logout', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
     }).then(() => {
         userStore.clearUser()
         router.push('/login')
     })
 }
-
 </script>
 
 <style scoped>

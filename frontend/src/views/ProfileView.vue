@@ -1,6 +1,6 @@
 <template>
     <div class="layout">
-        <TopBar :userId="userId" :username="user?.username || 'Profile'" />
+        <TopBar />
 
         <div class="content">
             <aside class="sidebar">
@@ -24,22 +24,25 @@
 
 <script setup>
 import TopBar from '../components/TopBar.vue'
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
-const route = useRoute()
-const userId = parseInt(route.params.id)
-const user = ref(null)
+const userStore = useUserStore()
+const { user, userId } = storeToRefs(userStore)  // storeToRefs() to keep it reactive
+
+console.log(user.value)
+
 const posts = ref([])
 
 onMounted(async () => {
     const usersRes = await fetch('http://localhost:8080/api/users')
     const allUsers = await usersRes.json()
-    user.value = allUsers.find(u => u.id === userId)
 
     const postsRes = await fetch('http://localhost:8080/api/posts')
     const allPosts = await postsRes.json()
-    posts.value = allPosts.filter(p => p.user_id === userId)
+
+    posts.value = allPosts.filter(p => p.user_id === userId.value)
 })
 </script>
 
