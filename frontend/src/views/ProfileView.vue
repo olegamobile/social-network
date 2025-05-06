@@ -31,8 +31,6 @@ import { useUserStore } from '@/stores/user'
 const userStore = useUserStore()
 const { user, userId } = storeToRefs(userStore)  // storeToRefs() to keep it reactive
 
-console.log(user.value)
-
 const posts = ref([])
 
 onMounted(async () => {

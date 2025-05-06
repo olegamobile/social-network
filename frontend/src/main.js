@@ -24,7 +24,6 @@ fetch('http://localhost:8080/api/me', {
         }
     })
     .then(user => {
-        console.log("User in main.js:",user)
         userStore.setUser(user)
         router.push('/') // Go to home
     })

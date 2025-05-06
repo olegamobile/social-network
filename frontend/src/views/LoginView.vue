@@ -2,8 +2,8 @@
     <div class="login">
         <h2>Login</h2>
         <form @submit.prevent="login">
-            <input v-model="email" type="email" placeholder="Email" required />
-            <input v-model="password" type="password" placeholder="Password" required />
+            <input v-model="email" type="email" placeholder="Email" required autocomplete="email"/>
+            <input v-model="password" type="password" placeholder="Password" required autocomplete="current-password"/>
             <button type="submit">Login</button>
             <p v-if="error">{{ error }}</p>
         </form>
@@ -31,7 +31,6 @@ async function login() {
 
     if (res.ok) {
         const data = await res.json()
-        console.log("User in login view:", data.user)
         userStore.setUser(data.user)
         router.push(`/profile/${data.user.id}`)
     } else {
