@@ -2,13 +2,18 @@
     <div class="post-card">
         <p class="post-content">{{ post.content }}</p>
         <small class="post-date">
-            Posted by <strong>{{ post.username }}</strong> on {{ formattedDate }}
+            Posted by
+            <RouterLink :to="`/profile/${post.user_id}`" class="post-username">
+                {{ post.username }}
+            </RouterLink>
+            on {{ formattedDate }}
         </small>
     </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const { post } = defineProps({
     post: {
@@ -44,5 +49,15 @@ const formattedDate = computed(() => {
 .post-date {
     color: #666;
     font-size: 0.85rem;
+}
+
+.post-username {
+    color: #0077cc;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.post-username:hover {
+    text-decoration: underline;
 }
 </style>

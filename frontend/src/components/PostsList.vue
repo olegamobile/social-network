@@ -15,10 +15,4 @@ const { posts } = defineProps({
   }
 });
 
-console.log("posts in PostsList:", posts);
-onMounted(() => {
-  console.log("Mounted PostsList, posts:", posts)
-})
-
-
 </script>

@@ -13,31 +13,46 @@
 
             <main class="main-content">
                 <h2>{{ user?.first_name }}'s Posts</h2>
-                <PostsList :posts="posts"/>
+                <PostsList :posts="posts" />
             </main>
         </div>
     </div>
 </template>
 
 <script setup>
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import TopBar from '../components/TopBar.vue'
-import { ref, onMounted, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/stores/user'
 import PostsList from '@/components/PostsList.vue'
 
-const userStore = useUserStore()
-const { user, userId } = storeToRefs(userStore)  // storeToRefs() to keep it reactive
-
+const route = useRoute()
+const user = ref(null)
 const posts = ref([])
 
-onMounted(async () => {
-    const postsRes = await fetch('http://localhost:8080/api/posts')
+async function fetchUserAndPosts(userId) {
+  // Fetch user info
+  const userRes = await fetch(`http://localhost:8080/api/users/${userId}`)
+  user.value = userRes.ok ? await userRes.json() : null
+
+  // Fetch and filter posts
+  const postsRes = await fetch('http://localhost:8080/api/posts')
+  if (postsRes.ok) {
     const allPosts = await postsRes.json()
-    posts.value = allPosts.filter(p => p.user_id === userId.value)
+    posts.value = allPosts.filter(p => p.user_id === Number(userId))
+  }
+}
+
+// Initial fetch
+onMounted(() => {
+  fetchUserAndPosts(route.params.id)
 })
 
+// React to route param changes (reaload when going from one profile to another)
+watch(() => route.params.id, (newId) => {
+  fetchUserAndPosts(newId)
+})
 </script>
+
 
 <style scoped>
 .layout {
