@@ -28,14 +28,17 @@ import PostsList from '@/components/PostsList.vue'
 const route = useRoute()
 const user = ref(null)
 const posts = ref([])
+const apiUrl = import.meta.env.VITE_API_URL
 
 async function fetchUserAndPosts(userId) {
   // Fetch user info
-  const userRes = await fetch(`http://localhost:8080/api/users/${userId}`)
+  //const userRes = await fetch(`http://localhost:8080/api/users/${userId}`)
+  const userRes = await fetch(`${apiUrl}/api/users/${userId}`)
   user.value = userRes.ok ? await userRes.json() : null
 
   // Fetch and filter posts
-  const postsRes = await fetch('http://localhost:8080/api/posts')
+  //const postsRes = await fetch('http://localhost:8080/api/posts')
+  const postsRes = await fetch(`${apiUrl}/api/posts`)
   if (postsRes.ok) {
     const allPosts = await postsRes.json()
     posts.value = allPosts.filter(p => p.user_id === Number(userId))

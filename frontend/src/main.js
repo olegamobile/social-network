@@ -12,8 +12,10 @@ app.use(router)
 app.mount('#app')
 
 const userStore = useUserStore()
+const apiUrl = import.meta.env.VITE_API_URL || '/api'
 
-fetch('http://localhost:8080/api/me', {
+//fetch('http://localhost:8080/api/me', {
+fetch(`${apiUrl}/api/me`, {
     credentials: 'include'
 })
     .then(res => {

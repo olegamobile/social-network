@@ -24,9 +24,11 @@ import { useUserStore } from '@/stores/user'
 const router = useRouter()
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reactive when destructured
+const apiUrl = import.meta.env.VITE_API_URL || '/api'
 
 function logout() {
-    fetch('http://localhost:8080/api/logout', {
+    //fetch('http://localhost:8080/api/logout', {
+    fetch(`${apiUrl}/api/logout`, {
         method: 'POST',
         credentials: 'include',
     }).then(() => {

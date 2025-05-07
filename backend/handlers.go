@@ -36,7 +36,7 @@ type LoginRequest struct {
 func withCORS(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Allow frontend origin
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 		// Allow credentials like cookies
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		// For preflight requests

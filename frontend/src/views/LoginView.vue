@@ -20,9 +20,11 @@ const password = ref('')
 const error = ref('')
 const router = useRouter()
 const userStore = useUserStore()
+const apiUrl = import.meta.env.VITE_API_URL
 
 async function login() {
-    const res = await fetch('http://localhost:8080/api/login', {
+    //const res = await fetch('http://localhost:8080/api/login', {
+    const res = await fetch(`${apiUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -36,9 +36,11 @@ import { ref, onMounted } from 'vue'
 import PostsList from '@/components/PostsList.vue'
 
 const posts = ref([])
+const apiUrl = import.meta.env.VITE_API_URL || '/api'
 
 onMounted(async () => {
-    const res = await fetch('http://localhost:8080/api/posts')
+    //const res = await fetch('http://localhost:8080/api/posts')
+    const res = await fetch(`${apiUrl}/api/posts`)
     posts.value = await res.json()
 })
 </script>

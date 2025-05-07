@@ -11,7 +11,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var db *sql.DB
+var (
+	db          *sql.DB
+	port        string
+	frontendURL string
+)
 
 func runInitSQL(db *sql.DB, filepath string) error {
 	sqlBytes, err := os.ReadFile(filepath)
@@ -48,6 +52,16 @@ func main() {
 		log.Fatalf("Failed to run init.sql: %v", err)
 	}
 
+	port = os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port
+	}
+
+	frontendURL = os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173" // Default frontend URL
+	}
+
 	// CORS to allow developement on same address
 	http.HandleFunc("/api/users", withCORS(getUsers))
 	http.HandleFunc("/api/users/", withCORS(getUserByID)) // With trailing slash
@@ -56,6 +70,8 @@ func main() {
 	http.HandleFunc("/api/logout", withCORS(handleLogout))
 	http.HandleFunc("/api/me", withCORS(handleMe))
 
-	fmt.Println("Backend running on :8080")
+	//fmt.Println("Backend running on :8080")
+	fmt.Printf("Backend running on port %s, allowing requests from %s\n", port, frontendURL)
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
