@@ -25,17 +25,6 @@ const router = useRouter()
 const userStore = useUserStore()
 const apiUrl = import.meta.env.VITE_API_URL
 
-function getCookieValue(name) {
-    const cookies = document.cookie.split('; ');
-    for (const cookie of cookies) {
-        const [key, value] = cookie.split('=');
-        if (key === name) {
-            return decodeURIComponent(value);
-        }
-    }
-    return null;
-}
-
 async function login() {
     
     const res = await fetch(`${apiUrl}/api/login`, {
@@ -47,9 +36,6 @@ async function login() {
     if (res.ok) {
         const data = await res.json()
         userStore.setUser(data.user)
-
-        const sessionId = getCookieValue("session_id");
-        console.log("Session ID:", sessionId);
 
         router.push(`/profile/${data.user.id}`)
     } else {
