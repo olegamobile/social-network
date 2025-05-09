@@ -21,23 +21,37 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import PostsList from '@/components/PostsList.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
 const user = ref(null)
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL
+const { logout } = useAuth()
+const router = useRouter()
 
 async function fetchUserAndPosts(userId) {
     // Fetch user info
-    const userRes = await fetch(`${apiUrl}/api/users/${userId}`)
+    const userRes = await fetch(`${apiUrl}/api/users/${userId}`, {
+        credentials: 'include' // This sends the session cookie with the request
+    })
+    if (userRes.status === 401) {
+        // Session is invalid — logout and redirect
+        console.log("invalid session");
+        logout(); // your logout function
+        router.push('/login');
+        return;
+    }
     user.value = userRes.ok ? await userRes.json() : null
 
     // Fetch and filter posts
-    const postsRes = await fetch(`${apiUrl}/api/posts`)
+    const postsRes = await fetch(`${apiUrl}/api/posts`, {
+        credentials: 'include' // This sends the session cookie with the request
+    })
     if (postsRes.ok) {
         const allPosts = await postsRes.json()
         posts.value = allPosts.filter(p => p.user_id === Number(userId))

@@ -43,7 +43,7 @@ const now = new Date()
 
 const allEvents = ref([
     { id: 1, title: 'Graduation Party', group: 'Class of 24', time: '2025-06-01T18:00', description: 'Celebrate graduation!', going: ['Omar', 'You'] },
-    { id: 2, title: 'Football Match', group: 'Football Team', time: '2025-04-20T15:00', description: 'Final match of the season', going: ['Dagvadorj'] },
+    { id: 2, title: 'Football Match', group: 'Football Team', time: '2025-04-20T15:00', description: 'Final match of the season', going: ['Dolgorsürengiin'] },
     { id: 3, title: 'Reunion', group: 'Old Friends', time: '2024-01-10T19:00', description: 'Meet and greet', going: [] }
 ])
 

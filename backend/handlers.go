@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -97,11 +98,14 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleLogout(w http.ResponseWriter, r *http.Request) {
+
 	cookie, err := r.Cookie("session_id")
 	if err == nil {
+		fmt.Println("deleting cookie", cookie)
 		db.Exec("DELETE FROM sessions WHERE id = ?", cookie.Value)
 	}
 
+	fmt.Println("setting cookie to empty")
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    "",
@@ -116,18 +120,9 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 
 // "/api/me" is a common RESTful convention that returns the currently authenticated user's info
 func handleMe(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
+	userID, err := validateSession(r)
 	if err != nil {
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
-		return
-	}
-
-	var userID int
-	err = db.QueryRow(`
-		SELECT user_id FROM sessions 
-		WHERE id = ? AND expires_at > datetime('now')`, cookie.Value).Scan(&userID)
-	if err != nil {
-		http.Error(w, "Invalid session", http.StatusUnauthorized)
 		return
 	}
 
@@ -147,6 +142,12 @@ func handleMe(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
+	_, err := validateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	rows, _ := db.Query("SELECT id, username, email, first_name, last_name, birthday FROM users")
 	defer rows.Close()
 
@@ -160,6 +161,12 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserByID(w http.ResponseWriter, r *http.Request) {
+	_, err := validateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/users/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -181,6 +188,12 @@ func getUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func getPosts(w http.ResponseWriter, r *http.Request) {
+	_, err := validateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	rows, err := db.Query(`
 		SELECT posts.id, posts.user_id, users.username, posts.content, posts.created_at
 		FROM posts

@@ -45,7 +45,7 @@ const chats = ref([
 
 const selectedChat = ref(chats.value[0])
 
-const followed = ref([{ id: 2, name: 'Dagvadorj' }])
+const followed = ref([{ id: 2, name: 'Dolgorsürengiin' }])
 const followers = ref([{ id: 3, name: 'Alex' }])
 
 function select(chat) {

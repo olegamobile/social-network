@@ -70,7 +70,6 @@ func main() {
 	http.HandleFunc("/api/logout", withCORS(handleLogout))
 	http.HandleFunc("/api/me", withCORS(handleMe))
 
-	//fmt.Println("Backend running on :8080")
 	fmt.Printf("Backend running on port %s, allowing requests from %s\n", port, frontendURL)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

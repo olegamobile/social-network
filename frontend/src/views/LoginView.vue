@@ -1,9 +1,11 @@
 <template>
     <div class="login">
+        <TopBar />
+
         <h2>Login</h2>
         <form @submit.prevent="login">
-            <input v-model="email" type="email" placeholder="Email" required autocomplete="email"/>
-            <input v-model="password" type="password" placeholder="Password" required autocomplete="current-password"/>
+            <input v-model="email" type="email" placeholder="Email" required autocomplete="email" />
+            <input v-model="password" type="password" placeholder="Password" required autocomplete="current-password" />
             <button type="submit">Login</button>
             <p v-if="error">{{ error }}</p>
         </form>
@@ -14,6 +16,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import TopBar from '@/components/TopBar.vue'
 
 const email = ref('')
 const password = ref('')
@@ -22,18 +25,32 @@ const router = useRouter()
 const userStore = useUserStore()
 const apiUrl = import.meta.env.VITE_API_URL
 
+function getCookieValue(name) {
+    const cookies = document.cookie.split('; ');
+    for (const cookie of cookies) {
+        const [key, value] = cookie.split('=');
+        if (key === name) {
+            return decodeURIComponent(value);
+        }
+    }
+    return null;
+}
+
 async function login() {
-    //const res = await fetch('http://localhost:8080/api/login', {
+    
     const res = await fetch(`${apiUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ email: email.value, password: password.value }),
     })
-
     if (res.ok) {
         const data = await res.json()
         userStore.setUser(data.user)
+
+        const sessionId = getCookieValue("session_id");
+        console.log("Session ID:", sessionId);
+
         router.push(`/profile/${data.user.id}`)
     } else {
         const msg = await res.text()
@@ -44,7 +61,9 @@ async function login() {
 
 <style scoped>
 .login {
-    max-width: 400px;
-    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
 }
 </style>

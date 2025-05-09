@@ -28,7 +28,7 @@ const showCurrent = ref(true)
 const mockNotifications = ref([
     { id: 1, text: "Omar accepted your follow request", isOld: false },
     { id: 2, text: "There's a new event 'Graduation Party' in your group 'Batch of 2024", isOld: false },
-    { id: 3, text: "Dagvadorj accepted your follow request", isOld: false },
+    { id: 3, text: "Dolgorsürengiin accepted your follow request", isOld: false },
     { id: 4, text: "You were removed from the group 'Old Friends'", isOld: true },
     { id: 5, text: "New message from Alex", isOld: true }
 ])

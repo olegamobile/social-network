@@ -35,13 +35,25 @@
 import TopBar from '../components/TopBar.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import PostsList from '@/components/PostsList.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
+const { logout } = useAuth()
+const router = useRouter()
 
 onMounted(async () => {
-    const res = await fetch(`${apiUrl}/api/posts`);
+    const res = await fetch(`${apiUrl}/api/posts`, {
+        credentials: 'include' // This sends the session cookie with the request
+    });
+    if (res.status === 401) {
+        // Session is invalid — logout and redirect
+        logout(); // your logout function
+        router.push('/login');
+        return;
+    }
     posts.value = await res.json()
 })
 </script>

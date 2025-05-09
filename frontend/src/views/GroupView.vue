@@ -49,7 +49,7 @@ const isMember = ref(groupId === '1') // Mock check
 const group = ref({
     name: 'Class of 24',
     description: 'The official group for the class of 2024',
-    members: [{ id: 1, name: 'Omar' }, { id: 2, name: 'Dagvadorj' }],
+    members: [{ id: 1, name: 'Omar' }, { id: 2, name: 'Dolgorsürengiin' }],
     posts: [
         { id: 1, user_id: 1, content: 'Welcome to the group!' },
         { id: 2, user_id: 2, content: 'Excited about the graduation.' }

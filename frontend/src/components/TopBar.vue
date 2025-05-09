@@ -1,11 +1,11 @@
 <template>
     <nav class="top-bar">
-        <h1>MySocial</h1>
-        <div class="nav-icons">
-            <router-link to="/" title="Home" aria-label="Home">🏠</router-link>
-            <router-link to="/groups" title="Groups" aria-label="Groups">👥</router-link>
-            <router-link to="/chats" title="Chats" aria-label="Chats">💬</router-link>
-            <router-link to="/events" title="Events" aria-label="Events">📅</router-link>
+        <router-link to="/" id="home-title" aria-label="Home"><h1>MySocial</h1></router-link>
+        <div class="nav-icons" v-if="!isLoginPage">
+            <router-link to="/" class="navbar-link" title="Home" aria-label="Home">🏠</router-link>
+            <router-link to="/groups" class="navbar-link" title="Groups" aria-label="Groups">👥</router-link>
+            <router-link to="/chats" class="navbar-link" title="Chats" aria-label="Chats">💬</router-link>
+            <router-link to="/events" class="navbar-link" title="Events" aria-label="Events">📅</router-link>
             <router-link to="/notifications" title="Notifications" aria-label="Notifications">🔔</router-link>
             <router-link v-if="user" :to="`/profile/${user.id}`" title="Your Profile" aria-label="Your Profile"
                 class="profile-link">
@@ -18,24 +18,21 @@
 
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user'
+import { useAuth } from '@/composables/useAuth'
 
+const route = useRoute();
 const router = useRouter()
 const userStore = useUserStore()
+
 const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reactive when destructured
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
+const isLoginPage = computed(() => route.path === '/login');
+const { logout } = useAuth()
 
-function logout() {
-    fetch(`${apiUrl}/api/logout`, {
-        method: 'POST',
-        credentials: 'include',
-    }).then(() => {
-        userStore.clearUser()
-        router.push('/login')
-    })
-}
 </script>
 
 <style scoped>
@@ -46,6 +43,17 @@ function logout() {
     background: #333;
     color: white;
     padding: 0.5rem 1rem;
+    width: 100vw;
+    box-sizing: border-box;
+}
+
+#home-title {
+    color: white;
+    text-decoration: none;
+}
+
+#home-title:hover {
+    color: rgb(193, 193, 193);
 }
 
 .nav-icons {
@@ -67,7 +75,8 @@ function logout() {
     transition: background-color 0.2s ease;
 }
 
-.router-link-active {
+.router-link-active.profile-link,
+.router-link-active.navbar-link {
     background-color: #555;
 }
 
