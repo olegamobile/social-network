@@ -1,9 +1,9 @@
 <template>
-    <div class="layout">
+    <div class="home-page">
         <TopBar />
 
-        <div class="content">
-            <aside class="sidebar">
+        <TwoColumnLayout>
+            <template #sidebar>
                 <h3>Following</h3>
                 <ul>
                     <li>@bob</li>
@@ -20,18 +20,20 @@
                     <li>Vue Fans</li>
                     <li>Go Developers</li>
                 </ul>
-            </aside>
+            </template>
 
-            <main class="main-content">
+            <template #main>
                 <h2>Home Feed</h2>
-                <PostsList :posts="posts"/>
-            </main>
-        </div>
+                <PostsList :posts="posts" />
+            </template>
+        </TwoColumnLayout>
+
     </div>
 </template>
 
 <script setup>
 import TopBar from '../components/TopBar.vue'
+import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { ref, onMounted } from 'vue'
 import PostsList from '@/components/PostsList.vue'
 
@@ -39,38 +41,15 @@ const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 
 onMounted(async () => {
-    //const res = await fetch('http://localhost:8080/api/posts')
-    const res = await fetch(`${apiUrl}/api/posts`)
+    const res = await fetch(`${apiUrl}/api/posts`);
     posts.value = await res.json()
 })
 </script>
 
 <style scoped>
-.layout {
+.home-page {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-}
-
-.content {
-    display: flex;
-    flex: 1;
-}
-
-.sidebar {
-    width: 250px;
-    background: #f5f5f5;
-    padding: 1rem;
-}
-
-.main-content {
-    flex: 1;
-    padding: 1rem;
-}
-
-.post {
-    border-bottom: 1px solid #ccc;
-    padding: 0.5rem 0;
+    min-height: 100vh;
 }
 </style>
