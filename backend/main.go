@@ -64,11 +64,12 @@ func main() {
 
 	// CORS to allow developement on same address
 	http.HandleFunc("/api/users", withCORS(getUsers))
-	http.HandleFunc("/api/users/", withCORS(getUserByID)) // With trailing slash
+	http.HandleFunc("/api/users/", withCORS(handleUserByID)) // With trailing slash
 	http.HandleFunc("/api/posts", withCORS(getPosts))
 	http.HandleFunc("/api/login", withCORS(handleLogin))
 	http.HandleFunc("/api/logout", withCORS(handleLogout))
 	http.HandleFunc("/api/me", withCORS(handleMe))
+	http.HandleFunc("/api/posts/create", withCORS(handleCreatePost))
 
 	fmt.Printf("Backend running on port %s, allowing requests from %s\n", port, frontendURL)
 

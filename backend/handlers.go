@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -101,11 +100,9 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("session_id")
 	if err == nil {
-		fmt.Println("deleting cookie", cookie)
 		db.Exec("DELETE FROM sessions WHERE id = ?", cookie.Value)
 	}
 
-	fmt.Println("setting cookie to empty")
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    "",
@@ -160,7 +157,14 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-func getUserByID(w http.ResponseWriter, r *http.Request) {
+func getUserByID(id int) (User, error) {
+	var u User
+	err := db.QueryRow("SELECT id, username, email, first_name, last_name, birthday FROM users WHERE id = ?", id).
+		Scan(&u.ID, &u.Username, &u.Email, &u.FirstName, &u.LastName, &u.Birthday)
+	return u, err
+}
+
+func handleUserByID(w http.ResponseWriter, r *http.Request) {
 	_, err := validateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -174,10 +178,7 @@ func getUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var u User
-	err = db.QueryRow("SELECT id, username, email, first_name, last_name, birthday FROM users WHERE id = ?", id).
-		Scan(&u.ID, &u.Username, &u.Email, &u.FirstName, &u.LastName, &u.Birthday)
-
+	u, err := getUserByID(id)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
@@ -198,6 +199,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		SELECT posts.id, posts.user_id, users.username, posts.content, posts.created_at
 		FROM posts
 		JOIN users ON posts.user_id = users.id
+		ORDER BY posts.id DESC;
 	`)
 	if err != nil {
 		http.Error(w, "Failed to query posts", http.StatusInternalServerError)
@@ -218,4 +220,62 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
+}
+
+// handleCreatePost adds a post to the database and returns the new one
+func handleCreatePost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := validateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var payload struct {
+		Content string `json:"content"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	if payload.Content == "" {
+		http.Error(w, "Content cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	result, err := db.Exec(
+		"INSERT INTO posts (user_id, content) VALUES (?, ?)",
+		userID, payload.Content,
+	)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	var createdAt string
+	_ = db.QueryRow("SELECT created_at FROM posts WHERE id = ?", id).Scan(&createdAt)
+
+	usr, err := getUserByID(userID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	post := map[string]any{
+		"id":         id,
+		"user_id":    userID,
+		"username":   usr.Username,
+		"content":    payload.Content,
+		"created_at": createdAt,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(post)
 }
