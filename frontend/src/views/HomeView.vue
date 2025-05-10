@@ -24,6 +24,7 @@
 
             <template #main>
                 <h2>Home Feed</h2>
+                <NewPostForm @post-submitted="handlePostSubmitted" />
                 <PostsList :posts="posts" />
             </template>
         </TwoColumnLayout>
@@ -38,11 +39,16 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import PostsList from '@/components/PostsList.vue'
 import { useAuth } from '@/composables/useAuth'
+import NewPostForm from '@/components/NewPostForm.vue'
 
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const { logout } = useAuth()
 const router = useRouter()
+
+const handlePostSubmitted = (newPost) => {
+  posts.value.unshift(newPost)
+}
 
 onMounted(async () => {
     const res = await fetch(`${apiUrl}/api/posts`, {

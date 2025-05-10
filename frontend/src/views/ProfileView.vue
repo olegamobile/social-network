@@ -37,7 +37,7 @@ const router = useRouter()
 async function fetchUserAndPosts(userId) {
     // Fetch user info
     const userRes = await fetch(`${apiUrl}/api/users/${userId}`, {
-        credentials: 'include' // This sends the session cookie with the request
+        credentials: 'include' // Necessary to send cookie all the way to backend server
     })
     if (userRes.status === 401) {
         // Session is invalid — logout and redirect
@@ -50,7 +50,7 @@ async function fetchUserAndPosts(userId) {
 
     // Fetch and filter posts
     const postsRes = await fetch(`${apiUrl}/api/posts`, {
-        credentials: 'include' // This sends the session cookie with the request
+        credentials: 'include'
     })
     if (postsRes.ok) {
         const allPosts = await postsRes.json()
