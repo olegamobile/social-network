@@ -7,9 +7,9 @@ import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 
 const app = createApp(App)
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
-app.mount('#app')
 
 const userStore = useUserStore()
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
@@ -18,16 +18,18 @@ fetch(`${apiUrl}/api/me`, {
     credentials: 'include'
 })
     .then(res => {
-        if (res.status === 200) {
-            return res.json()
-        } else {
-            throw new Error('Not logged in')
-        }
+        if (res.status === 200) return res.json()
+        throw new Error('Not logged in')
     })
     .then(user => {
         userStore.setUser(user)
-        router.push('/') // Go to home
+        app.mount('#app')   // mount app after credentials check
+        //router.push('/') // Go to home
     })
     .catch(() => {
-        router.push('/login')
+        // If not logged in and not already on login page, redirect to login
+        if (router.currentRoute.value.path !== '/login') {
+            router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
+        }
+        app.mount('#app')
     })

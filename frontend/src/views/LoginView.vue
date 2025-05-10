@@ -14,13 +14,14 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import TopBar from '@/components/TopBar.vue'
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const apiUrl = import.meta.env.VITE_API_URL
@@ -37,7 +38,11 @@ async function login() {
         const data = await res.json()
         userStore.setUser(data.user)
 
-        router.push(`/profile/${data.user.id}`)
+        //router.push(`/profile/${data.user.id}`)
+
+        // Navigate to what the user wanted or home 
+        const redirectTo = route.query.redirect || '/'
+        router.push(redirectTo)
     } else {
         const msg = await res.text()
         error.value = msg || 'Login failed'
