@@ -6,7 +6,8 @@
             <template #sidebar>
                 <h3>Chats</h3>
                 <ul>
-                    <li v-for="chat in chats" :key="chat.id" :class="{ active: selectedChat.id === chat.id }" @click="select(chat)">
+                    <li v-for="chat in chats" :key="chat.id" :class="{ active: selectedChat.id === chat.id }"
+                        @click="select(chat)">
                         {{ chat.name }}
                     </li>
                 </ul>

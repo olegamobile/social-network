@@ -27,26 +27,32 @@ const userStore = useUserStore()
 const apiUrl = import.meta.env.VITE_API_URL
 
 async function login() {
-    
-    const res = await fetch(`${apiUrl}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email: email.value, password: password.value }),
-    })
-    if (res.ok) {
-        const data = await res.json()
-        userStore.setUser(data.user)
 
-        //router.push(`/profile/${data.user.id}`)
+    try {
+        const res = await fetch(`${apiUrl}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email: email.value, password: password.value }),
+        })
+        if (res.ok) {
+            const data = await res.json()
+            userStore.setUser(data.user)
 
-        // Navigate to what the user wanted or home 
-        const redirectTo = route.query.redirect || '/'
-        router.push(redirectTo)
-    } else {
-        const msg = await res.text()
-        error.value = msg || 'Login failed'
+            // Navigate to what the user wanted or home 
+            const redirectTo = route.query.redirect || '/'
+            router.push(redirectTo)
+        } else {
+            const msg = await res.text()
+            error.value = msg || 'Login failed'
+        }
+
+    } catch (error) {
+        errorStore.setError('Unexpected Error', 'Something went wrong while logging in.')
+        router.push('/error')
+        return
     }
+
 }
 </script>
 

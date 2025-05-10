@@ -7,6 +7,10 @@ import GroupsView from '@/views/GroupsView.vue'
 import GroupView from '@/views/GroupView.vue'
 import EventsView from '@/views/EventsView.vue'
 import ChatsView from '@/views/ChatsView.vue'
+import ErrorView from '@/views/ErrorView.vue'
+import NotFound from '@/views/NotFound.vue'
+import { useErrorStore } from '@/stores/error'
+
 
 const routes = [
     { path: '/', name: 'home', component: HomeView },
@@ -17,11 +21,21 @@ const routes = [
     { path: '/groups/:id', name: 'group', component: GroupView },
     { path: '/events', name: 'events', component: EventsView },
     { path: '/chats', name: 'chats', component: ChatsView },
+    { path: '/error', name: 'Error', component: ErrorView },
+    { path: '/:pathMatch(.*)*', name: 'notfound', component: NotFound } // Catch-all route if nothin before matches
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
+})
+
+router.beforeEach((to, from, next) => {
+    const errorStore = useErrorStore()
+    if (errorStore.title && to.path != '/error') {
+        errorStore.clearError()
+    }
+    next()
 })
 
 export default router

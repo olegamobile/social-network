@@ -27,36 +27,68 @@ import PostsList from '@/components/PostsList.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useAuth } from '@/composables/useAuth'
 
+import { useErrorStore } from '@/stores/error'
+
 const route = useRoute()
 const user = ref(null)
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL
 const { logout } = useAuth()
 const router = useRouter()
+const errorStore = useErrorStore()
 
 async function fetchUserAndPosts(userId) {
-    // Fetch user info
-    const userRes = await fetch(`${apiUrl}/api/users/${userId}`, {
-        credentials: 'include' // Necessary to send cookie all the way to backend server
-    })
-    if (userRes.status === 401) {
-        // Session is invalid — logout and redirect
-        console.log("invalid session");
-        logout(); // your logout function
-        router.push('/login');
-        return;
-    }
-    user.value = userRes.ok ? await userRes.json() : null
+    try {
+        // Fetch user info
+        const userRes = await fetch(`${apiUrl}/api/users/${userId}`, {
+            credentials: 'include' // Necessary to send cookie all the way to backend server
+        })
 
-    // Fetch and filter posts
-    const postsRes = await fetch(`${apiUrl}/api/posts`, {
-        credentials: 'include'
-    })
-    if (postsRes.ok) {
+        if (userRes.status === 401) {
+            // Session is invalid — logout and redirect
+            console.log("Invalid session")
+            logout()
+            router.push('/login')
+            return
+        }
+
+        if (userRes.status === 404) {
+            errorStore.setError('User Not Found', `User with ID ${userId} does not exist.`)
+            router.push('/error')
+            return
+        }
+
+        if (userRes.status === 400) {
+            errorStore.setError('Bad request', `Failed to get user with ID ${userId}.`)
+            router.push('/error')
+            return
+        }
+
+        if (!userRes.ok) {
+            // Generic error
+            throw new Error(`Failed to fetch user: ${userRes.status}`)
+        }
+
+        user.value = await userRes.json()
+
+        // Fetch and filter posts
+        const postsRes = await fetch(`${apiUrl}/api/posts`, {
+            credentials: 'include'
+        })
+
+        if (!postsRes.ok) {
+            throw new Error(`Failed to fetch posts: ${postsRes.status}`)
+        }
+
         const allPosts = await postsRes.json()
         posts.value = allPosts.filter(p => p.user_id === Number(userId))
+    } catch (err) {
+        errorStore.setError('Error', 'Something went wrong while loading user data.')
+        router.push('/error')
+        return
     }
 }
+
 
 // Initial fetch
 onMounted(() => {

@@ -1,0 +1,25 @@
+<template>
+    <div class="not-found">
+        <TopBar />
+        <TwoColumnLayout>
+            <template #main>
+                <h1>404 - Page Not Found</h1>
+                <p>The page you're looking for doesn't exist.</p>
+            </template>
+
+        </TwoColumnLayout>
+    </div>
+</template>
+
+<script setup>
+import TopBar from '@/components/TopBar.vue'
+import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
+
+// No actual 404 status, that should come from the server.
+</script>
+
+<style scoped>
+.not-found {
+    text-align: center;
+}
+</style>

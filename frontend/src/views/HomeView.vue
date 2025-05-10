@@ -47,20 +47,27 @@ const { logout } = useAuth()
 const router = useRouter()
 
 const handlePostSubmitted = (newPost) => {
-  posts.value.unshift(newPost)
+    posts.value.unshift(newPost)
 }
 
 onMounted(async () => {
-    const res = await fetch(`${apiUrl}/api/posts`, {
-        credentials: 'include' // This sends the session cookie with the request
-    });
-    if (res.status === 401) {
-        // Session is invalid — logout and redirect
-        logout(); // your logout function
-        router.push('/login');
-        return;
+    try {
+        const res = await fetch(`${apiUrl}/api/posts`, {
+            credentials: 'include' // This sends the session cookie with the request
+        });
+        if (res.status === 401) {
+            // Session is invalid — logout and redirect
+            logout(); // your logout function
+            router.push('/login');
+            return;
+        }
+        posts.value = await res.json()
+    } catch (error) {
+        errorStore.setError('Unexpected Error', 'Something went wrong while loading posts')
+        router.push('/error')
+        return
     }
-    posts.value = await res.json()
+
 })
 </script>
 

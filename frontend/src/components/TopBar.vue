@@ -1,6 +1,8 @@
 <template>
     <nav class="top-bar">
-        <router-link to="/" id="home-title" aria-label="Home"><h1>MySocial</h1></router-link>
+        <router-link to="/" id="home-title" aria-label="Home">
+            <h1>MySocial</h1>
+        </router-link>
         <div class="nav-icons" v-if="!isLoginPage">
             <router-link to="/" class="navbar-link" title="Home" aria-label="Home">🏠</router-link>
             <router-link to="/groups" class="navbar-link" title="Groups" aria-label="Groups">👥</router-link>
