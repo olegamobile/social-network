@@ -40,6 +40,7 @@ const { logout } = useAuth()
 <style scoped>
 .top-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     background: #333;
@@ -60,6 +61,7 @@ const { logout } = useAuth()
 
 .nav-icons {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
     align-items: center;
 }
