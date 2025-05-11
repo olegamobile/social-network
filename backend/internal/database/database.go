@@ -31,7 +31,7 @@ func runInitSQL(db *sql.DB, filepath string) error {
 	return nil
 }
 
-func New(path string) error {
+func NewDatabase(path string) error {
 	var err error
 	DB, err = sql.Open("sqlite3", path)
 	if err != nil {

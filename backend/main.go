@@ -26,7 +26,7 @@ func setHandlers() {
 func main() {
 	config.InitConfig()
 
-	err := database.New(config.DBPath)
+	err := database.NewDatabase(config.DBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
