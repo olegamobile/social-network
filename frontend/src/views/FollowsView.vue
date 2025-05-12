@@ -75,7 +75,7 @@ async function searchUsers() {
         const response = await fetch(`${apiUrl}/api/users/search?query=${searchQuery.value}`, {
             credentials: 'include'
         });
-        if (res.status === 401) {
+        if (response.status === 401) {
             // Session is invalid — logout and redirect
             logout();
             router.push('/login');
