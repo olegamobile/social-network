@@ -52,6 +52,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useErrorStore } from '@/stores/error'
+import { useAuth } from '@/composables/useAuth'
 
 const apiUrl = import.meta.env.VITE_API_URL
 const errorStore = useErrorStore()
@@ -60,6 +61,7 @@ const users = ref([])
 const searchQuery = ref('');
 const searchResults = ref([]);
 const searchInitiated = ref(false);
+const { logout } = useAuth()
 
 async function searchUsers() {
     searchInitiated.value = true;
@@ -73,6 +75,12 @@ async function searchUsers() {
         const response = await fetch(`${apiUrl}/api/users/search?query=${searchQuery.value}`, {
             credentials: 'include'
         });
+        if (res.status === 401) {
+            // Session is invalid — logout and redirect
+            logout();
+            router.push('/login');
+            return;
+        }
         if (!response.ok) {
             errorStore.setError(response.status, 'Error fetching search results')
             router.push('/error')
