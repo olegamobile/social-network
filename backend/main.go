@@ -16,6 +16,7 @@ func setHandlers() {
 	// CORS to allow developement on same address
 	http.HandleFunc("/api/users", middleware.WithCORS(handlers.GetUsers))
 	http.HandleFunc("/api/users/", middleware.WithCORS(handlers.HandleUserByID)) // With trailing slash
+	http.HandleFunc("/api/users/search", middleware.WithCORS(handlers.SearchUsers))
 	http.HandleFunc("/api/posts", middleware.WithCORS(handlers.GetPosts))
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
 	http.HandleFunc("/api/logout", middleware.WithCORS(handlers.HandleLogout))

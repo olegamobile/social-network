@@ -108,6 +108,28 @@ func HandleUserByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(u)
 }
 
+// SearchUsers handles the user search request.
+func SearchUsers(w http.ResponseWriter, r *http.Request) {
+	_, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+
+	users, err := repository.SearchUsers(query)
+	if err != nil {
+		http.Error(w, "Error searching users", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(users)
+}
+
 func GetPosts(w http.ResponseWriter, r *http.Request) {
 	_, err := service.ValidateSession(r)
 	if err != nil {

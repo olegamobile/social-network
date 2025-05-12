@@ -55,12 +55,14 @@ onMounted(async () => {
         const res = await fetch(`${apiUrl}/api/posts`, {
             credentials: 'include' // This sends the session cookie with the request
         });
+        
         if (res.status === 401) {
             // Session is invalid — logout and redirect
             logout(); // your logout function
             router.push('/login');
             return;
         }
+
         posts.value = await res.json()
     } catch (error) {
         errorStore.setError('Unexpected Error', 'Something went wrong while loading posts')

@@ -108,3 +108,31 @@ func InsertPost(userID int, content string) (int64, string, error) {
 
 	return id, createdAt, nil
 }
+
+// SearchUsers retrieves users whose username, first_name, or last_name match the query.
+func SearchUsers(query string) ([]model.User, error) {
+	q := "%" + query + "%" // Add wildcards for LIKE clause
+	rows, err := database.DB.Query(`
+		SELECT id, username, email, first_name, last_name, birthday
+		FROM users 
+		WHERE username LIKE ? OR first_name LIKE ? OR last_name LIKE ?
+		`,
+		q, q, q,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+	for rows.Next() {
+		var u model.User
+		err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.FirstName, &u.LastName, &u.Birthday)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	return users, nil
+}
