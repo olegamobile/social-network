@@ -26,7 +26,6 @@ import TopBar from '@/components/TopBar.vue'
 import PostsList from '@/components/PostsList.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useAuth } from '@/composables/useAuth'
-
 import { useErrorStore } from '@/stores/error'
 
 const route = useRoute()

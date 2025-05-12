@@ -5,6 +5,7 @@
         </router-link>
         <div class="nav-icons" v-if="!isLoginPage">
             <router-link to="/" class="navbar-link" title="Home" aria-label="Home">🏠</router-link>
+            <router-link to="/follows" class="navbar-link" title="Follows" aria-label="Follows">🙂</router-link>
             <router-link to="/groups" class="navbar-link" title="Groups" aria-label="Groups">👥</router-link>
             <router-link to="/chats" class="navbar-link" title="Chats" aria-label="Chats">💬</router-link>
             <router-link to="/events" class="navbar-link" title="Events" aria-label="Events">📅</router-link>
