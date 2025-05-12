@@ -25,14 +25,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="4.8882426"
-     inkscape:cx="35.493328"
-     inkscape:cy="81.419854"
+     inkscape:cx="34.675038"
+     inkscape:cy="82.238144"
      inkscape:window-width="2240"
      inkscape:window-height="1119"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer2" />
+     inkscape:current-layer="layer3" />
   <defs
      id="defs1" />
   <g
@@ -54,7 +54,7 @@
      transform="translate(-14.949524,-15.932528)">
     <path
        style="fill:none;fill-opacity:0.2;stroke:#5c0031;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       d="M 26.804705,37.01041 40.612512,45.143977 41.5271,27.53828 Z"
+       d="M 27.019997,39.198925 40.612512,45.143977 40.327108,29.851232 Z"
        id="path9"
        sodipodi:nodetypes="cccc" />
     <path
@@ -69,27 +69,27 @@
        sodipodi:nodetypes="cc" />
     <path
        style="fill:#fe008f;fill-opacity:1;stroke:#5c0031;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       d="M 51.990765,19.693624 41.5271,27.53828"
+       d="M 51.016487,20.776154 40.327108,29.851232"
        id="path15"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:#000000;fill-opacity:1;stroke:#5c0031;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       d="m 30.322923,19.040421 11.20418,8.497859"
+       d="m 33.344586,19.873501 6.982522,9.977731"
        id="path16"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:#000000;fill-opacity:1;stroke:#5c0031;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       d="M 19.069012,49.745518 26.804705,37.01041"
+       d="M 19.069012,49.745518 27.019997,39.198925"
        id="path17"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:#808080;fill-opacity:0.2;stroke:#5c0031;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       d="M 19.432588,25.258438 26.804705,37.01041"
+       d="m 17.899524,28.04371 9.120473,11.155215"
        id="path5"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:#000000;fill-opacity:1;stroke:#5c0031;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       d="M 40.612512,45.143977 30.610808,53.143784"
+       d="m 40.612512,45.143977 -8.070985,8.612172"
        id="path1"
        sodipodi:nodetypes="cc" />
   </g>
@@ -102,22 +102,22 @@
     <circle
        style="fill:#a2005a;fill-opacity:1;stroke:none;stroke-width:1.91823;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
        id="circle21"
-       cx="51.990765"
-       cy="19.693624"
+       cx="51.016487"
+       cy="20.776154"
        r="2.95" />
     <use
        x="0"
        y="0"
        xlink:href="#circle21"
        id="use27"
-       transform="translate(-21.667842,-0.65320353)"
+       transform="translate(-17.671901,-0.90265244)"
        style="fill:#490f52;fill-opacity:1" />
     <use
        x="0"
        y="0"
        xlink:href="#circle21"
        id="use29"
-       transform="translate(-1.1241816,18.185061)"
+       transform="translate(-0.14990508,17.102532)"
        style="fill:#490f52;fill-opacity:1" />
     <use
        x="0"
@@ -137,33 +137,33 @@
        y="0"
        xlink:href="#use32"
        id="use33"
-       transform="translate(0.36357614,-24.48708)"
+       transform="translate(-1.1694876,-21.701808)"
        style="fill:#490f52;fill-opacity:1" />
     <circle
-       style="fill:#a2005a;fill-opacity:1;stroke:none;stroke-width:1.37929;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#a2005a;fill-opacity:1;stroke:none;stroke-width:1.01033;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
        id="path35"
-       cx="26.804705"
-       cy="37.01041"
-       r="4.7781782" />
+       cx="27.019997"
+       cy="39.198925"
+       r="3.5" />
     <use
        x="0"
        y="0"
        xlink:href="#path35"
        id="use36"
-       transform="translate(13.807807,8.1335669)"
+       transform="translate(13.592515,5.9450534)"
        style="fill:#490f52;fill-opacity:1" />
     <use
        x="0"
        y="0"
        xlink:href="#use36"
        id="use37"
-       transform="translate(0.91459124,-17.605697)"
+       transform="translate(-0.28540355,-15.292746)"
        style="fill:#490f52;fill-opacity:1" />
     <use
        x="0"
        y="0"
        xlink:href="#circle21"
        id="use1"
-       transform="translate(-21.379957,33.45016)" />
+       transform="translate(-18.47496,32.979995)" />
   </g>
 </svg>
