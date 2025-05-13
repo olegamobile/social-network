@@ -70,8 +70,9 @@ async function fetchUserAndPosts(userId) {
         }
 
         user.value = await userRes.json()
-
-        console.log("user at profile view", user.value)
+        user.value.birthday = new Date(user.value.birthday).toLocaleString("fi-FI", {
+            dateStyle: 'short',
+        })
 
         // Fetch and filter posts
         const postsRes = await fetch(`${apiUrl}/api/posts`, {

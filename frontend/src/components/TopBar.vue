@@ -42,9 +42,6 @@ const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reacti
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const isLoginPage = computed(() => route.path === '/login');
 const { logout } = useAuth()
-
-console.log("user from uesrstore in top bar:", user.value)
-
 </script>
 
 <style scoped>
