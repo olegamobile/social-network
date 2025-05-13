@@ -1,2 +1,4 @@
 .DS_Store
 backend/data/app.db
+backend/avatars/*
+!backend/avatars/.gitkeep
