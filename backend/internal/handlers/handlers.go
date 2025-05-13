@@ -160,38 +160,12 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload struct {
-		Content string `json:"content"`
-	}
+	post, statusCode := service.CreatePost(r, userID)
 
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	// Error code:
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) {
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
-	}
-
-	if payload.Content == "" {
-		http.Error(w, "Content cannot be empty", http.StatusBadRequest)
-		return
-	}
-
-	id, createdAt, err := repository.InsertPost(userID, payload.Content)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	usr, err := repository.GetUserById(userID)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-
-	post := map[string]any{
-		"id":         id,
-		"user_id":    userID,
-		"username":   usr.Username,
-		"content":    payload.Content,
-		"created_at": createdAt,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

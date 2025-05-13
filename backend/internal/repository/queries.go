@@ -88,7 +88,7 @@ func GetAllPosts() ([]model.Post, error) {
 	return posts, nil
 }
 
-func InsertPost(userID int, content string) (int64, string, error) {
+func InsertPost(userID int, content string) (int, string, error) {
 	result, err := database.DB.Exec(
 		"INSERT INTO posts (user_id, content) VALUES (?, ?)",
 		userID, content,
@@ -106,7 +106,7 @@ func InsertPost(userID int, content string) (int64, string, error) {
 	var createdAt string
 	_ = database.DB.QueryRow("SELECT created_at FROM posts WHERE id = ?", id).Scan(&createdAt)
 
-	return id, createdAt, nil
+	return int(id), createdAt, nil
 }
 
 // SearchUsers retrieves users whose username, first_name, or last_name match the query.
