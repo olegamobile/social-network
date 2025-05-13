@@ -4,6 +4,7 @@ import (
 	"backend/internal/model"
 	"backend/internal/repository"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -32,6 +33,31 @@ func ValidateSession(r *http.Request) (int, error) {
 	}
 
 	return userID, nil
+}
+
+func Login(w http.ResponseWriter, r *http.Request) (model.User, int) {
+	var usr model.User
+
+	var req model.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return usr, http.StatusBadRequest
+	}
+
+	user, err := repository.GetUserByEmail(req)
+	if err != nil {
+		return usr, http.StatusUnauthorized
+	}
+
+	if user.Password != req.Password {
+		return usr, http.StatusUnauthorized
+	}
+
+	err = CreateSession(user, w)
+	if err != nil {
+		return usr, http.StatusInternalServerError
+	}
+
+	return usr, http.StatusOK
 }
 
 func CreateSession(user model.User, w http.ResponseWriter) error {

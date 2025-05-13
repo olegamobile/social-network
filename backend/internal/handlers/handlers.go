@@ -6,32 +6,13 @@ import (
 	"backend/internal/service"
 	"encoding/json"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	var req model.LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
-		return
-	}
+	user, statusCode := service.Login(w, r)
 
-	user, err := repository.GetUserByEmail(req)
-
-	if err != nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
-		return
-	}
-
-	if user.Password != req.Password { // unencrypted demo, bcrypt later
-		http.Error(w, "Wrong password", http.StatusUnauthorized)
-		return
-	}
-
-	err = service.CreateSession(user, w)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // Error code
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
@@ -91,21 +72,14 @@ func HandleUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/users/")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	u, err := repository.GetUserById(id)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+	usr, statusCode := service.UserById(r)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // Error code
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(u)
+	json.NewEncoder(w).Encode(usr)
 }
 
 // SearchUsers handles the user search request.
@@ -161,9 +135,7 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post, statusCode := service.CreatePost(r, userID)
-
-	// Error code:
-	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) {
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
