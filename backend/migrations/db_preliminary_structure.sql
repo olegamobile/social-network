@@ -78,7 +78,7 @@ CREATE TABLE follow_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     follower_id INTEGER NOT NULL,
     followed_id INTEGER NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
+    approval_status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -103,10 +103,30 @@ CREATE TABLE group_members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     group_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
+    approval_status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER,
+    status TEXT NOT NULL CHECK (status IN ('enable', 'disable', 'delete')) DEFAULT 'enable',
+    FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(group_id, user_id)
+);
+
+-- Creating group_invitations table for group membership
+CREATE TABLE group_invitations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    inviter_id INTEGER NOT NULL,
+    approval_status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER,
+    status TEXT NOT NULL CHECK (status IN ('enable', 'disable', 'delete')) DEFAULT 'enable',
+    FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (inviter_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(group_id, user_id)
 );
 
