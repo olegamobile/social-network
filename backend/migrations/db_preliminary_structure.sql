@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS follow_requests;
 DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS group_members;
+DROP TABLE IF EXISTS group_invitations;
 DROP TABLE IF EXISTS group_posts;
 DROP TABLE IF EXISTS group_comments;
 DROP TABLE IF EXISTS events;
@@ -78,7 +79,7 @@ CREATE TABLE follow_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     follower_id INTEGER NOT NULL,
     followed_id INTEGER NOT NULL,
-    approval_status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
+    approval_status TEXT NOT NULL CHECK (approval_status IN ('pending', 'accepted', 'declined')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -103,7 +104,7 @@ CREATE TABLE group_members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     group_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    approval_status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
+    approval_status TEXT NOT NULL CHECK (approval_status IN ('pending', 'accepted', 'declined')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by INTEGER,
     status TEXT NOT NULL CHECK (status IN ('enable', 'disable', 'delete')) DEFAULT 'enable',
