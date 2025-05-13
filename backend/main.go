@@ -19,6 +19,7 @@ func setHandlers() {
 	http.HandleFunc("/api/users/search", middleware.WithCORS(handlers.SearchUsers))
 	http.HandleFunc("/api/posts", middleware.WithCORS(handlers.GetPosts))
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
+	http.HandleFunc("/api/register", middleware.WithCORS(handlers.HandleRegister))
 	http.HandleFunc("/api/logout", middleware.WithCORS(handlers.HandleLogout))
 	http.HandleFunc("/api/me", middleware.WithCORS(handlers.HandleMe))
 	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))

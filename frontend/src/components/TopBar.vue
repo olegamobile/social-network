@@ -136,6 +136,13 @@
                 </div>
             </div>
         </div>
+
+        <div class="nav-icons" v-if="isLoginPage">
+            <router-link to="/register" class="text-link" data-title="Home" aria-label="Home">Register</router-link>
+        </div>
+        <div class="nav-icons" v-if="isRegisterPage">
+            <router-link to="/login" class="text-link" data-title="Home" aria-label="Home">Login</router-link>
+        </div>
     </nav>
 </template>
 
@@ -149,15 +156,16 @@ import { useAuth } from '@/composables/useAuth';
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
-const { user } = storeToRefs(userStore); // Reactive user data
-const { logout } = useAuth();
-
 const isMobileMenuOpen = ref(false); // Controls mobile menu visibility
-const isLoginPage = computed(() => route.path === '/login'); // Hide nav on login page
 
 const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
+const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reactive when destructured
+const apiUrl = import.meta.env.VITE_API_URL || '/api'
+const isLoginPage = computed(() => route.path === '/login');
+const isRegisterPage = computed(() => route.path === '/register');
+const { logout } = useAuth()
 </script>
 
 <style scoped>
@@ -264,6 +272,72 @@ const toggleMobileMenu = () => {
 
 .fa-user {
     margin-right: 0px !important;
+}
+
+.nav-icons a,
+.text-link,
+.logout-button {
+    position: relative;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    /* background-color: transparent; */
+    transition: background-color 0.2s ease;
+}
+
+.router-link-active.text-link,
+.router-link-active.navbar-link {
+    background-color: #555;
+}
+
+/* .router-link-exact-active {
+    font-weight: bold;
+} */
+
+.logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.material-icons,
+a.material-icons {
+  color: #b7d9ec; /* blue, or whatever you prefer */
+}
+
+
+/* Tooltip styles */
+.nav-icons a:hover::after,
+.text-link:hover::after,
+.logout-button:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    bottom: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #444;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 1;
+    pointer-events: none;
+    z-index: 100;
+
+    /* Override the icon font */
+    font-family: sans-serif;
+}
+
+.nav-icons a::after,
+.text-link::after,
+.logout-button::after {
+    content: '';
+    opacity: 0;
+    transition: opacity 0.4s ease;
 }
 
 </style>
