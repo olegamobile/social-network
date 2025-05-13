@@ -25,7 +25,7 @@
         </div>
 
         <div class="nav-icons" v-if="isLoginPage">
-            <router-link to="/register" class="text-link" data-title="Home" aria-label="Home">Register!</router-link>
+            <router-link to="/register" class="text-link" data-title="Home" aria-label="Home">Register</router-link>
         </div>
         <div class="nav-icons" v-if="isRegisterPage">
             <router-link to="/login" class="text-link" data-title="Home" aria-label="Home">Login</router-link>
