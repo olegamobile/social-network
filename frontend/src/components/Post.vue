@@ -24,10 +24,10 @@ const { post } = defineProps({
 
 const formattedDate = computed(() => {
     const date = new Date(post.created_at)
-    return date.toLocaleString(undefined, {
+    return date.toLocaleString("fi-FI", {
         dateStyle: 'medium',
-        timeStyle: 'short'
-    })
+        timeStyle: 'medium'
+    }).replace("klo ", "")
 })
 </script>
 
