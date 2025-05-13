@@ -26,8 +26,8 @@
                         <h3>Search Results:</h3>
                         <ul>
                             <li v-for="user in searchResults" :key="user.id">
-                                <RouterLink :to="`/profile/${user.id}`">{{ user.username }}</RouterLink>
-                                - {{ user.first_name }} {{ user.last_name }}
+                                <RouterLink :to="`/profile/${user.id}`">{{ user.first_name }} {{ user.last_name }}</RouterLink>
+                                <span v-if="user.username"> - {{ user.username }}</span>
                             </li>
                         </ul>
                     </div>
@@ -37,8 +37,8 @@
                 <h3>Suggested Users</h3>
                 <ul>
                     <li v-for="user in users" :key="user.id">
-                        <RouterLink :to="`/profile/${user.id}`">{{ user.username }}</RouterLink>
-                        - {{ user.first_name }} {{ user.last_name }}
+                        <RouterLink :to="`/profile/${user.id}`">{{ user.first_name }} {{ user.last_name }}</RouterLink>
+                        <span v-if="user.username"> - {{ user.username }}</span>
                     </li>
                 </ul>
             </template>

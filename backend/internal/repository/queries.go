@@ -175,7 +175,7 @@ func SearchUsers(query string) ([]model.User, error) {
 	rows, err := database.DB.Query(`
 		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me
 		FROM users 
-		WHERE username LIKE ? OR first_name LIKE ? OR last_name LIKE ?
+		WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ?
 		`,
 		q, q, q,
 	)
