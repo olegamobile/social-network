@@ -8,6 +8,7 @@ type User struct {
 	LastName  string `json:"last_name"`
 	Birthday  string `json:"birthday"`
 	Password  string `json:"password"`
+	About     string `json:"about_me"`
 }
 
 type Post struct {

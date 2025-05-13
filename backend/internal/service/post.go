@@ -4,6 +4,7 @@ import (
 	"backend/internal/model"
 	"backend/internal/repository"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -12,14 +13,16 @@ func CreatePost(r *http.Request, userID int) (model.Post, int) {
 
 	var payload struct {
 		Content string `json:"content"`
+		Privacy string `json:"privacy_level"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&payload)
 
 	if err != nil || payload.Content == "" {
+		fmt.Println("error in CreatePost:", err)
 		return post, http.StatusBadRequest
 	}
 
-	id, createdAt, err := repository.InsertPost(userID, payload.Content)
+	id, createdAt, err := repository.InsertPost(userID, payload.Content, payload.Privacy)
 	if err != nil {
 		return post, http.StatusInternalServerError
 	}
@@ -31,7 +34,7 @@ func CreatePost(r *http.Request, userID int) (model.Post, int) {
 
 	post.ID = id
 	post.UserID = userID
-	post.Username = usr.Username
+	post.Username = usr.FirstName + " " + usr.LastName
 	post.Content = payload.Content
 	post.CreatedAt = createdAt
 

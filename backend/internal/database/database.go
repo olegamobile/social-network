@@ -9,7 +9,7 @@ import (
 
 var DB *sql.DB
 
-func runInitSQL(db *sql.DB, filepath string) error {
+func runSqlFile(db *sql.DB, filepath string) error {
 	sqlBytes, err := os.ReadFile(filepath)
 	if err != nil {
 		return err
@@ -38,7 +38,13 @@ func NewDatabase(path string) error {
 		return err
 	}
 
-	err = runInitSQL(DB, "migrations/init.sql")
+	//err = runInitSQL(DB, "migrations/init.sql")
+	err = runSqlFile(DB, "migrations/db_preliminary_structure.sql")
+	if err != nil {
+		return err
+	}
+
+	err = runSqlFile(DB, "migrations/insert_data.sql")
 	if err != nil {
 		return err
 	}
