@@ -4,7 +4,7 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3>Upcoming Events</h3>
+                <h3 class="text-lg font-semibold">Upcoming Events</h3>
                 <ul>
                     <li v-for="event in upcoming" :key="event.id" :class="{ active: selectedEvent.id === event.id }"
                         @click="select(event)">

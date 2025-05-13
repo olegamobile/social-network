@@ -4,27 +4,28 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3>Following</h3>
-                <ul>
+                <h3 class="text-lg font-semibold">Following</h3>
+                <ul class="list-disc pl-6">
                     <li>@bob</li>
                     <li>@john</li>
                 </ul>
 
-                <h3>Followers</h3>
-                <ul>
+                <h3 class="text-lg font-semibold">Followers</h3>
+                <ul class="list-disc pl-6">
                     <li>@bob</li>
                 </ul>
             </template>
 
             <template #main>
-                <h2>Explore Users</h2>
+                <h2 class="text-2xl font-bold mb-4">Explore Users</h2>
                 <div>
-                    <input type="text" v-model="searchQuery" placeholder="Search users..." />
+                    <input type="text" v-model="searchQuery" placeholder="Search users..." 
+                    class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                     <button @click="searchUsers">Search</button>
 
                     <div v-if="searchResults && searchResults.length > 0">
-                        <h3>Search Results:</h3>
-                        <ul>
+                        <h3 class="text-lg font-semibold">Search Results:</h3>
+                        <ul class="list-disc pl-6">
                             <li v-for="user in searchResults" :key="user.id">
                                 <RouterLink :to="`/profile/${user.id}`">{{ user.first_name }} {{ user.last_name }}</RouterLink>
                                 <span v-if="user.username"> - {{ user.username }}</span>
@@ -34,7 +35,7 @@
                     <p v-else-if="searchInitiated">No users found.</p>
                 </div>
 
-                <h3>Suggested Users</h3>
+                <h3 class="text-lg font-semibold">Suggested Users</h3>
                 <ul>
                     <li v-for="user in users" :key="user.id">
                         <RouterLink :to="`/profile/${user.id}`">{{ user.first_name }} {{ user.last_name }}</RouterLink>

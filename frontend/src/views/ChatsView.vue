@@ -4,7 +4,7 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3>Chats</h3>
+                <h3 class="text-lg font-semibold">Chats</h3>
                 <ul>
                     <li v-for="chat in chats" :key="chat.id" :class="{ active: selectedChat.id === chat.id }"
                         @click="select(chat)">

@@ -4,7 +4,7 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3>Your Groups</h3>
+                <h3 class="text-lg font-semibold">Your Groups</h3>
                 <ul>
                     <li v-for="group in userGroups" :key="group.id">
                         <RouterLink :to="`/groups/${group.id}`">{{ group.name }}</RouterLink>
@@ -13,10 +13,11 @@
             </template>
 
             <template #main>
-                <h2>Explore Groups</h2>
-                <input v-model="search" placeholder="Search for groups..." />
+                <h2 class="text-2xl font-bold mb-4">Explore Groups</h2>
+                <input v-model="search" placeholder="Search for groups..." 
+                class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
 
-                <h3>Suggested Groups</h3>
+                <h3 class="text-lg font-semibold">Suggested Groups</h3>
                 <ul>
                     <li v-for="group in filteredSuggestions" :key="group.id">
                         <RouterLink :to="`/groups/${group.id}`">{{ group.name }}</RouterLink> - {{ group.description }}

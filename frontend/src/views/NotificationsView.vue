@@ -4,13 +4,13 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3>Notifications</h3>
+                <h3 class="text-lg font-semibold">Notifications</h3>
                 <button @click="showCurrent = true" :class="{ active: showCurrent }">Current</button>
                 <button @click="showCurrent = false" :class="{ active: !showCurrent }">Old</button>
             </template>
 
             <template #main>
-                <h2>{{ showCurrent ? 'Current' : 'Old' }} Notifications</h2>
+                <h2 class="text-2xl font-bold mb-4">{{ showCurrent ? 'Current' : 'Old' }} Notifications</h2>
                 <NotificationsList :notifications="filteredNotifications" />
             </template>
         </TwoColumnLayout>

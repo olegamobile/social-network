@@ -1,7 +1,8 @@
 <template>
   <div class="new-post-form">
-    <h3>Create a New Post</h3>
-    <textarea v-model="content" placeholder="What's on your mind?" rows="4"></textarea>
+    <h3 class="text-lg font-semibold">Create a New Post</h3>
+    <textarea v-model="content" placeholder="What's on your mind?" rows="4"
+    class="w-full border border-gray-300 rounded px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
     <select v-model="privacy_level">
       <option value="public">Public</option>
       <option value="almost_private">Almost Private</option>

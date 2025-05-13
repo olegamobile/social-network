@@ -1,0 +1,14 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F7F9FB; /* Primary Background */
+}
+/* Custom Nordic Colors for Tailwind */
+.bg-nordic-primary-bg { background-color: #F7F9FB; }
+.bg-nordic-secondary-bg { background-color: #E8EDF2; }
+.text-nordic-primary-accent { color: #607D8B; }
+.hover\:text-nordic-secondary-accent:hover { color: #769FCD; }
+.border-nordic-light { border-color: #CFD8DC; }
+.text-nordic-dark { color: #263238; }
+.text-nordic-light { color: #546E7A; }
+.bg-nordic-primary-accent { background-color: #607D8B; }
+.hover\:bg-nordic-secondary-accent:hover { background-color: #769FCD; }

@@ -2,7 +2,7 @@
     <div class="login">
         <TopBar />
 
-        <h2>Login</h2>
+        <h2 class="text-2xl font-bold mb-4">Login</h2>
         <form @submit.prevent="login">
             <input v-model="email" type="email" placeholder="Email" required autocomplete="email" />
             <input v-model="password" type="password" placeholder="Password" required autocomplete="current-password" />

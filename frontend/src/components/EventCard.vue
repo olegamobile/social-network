@@ -1,6 +1,6 @@
 <template>
     <div class="event-card">
-        <h2>{{ event.title }}</h2>
+        <h2 class="text-2xl font-bold mb-4">{{ event.title }}</h2>
         <p><strong>Group:</strong> {{ event.group }}</p>
         <p><strong>Time:</strong> {{ event.time }}</p>
         <p><strong>Description:</strong> {{ event.description }}</p>
