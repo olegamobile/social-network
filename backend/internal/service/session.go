@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // ValidateSession extracts the session cookie, validates it, and returns the user_id
@@ -37,6 +38,7 @@ func ValidateSession(r *http.Request) (int, error) {
 
 func Login(w http.ResponseWriter, r *http.Request) (model.User, int) {
 	var user model.User
+	var emptyUser model.User
 
 	var req model.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -45,11 +47,18 @@ func Login(w http.ResponseWriter, r *http.Request) (model.User, int) {
 
 	user, err := repository.GetUserByEmail(req)
 	if err != nil {
-		return user, http.StatusUnauthorized
+		return emptyUser, http.StatusUnauthorized
 	}
 
-	if user.Password != req.Password {
+	/* 	if user.Password != req.Password {
 		return user, http.StatusUnauthorized
+	} */
+
+	// Compare the entered password with the stored hashed password using bcrypt
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if err != nil {
+		// Password is incorrect
+		return emptyUser, http.StatusUnauthorized
 	}
 
 	err = CreateSession(user, w)

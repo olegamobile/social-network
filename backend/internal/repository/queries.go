@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -210,4 +211,34 @@ func SearchUsers(query string) ([]model.User, error) {
 	}
 
 	return users, nil
+}
+
+func InsertUser(passwordHash []byte, email, firstName, lastName string, parsedDOB time.Time, avatarPath, nickname, about sql.NullString) (string, int) {
+
+	// Insert user into database
+	query := `
+		INSERT INTO users (
+			email, password_hash, first_name, last_name,
+			date_of_birth, avatar_path, nickname, about_me
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		`
+
+	_, err := database.DB.Exec(
+		query,
+		email, passwordHash, firstName, lastName,
+		parsedDOB.Format("2006-01-02"),
+		avatarPath, nickname, about,
+	)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
+			fmt.Println("08", err)
+			return "Email already in use", http.StatusConflict
+		} else {
+			fmt.Println("09", err)
+			return "Failed to register user", http.StatusInternalServerError
+		}
+	}
+
+	return "", http.StatusOK
 }

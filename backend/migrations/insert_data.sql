@@ -1,14 +1,16 @@
+-- All passwords are "pass"
+
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth) VALUES
-('amina.ali@example.com', 'pass', 'Amina', 'Ali', '1990-05-15');
+('amina.ali@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Amina', 'Ali', '1990-05-15');
 
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, nickname, about_me, is_public) VALUES
-('yusuf.kamau@example.com', 'pass', 'Yusuf', 'Kamau', '1988-11-20', 'Yus', 'Loves hiking and photography.', TRUE);
+('yusuf.kamau@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Yusuf', 'Kamau', '1988-11-20', 'Yus', 'Loves hiking and photography.', TRUE);
 
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, nickname, is_public, status) VALUES
-('aziz.bek@example.com', 'pass', 'Aziz', 'Bek', '1985-07-10', 'AzizB', FALSE, 'enable');
+('aziz.bek@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Aziz', 'Bek', '1985-07-10', 'AzizB', FALSE, 'enable');
 
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, about_me) VALUES
-('zara.khan@example.com', 'pass', 'Zara', 'Khan', '1996-12-25', 'Enjoys reading and learning new languages.');
+('zara.khan@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Zara', 'Khan', '1996-12-25', 'Enjoys reading and learning new languages.');
 
 
 INSERT INTO posts (user_id, content, privacy_level) VALUES

@@ -5,6 +5,7 @@ import (
 	"backend/internal/repository"
 	"backend/internal/service"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -142,4 +143,21 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
+}
+
+func HandleRegister(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		fmt.Println("00")
+		return
+	}
+
+	errMsg, statusCode := service.RegisterUser(r)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		http.Error(w, errMsg, statusCode)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("User registered successfully"))
 }

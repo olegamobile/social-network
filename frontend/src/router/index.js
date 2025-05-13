@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import LoginView from '@/views/LoginView.vue'
+import RegisterView from '@/views/RegisterView.vue'
 import NotificationsView from '@/views/NotificationsView.vue'
 import GroupsView from '@/views/GroupsView.vue'
 import GroupView from '@/views/GroupView.vue'
@@ -16,6 +17,7 @@ import { useErrorStore } from '@/stores/error'
 const routes = [
     { path: '/', name: 'home', component: HomeView },
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/register', name: 'register', component: RegisterView },
     { path: '/profile/:id', name: 'profile', component: ProfileView },
     { path: '/notifications', name: 'notifications', component: NotificationsView },
     { path: '/follows', name: 'follows', component: FollowsView },
