@@ -1,14 +1,29 @@
 <template>
   <div class="new-post-form">
-    <h3 class="text-lg font-semibold">Create a New Post</h3>
-    <textarea v-model="content" placeholder="What's on your mind?" rows="4"
-    class="w-full border border-gray-300 rounded px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-    <select v-model="privacy_level">
-      <option value="public">Public</option>
-      <option value="almost_private">Almost Private</option>
-      <option value="private">Private</option>
-    </select>
-    <button @click="submitPost" :disabled="!content.trim()">Post</button>
+
+    <div class="mb-0">
+      <h3 for="textarea" class="text-lg font-semibold">Create a New Post</h3>
+      <textarea id="textarea" v-model="content" rows=4 cols=100
+        class="block w-full py-2 px-3 border border-nordic-light rounded-md bg-white text-nordic-dark placeholder-nordic-light focus:outline-none focus:ring-2 focus:ring-nordic-secondary-accent focus:border-nordic-secondary-accent sm:text-sm h-32 resize-y"
+        placeholder="Enter your message"></textarea>
+    </div>
+
+    <div class="mb-0">
+      <label for="select" class="block text-sm font-medium text-nordic-dark mb-1">Select privacy level</label>
+      <select id="select" v-model="privacy_level"
+        class="block w-full py-2 px-3 border border-nordic-light rounded-md bg-white 
+        text-nordic-dark focus:outline-none focus:ring-2 focus:ring-nordic-secondary-accent 
+        focus:border-nordic-secondary-accent sm:text-sm">
+        <option value="public" selected>Public</option>
+        <option value="almost_private">Almost Private</option>
+        <option value="private">Private</option>
+      </select>
+    </div>
+
+    <button @click="submitPost" :disabled="!content.trim()" 
+    class="inline-flex items-center py-2 px-4 border border-nordic-light rounded-md 
+    bg-nordic-primary-accent text-white hover:bg-nordic-secondary-accent focus:outline-none 
+    focus:ring-2 focus:ring-nordic-secondary-accent transition font-medium">Post</button>
   </div>
 </template>
 

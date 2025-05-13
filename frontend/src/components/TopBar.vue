@@ -7,7 +7,7 @@
                         aria-label="Home">
                         Åsocial
                     </router-link>
-                    <div class="hidden md:flex md:ml-6 space-x-1" v-if="!isLoginPage">
+                    <div class="hidden md:flex md:ml-6 space-x-1" v-if="!isLoginPage && !isRegisterPage">
                         <router-link to="/" class="top-bar-button" :class="{ 'active': $route.path === '/' }"
                             data-title="Home" aria-label="Home">
                             <i class="fas fa-home"></i> Home
@@ -270,7 +270,7 @@ const { logout } = useAuth()
     /* Helps with vertical alignment */
 }
 
-.fa-user {
+.fa-user, .fa-bell {
     margin-right: 0px !important;
 }
 
