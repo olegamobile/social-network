@@ -36,28 +36,28 @@ func ValidateSession(r *http.Request) (int, error) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) (model.User, int) {
-	var usr model.User
+	var user model.User
 
 	var req model.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return usr, http.StatusBadRequest
+		return user, http.StatusBadRequest
 	}
 
 	user, err := repository.GetUserByEmail(req)
 	if err != nil {
-		return usr, http.StatusUnauthorized
+		return user, http.StatusUnauthorized
 	}
 
 	if user.Password != req.Password {
-		return usr, http.StatusUnauthorized
+		return user, http.StatusUnauthorized
 	}
 
 	err = CreateSession(user, w)
 	if err != nil {
-		return usr, http.StatusInternalServerError
+		return user, http.StatusInternalServerError
 	}
 
-	return usr, http.StatusOK
+	return user, http.StatusOK
 }
 
 func CreateSession(user model.User, w http.ResponseWriter) error {

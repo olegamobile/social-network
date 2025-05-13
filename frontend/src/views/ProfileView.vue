@@ -5,10 +5,11 @@
         <TwoColumnLayout>
             <template #sidebar>
                 <h3>User Info</h3>
-                <p><strong>Username:</strong> {{ user?.username }}</p>
-                <p><strong>Email:</strong> {{ user?.email }}</p>
                 <p><strong>Name:</strong> {{ user?.first_name }} {{ user?.last_name }}</p>
+                <p><strong>Email:</strong> {{ user?.email }}</p>
                 <p><strong>Birthday:</strong> {{ user?.birthday }}</p>
+                <p v-if="user?.username"><strong>Username:</strong> {{ user?.username }}</p>
+                <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
             </template>
 
             <template #main>
@@ -69,6 +70,8 @@ async function fetchUserAndPosts(userId) {
         }
 
         user.value = await userRes.json()
+
+        console.log("user at profile view", user.value)
 
         // Fetch and filter posts
         const postsRes = await fetch(`${apiUrl}/api/posts`, {

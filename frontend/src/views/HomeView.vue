@@ -40,11 +40,13 @@ import { useRouter } from 'vue-router'
 import PostsList from '@/components/PostsList.vue'
 import { useAuth } from '@/composables/useAuth'
 import NewPostForm from '@/components/NewPostForm.vue'
+import { useErrorStore } from '@/stores/error'
 
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const { logout } = useAuth()
 const router = useRouter()
+const errorStore = useErrorStore()
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)

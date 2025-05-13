@@ -18,7 +18,7 @@
                 aria-label="Notifications">notifications</router-link>
             <router-link v-if="user" :to="`/profile/${user.id}`" data-title="Your Profile" aria-label="Your Profile"
                 class="profile-link">
-                {{ user.username }}
+                {{ user.first_name }}
             </router-link>
             <button class="logout-button material-icons" @click="logout" data-title="Logout"
                 aria-label="Logout">logout</button>
@@ -42,6 +42,8 @@ const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reacti
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const isLoginPage = computed(() => route.path === '/login');
 const { logout } = useAuth()
+
+console.log("user from uesrstore in top bar:", user.value)
 
 </script>
 

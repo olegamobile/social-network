@@ -3,7 +3,7 @@
         <p class="post-content">{{ post.content }}</p>
         <small class="post-date">
             Posted by
-            <RouterLink :to="`/profile/${post.user_id}`" class="post-username">
+            <RouterLink :to="`/profile/${post.user_id}`" class="post-user">
                 {{ post.username }}
             </RouterLink>
             on {{ formattedDate }}
@@ -51,13 +51,13 @@ const formattedDate = computed(() => {
     font-size: 0.85rem;
 }
 
-.post-username {
+.post-user {
     color: #0077cc;
     text-decoration: none;
     font-weight: bold;
 }
 
-.post-username:hover {
+.post-user:hover {
     text-decoration: underline;
 }
 </style>

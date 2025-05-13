@@ -2,6 +2,11 @@
   <div class="new-post-form">
     <h3>Create a New Post</h3>
     <textarea v-model="content" placeholder="What's on your mind?" rows="4"></textarea>
+    <select v-model="privacy_level">
+      <option value="public">Public</option>
+      <option value="almost_private">Almost Private</option>
+      <option value="private">Private</option>
+    </select>
     <button @click="submitPost" :disabled="!content.trim()">Post</button>
   </div>
 </template>
@@ -12,19 +17,21 @@ import { ref } from 'vue'
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const emit = defineEmits(['post-submitted'])
 const content = ref('')
+const privacy_level = ref('public') // Default to 'public'
 
 const submitPost = async () => {
   const res = await fetch(`${apiUrl}/api/posts/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include', // to send the session cookie
-    body: JSON.stringify({ content: content.value })
+    body: JSON.stringify({ content: content.value, privacy_level: privacy_level.value })
   })
 
   if (res.ok) {
     const newPost = await res.json()
     emit('post-submitted', newPost)
     content.value = ''
+    privacy_level.value = 'public'
   } else {
     alert('Failed to post. Are you logged in?')
   }
@@ -33,12 +40,15 @@ const submitPost = async () => {
 
 <style scoped>
 .new-post-form {
-  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 1rem 0 2rem;
 }
 
 textarea {
   width: 100%;
-  padding: 0.5rem;
   resize: vertical;
 }
 

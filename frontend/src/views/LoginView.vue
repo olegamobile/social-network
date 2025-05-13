@@ -39,6 +39,8 @@ async function login() {
             const data = await res.json()
             userStore.setUser(data.user)
 
+            console.log("login response:", data)
+
             // Navigate to what the user wanted or home 
             const redirectTo = route.query.redirect || '/'
             router.push(redirectTo)
