@@ -6,7 +6,10 @@ import (
 	"backend/internal/service"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +51,82 @@ func HandleMe(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+func HandleRegister(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		fmt.Println("00")
+		return
+	}
+
+	errMsg, statusCode := service.RegisterUser(r)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		http.Error(w, errMsg, statusCode)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("User registered successfully"))
+}
+
+func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("updating profile")
+
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "Error parsing form", http.StatusBadRequest)
+		return
+	}
+
+	updateData := model.UpdateProfileData{
+		FirstName: r.FormValue("firstName"),
+		LastName:  r.FormValue("lastName"),
+		DOB:       r.FormValue("dob"),
+		Nickname:  r.FormValue("nickname"),
+		About:     r.FormValue("about"),
+	}
+
+	// Handle optional avatar
+	file, handler, err := r.FormFile("avatar")
+	if err == nil {
+		defer file.Close()
+
+		filename := fmt.Sprintf("avatar_%d%s", userId, filepath.Ext(handler.Filename))
+		path := filepath.Join("uploads", "avatars", filename)
+
+		os.MkdirAll(filepath.Dir(path), os.ModePerm)
+
+		dst, err := os.Create(path)
+		if err != nil {
+			http.Error(w, "Failed to save avatar", http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+		io.Copy(dst, file)
+
+		updateData.AvatarPath = &path
+	}
+
+	// Handle delete_avatar flag
+	if r.FormValue("delete_avatar") == "true" {
+		updateData.DeleteAvatar = true
+	}
+
+	usr, err := service.UpdateUserProfile(userId, updateData)
+	if err != nil {
+		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	//json.NewEncoder(w).Encode(map[string]string{"message": "Profile updated"})
+	json.NewEncoder(w).Encode(usr)
 }
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
@@ -143,21 +222,4 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
-}
-
-func HandleRegister(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		fmt.Println("00")
-		return
-	}
-
-	errMsg, statusCode := service.RegisterUser(r)
-	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
-		http.Error(w, errMsg, statusCode)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("User registered successfully"))
 }

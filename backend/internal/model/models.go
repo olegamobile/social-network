@@ -23,3 +23,13 @@ type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type UpdateProfileData struct {
+	FirstName    string
+	LastName     string
+	DOB          string
+	Nickname     string
+	About        string
+	AvatarPath   *string
+	DeleteAvatar bool
+}

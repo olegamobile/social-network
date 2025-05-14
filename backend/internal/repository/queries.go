@@ -3,16 +3,13 @@ package repository
 import (
 	"backend/internal/database"
 	"backend/internal/model"
+	"backend/internal/utils"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 )
-
-// username > nickname
-// birthday > date_of_birth
-// null to
 
 func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 	var user model.User
@@ -241,4 +238,39 @@ func InsertUser(passwordHash []byte, email, firstName, lastName string, parsedDO
 	}
 
 	return "", http.StatusOK
+}
+
+func UpdateUser(userID int, data model.UpdateProfileData) (model.User, error) {
+	query := `
+		UPDATE users SET
+			first_name = ?,
+			last_name = ?,
+			date_of_birth = ?,
+			nickname = ?,
+			about_me = ?,
+			updated_at = CURRENT_TIMESTAMP
+	`
+	args := []any{data.FirstName, data.LastName, data.DOB, utils.NullableString(data.Nickname), utils.NullableString(data.About)}
+
+	if data.DeleteAvatar {
+		query += `, avatar_path = NULL`
+	} else if data.AvatarPath != nil {
+		query += `, avatar_path = ?`
+		args = append(args, *data.AvatarPath)
+	}
+
+	query += ` WHERE id = ?`
+	args = append(args, userID)
+
+	result, err := database.DB.Exec(query, args...)
+
+	var usr model.User
+	id, err := result.LastInsertId()
+	if err != nil {
+		return usr, err
+	}
+
+	usr, err = GetUserById(int(id))
+
+	return usr, err
 }

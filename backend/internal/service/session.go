@@ -66,6 +66,7 @@ func Login(w http.ResponseWriter, r *http.Request) (model.User, int) {
 		return user, http.StatusInternalServerError
 	}
 
+	user.Password = ""
 	return user, http.StatusOK
 }
 

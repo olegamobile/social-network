@@ -1,7 +1,7 @@
 -- All passwords are "pass"
 
-INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth) VALUES
-('amina.ali@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Amina', 'Ali', '1990-05-15');
+INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, nickname, about_me) VALUES
+('amina.ali@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Amina', 'Ali', '1990-05-15', 'Amy', 'Kicks ass');
 
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, nickname, about_me, is_public) VALUES
 ('yusuf.kamau@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Yusuf', 'Kamau', '1988-11-20', 'Yus', 'Loves hiking and photography.', TRUE);

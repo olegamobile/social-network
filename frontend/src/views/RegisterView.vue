@@ -70,7 +70,6 @@ const register = async () => {
             formData.append('avatar', form.value.avatar);
         }
 
-        // Replace this with your actual API endpoint:
         const response = await fetch(`${apiUrl}/api/register`, {
             method: 'POST',
             body: formData,

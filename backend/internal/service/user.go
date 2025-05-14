@@ -3,7 +3,9 @@ package service
 import (
 	"backend/internal/model"
 	"backend/internal/repository"
+	"backend/internal/utils"
 	"database/sql"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -96,7 +98,7 @@ func RegisterUser(r *http.Request) (string, int) {
 		fmt.Println("07", err)
 	}
 
-	errMsg, statusCode := repository.InsertUser(passwordHash, email, firstName, lastName, parsedDOB, avatarPath, nullableString(nickname), nullableString(about))
+	errMsg, statusCode := repository.InsertUser(passwordHash, email, firstName, lastName, parsedDOB, avatarPath, utils.NullableString(nickname), utils.NullableString(about))
 	if errMsg != "" {
 		return errMsg, statusCode
 	}
@@ -104,17 +106,19 @@ func RegisterUser(r *http.Request) (string, int) {
 	return "", http.StatusOK
 }
 
-// Helper: return a sql.NullString
-func nullableString(s string) sql.NullString {
-	if s == "" {
-		return sql.NullString{Valid: false}
-	}
-	return sql.NullString{Valid: true, String: s}
-}
-
 // Helper: check if extension is a valid image type
 func isAllowedImageExtension(ext string) bool {
 	ext = strings.ToLower(ext)
 	allowed := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
 	return allowed[ext]
+}
+
+func UpdateUserProfile(userID int, data model.UpdateProfileData) (model.User, error) {
+	var usr model.User
+	if strings.TrimSpace(data.FirstName) == "" || strings.TrimSpace(data.LastName) == "" || strings.TrimSpace(data.DOB) == "" {
+		return usr, errors.New("required fields missing")
+	}
+
+	usr, err := repository.UpdateUser(userID, data)
+	return usr, err
 }
