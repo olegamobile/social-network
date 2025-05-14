@@ -12,3 +12,17 @@ body {
 .text-nordic-light { color: #546E7A; }
 .bg-nordic-primary-accent { background-color: #607D8B; }
 .hover\:bg-nordic-secondary-accent:hover { background-color: #769FCD; }
+.hover\:text-nordic-primary-accent:hover {
+    color: var(--nordic-primary-accent, #607D8B);
+  }
+
+
+
+:root {
+    --nordic-primary-bg: #F7F9FB; /* Very Light Cool Grey */
+    --nordic-secondary-bg: #E8EDF2; /* Soft Blue-Grey for panels or accents */
+    --nordic-text-dark: #263238;    /* Dark Slate Grey for primary text */
+    --nordic-text-light: #546E7A;   /* Lighter Slate Grey for secondary text */
+    --nordic-primary-accent: #607D8B;/* Muted Blue-Grey for active elements */
+    --nordic-border-light: #CFD8DC;  /* Light Grey for borders */
+  }

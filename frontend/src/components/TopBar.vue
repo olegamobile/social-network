@@ -302,7 +302,6 @@ const { logout } = useAuth()
     /* Helps with vertical alignment */
 }
 
-/* .fa-bell, */
 .fa-user {
     margin-right: 0px !important;
 }
@@ -312,7 +311,4 @@ const { logout } = useAuth()
     background-color: #555;
 }
 
-/* .router-link-exact-active {
-    font-weight: bold;
-} */
 </style>

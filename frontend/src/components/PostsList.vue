@@ -1,5 +1,5 @@
 <template>
-  <div class="posts-container">
+  <div class="posts-container max-w-screen-lg">
     <Post v-for="p in posts" :key="p.id" :post="p" />
   </div>
 </template>
