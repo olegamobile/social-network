@@ -66,6 +66,21 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func GetGroups(w http.ResponseWriter, r *http.Request) {
+	_, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := repository.GetAllGroups()
+	if err != nil {
+		http.Error(w, "Users not found", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(groups)
+}
+
 func HandleUserByID(w http.ResponseWriter, r *http.Request) {
 	_, err := service.ValidateSession(r)
 	if err != nil {

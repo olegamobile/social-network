@@ -23,3 +23,9 @@ type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type Group struct {
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}

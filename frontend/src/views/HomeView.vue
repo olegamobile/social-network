@@ -121,11 +121,4 @@ onMounted(async () => {
   min-height: 100vh;
 }
 
-
-.sidebar-list li {
-  /* list-style-type: none; */ /* Handled by Tailwind's 'list-disc' and custom spacing */
-  /* padding-left: 0.5rem; */ /* Adjust as needed */
-}
-
-
 </style>
