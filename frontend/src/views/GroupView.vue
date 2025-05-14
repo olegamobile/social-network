@@ -4,7 +4,7 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h2>{{ group.name }}</h2>
+                <h2 class="text-2xl font-bold mb-4">{{ group.name }}</h2>
                 <p>{{ group.description }}</p>
 
                 <template v-if="isMember">

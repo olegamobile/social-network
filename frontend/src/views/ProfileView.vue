@@ -4,7 +4,7 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3>User Info</h3>
+                <h3 class="text-lg font-semibold">User Info</h3>
                 <p><strong>Name:</strong> {{ user?.first_name }} {{ user?.last_name }}</p>
                 <p><strong>Email:</strong> {{ user?.email }}</p>
                 <p><strong>Birthday:</strong> {{ user?.birthday }}</p>
@@ -13,7 +13,7 @@
             </template>
 
             <template #main>
-                <h2>{{ user?.first_name }}'s Posts</h2>
+                <h2 class="text-2xl font-bold mb-4">{{ user?.first_name }}'s Posts</h2>
                 <PostsList :posts="posts" />
             </template>
         </TwoColumnLayout>

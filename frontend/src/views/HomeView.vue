@@ -4,26 +4,26 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3>Following</h3>
-                <ul>
+                <h3 class="text-lg font-semibold">Following</h3>
+                <ul class="list-disc pl-6">
                     <li>@bob</li>
                     <li>@john</li>
                 </ul>
 
-                <h3>Followers</h3>
-                <ul>
+                <h3 class="text-lg font-semibold">Followers</h3>
+                <ul class="list-disc pl-6">
                     <li>@bob</li>
                 </ul>
 
-                <h3>Groups</h3>
-                <ul>
+                <h3 class="text-lg font-semibold">Groups</h3>
+                <ul class="list-disc pl-6">
                     <li>Vue Fans</li>
                     <li>Go Developers</li>
                 </ul>
             </template>
 
             <template #main>
-                <h2>Home Feed</h2>
+                <h2 class="text-2xl font-bold mb-4">Home Feed</h2>
                 <NewPostForm @post-submitted="handlePostSubmitted" />
                 <PostsList :posts="posts" />
             </template>
