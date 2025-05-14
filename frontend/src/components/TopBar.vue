@@ -1,12 +1,16 @@
 <template>
     <nav class="bg-white shadow-sm w-full top-0 left-0 z-50">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex flex-wrap items-center justify-between py-4">
                 <div class="flex items-center">
+
+                    <!-- title -->
                     <router-link to="/" class="flex-shrink-0 text-2xl font-bold text-nordic-primary-accent"
                         aria-label="Home">
                         Åsocial
                     </router-link>
+
+                    <!-- home, follows, groups, chats and events links -->
                     <div class="hidden md:flex md:ml-6 space-x-1" v-if="!isLoginPage && !isRegisterPage">
                         <router-link to="/" class="top-bar-button" :class="{ 'active': $route.path === '/' }"
                             data-title="Home" aria-label="Home">
@@ -31,7 +35,9 @@
                     </div>
                 </div>
 
-                <div class="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end">
+                <!-- Search bar -->
+                <div class="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end"
+                    v-if="!isLoginPage && !isRegisterPage">
                     <div class="max-w-lg w-full lg:max-w-xs">
                         <label for="search" class="sr-only">Search</label>
                         <div class="relative">
@@ -45,13 +51,14 @@
                     </div>
                 </div>
 
-                <div class="hidden md:flex md:items-center md:ml-4 space-x-2" v-if="!isLoginPage">
+                <!-- notifications and profile links -->
+                <div class="hidden md:flex md:items-center md:ml-4 space-x-2" v-if="!isLoginPage & !isRegisterPage">
                     <router-link to="/notifications" class="top-bar-button relative" data-title="Notifications"
                         aria-label="Notifications">
                         <span class="sr-only">View notifications</span>
                         <i class="fas fa-bell"></i>
                         <span
-                            class="absolute top-1 right-1 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
+                            class="absolute top-2 right-3 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
                     </router-link>
 
                     <router-link v-if="user" :to="`/profile/${user.id}`" class="top-bar-button"
@@ -68,20 +75,34 @@
                     </button>
                 </div>
 
+                <!-- hamburger menu -->
                 <div class="-mr-2 flex md:hidden">
                     <button type="button"
                         class="bg-white inline-flex items-center justify-center p-2 rounded-md text-nordic-light hover:text-nordic-dark hover:bg-nordic-secondary-bg focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nordic-primary-accent"
                         aria-controls="mobile-menu" :aria-expanded="isMobileMenuOpen.toString()"
                         @click="toggleMobileMenu">
                         <span class="sr-only">Open main menu</span>
-                        <i class="material-icons">{{ isMobileMenuOpen ? 'close' : 'menu' }}</i>
+                        <i :class="[isMobileMenuOpen ? 'fas fa-xmark' : 'fas fa-bars']"></i>
                     </button>
                 </div>
+
+                <!-- link to register or login -->
+                <div class="hidden md:flex nav-icons" v-if="isLoginPage">
+                    <router-link to="/register" class="text-link" data-title="Home"
+                        aria-label="Home">Register</router-link>
+                </div>
+                <div class="hidden md:flex nav-icons" v-if="isRegisterPage">
+                    <router-link to="/login" class="text-link" data-title="Home" aria-label="Home">Login</router-link>
+                </div>
+
             </div>
         </div>
 
-        <div class="md:hidden" :class="{ 'hidden': !isMobileMenuOpen }" id="mobile-menu" v-if="!isLoginPage">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <!-- mobile menu -->
+        <div class="md:hidden" :class="{ 'hidden': !isMobileMenuOpen }" id="mobile-menu">
+
+            <!-- home, follows, groups, chats and events links -->
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" v-if="!isLoginPage & !isRegisterPage">
                 <router-link to="/" class="top-bar-button block" :class="{ 'active': $route.path === '/' }"
                     @click="toggleMobileMenu" data-title="Home" aria-label="Home">
                     <i class="fas fa-home"></i>Home
@@ -103,46 +124,61 @@
                     @click="toggleMobileMenu" data-title="Events" aria-label="Events">
                     <i class="fas fa-calendar-alt"></i>Events
                 </router-link>
-            </div>
-            <div class="pt-4 pb-3 border-t border-nordic-light">
-                <div class="flex items-center px-5">
-                    <div class="profile-avatar">
+                <!-- </div> -->
+
+                <!-- user, notifications and profile -->
+                <!-- <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" v-if="!isLoginPage & !isRegisterPage"> -->
+                <!-- <div class="flex items-center px-5"> -->
+                <!-- <div class="mt-3 px-2 space-y-1"> -->
+                <!--                     <div class="profile-avatar">
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="ml-3">
                         <div class="text-base font-medium leading-none text-nordic-dark">{{ user?.first_name }}</div>
                         <div class="text-sm font-medium leading-none text-nordic-light">{{ user?.email }}</div>
-                    </div>
-                    <router-link to="/notifications"
-                        class="ml-auto bg-white flex-shrink-0 p-1 rounded-full text-nordic-light hover:text-nordic-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nordic-primary-accent relative"
-                        data-title="Notifications" aria-label="Notifications">
-                        <span class="sr-only">View notifications</span>
-                        <i class="fas fa-bell"></i>
-                        <span
-                            class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-1 ring-white bg-red-500"></span>
-                    </router-link>
-                </div>
-                <div class="mt-3 px-2 space-y-1">
-                    <router-link v-if="user" :to="`/profile/${user.id}`"
+                    </div> -->
+                <router-link to="/notifications" class="top-bar-button block relative"
+                    :class="{ 'active': $route.path === '/notifications' }" @click="toggleMobileMenu" data-title="Notifications"
+                    aria-label="Notifications">
+                    <i class="fas fa-bell"></i>View notifications
+                    <span class="absolute top-1 left-6 block h-2 w-2 rounded-full ring-1 ring-white bg-red-500"></span>
+                    
+                </router-link>
+
+                <!-- </div> -->
+
+                <!-- <div class="mt-3 px-2 space-y-1"> -->
+
+                <!-- <router-link v-if="user" :to="`/profile/${user.id}`"
                         class="block px-3 py-2 rounded-md text-base font-medium text-nordic-light hover:text-nordic-dark hover:bg-nordic-secondary-bg"
                         @click="toggleMobileMenu" data-title="Your Profile" aria-label="Your Profile">
                         <i class="fas fa-user"></i> Profile
-                    </router-link>
-                    <button
-                        class="block px-3 py-2 rounded-md text-base font-medium text-nordic-light hover:text-nordic-dark hover:bg-nordic-secondary-bg w-full text-left"
-                        @click="logout(); toggleMobileMenu()" data-title="Logout" aria-label="Logout">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </div>
+                    </router-link> -->
+
+                <router-link v-if="user" :to="`/profile/${user.id}`" class="top-bar-button"
+                    :class="{ 'active': $route.path === '/profile/' + user?.id }" data-title="Your Profile"
+                    aria-label="Your Profile">
+                    <i class="fas fa-user"></i>
+                    <span class="ml-2">{{ user?.first_name }}</span>
+                </router-link>
+
+                <button
+                    class="block px-3 py-2 rounded-md text-base font-medium text-nordic-light hover:text-nordic-dark hover:bg-nordic-secondary-bg w-full text-left"
+                    @click="logout(); toggleMobileMenu()" data-title="Logout" aria-label="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+                <!-- </div> -->
+            </div>
+
+            <!-- link to register or login -->
+            <div class="nav-icons" v-if="isLoginPage">
+                <router-link to="/register" class="text-link" data-title="Home" aria-label="Home">Register</router-link>
+            </div>
+            <div class="nav-icons" v-if="isRegisterPage">
+                <router-link to="/login" class="text-link" data-title="Home" aria-label="Home">Login</router-link>
             </div>
         </div>
 
-        <div class="nav-icons" v-if="isLoginPage">
-            <router-link to="/register" class="text-link" data-title="Home" aria-label="Home">Register</router-link>
-        </div>
-        <div class="nav-icons" v-if="isRegisterPage">
-            <router-link to="/login" class="text-link" data-title="Home" aria-label="Home">Login</router-link>
-        </div>
     </nav>
 </template>
 
@@ -175,10 +211,6 @@ const { logout } = useAuth()
      but in a real Vue project with Tailwind, you'd configure these
      colors in your tailwind.config.js file.
   */
-
-/* Scoped styles specific to this component */
-@import url('https://fonts.googleapis.com/css2?family=Material+Icons');
-
 
 /* Custom Nordic Colors (apply these in tailwind.config.js if using Tailwind properly) */
 .text-nordic-primary-accent {
@@ -270,21 +302,9 @@ const { logout } = useAuth()
     /* Helps with vertical alignment */
 }
 
-.fa-user, .fa-bell {
+/* .fa-bell, */
+.fa-user {
     margin-right: 0px !important;
-}
-
-.nav-icons a,
-.text-link,
-.logout-button {
-    position: relative;
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 5px;
-    color: white;
-    text-decoration: none;
-    /* background-color: transparent; */
-    transition: background-color 0.2s ease;
 }
 
 .router-link-active.text-link,
@@ -295,49 +315,4 @@ const { logout } = useAuth()
 /* .router-link-exact-active {
     font-weight: bold;
 } */
-
-.logout-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.material-icons,
-a.material-icons {
-  color: #b7d9ec; /* blue, or whatever you prefer */
-}
-
-
-/* Tooltip styles */
-.nav-icons a:hover::after,
-.text-link:hover::after,
-.logout-button:hover::after {
-    content: attr(data-title);
-    position: absolute;
-    bottom: -2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #444;
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    opacity: 1;
-    pointer-events: none;
-    z-index: 100;
-
-    /* Override the icon font */
-    font-family: sans-serif;
-}
-
-.nav-icons a::after,
-.text-link::after,
-.logout-button::after {
-    content: '';
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
 </style>

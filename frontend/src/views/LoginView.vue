@@ -39,14 +39,17 @@ async function login() {
             const data = await res.json()
             userStore.setUser(data.user)
 
-            console.log("login response:", data)
-
             // Navigate to what the user wanted or home 
-            const redirectTo = route.query.redirect || '/'
+            let redirectTo = route.query.redirect || '/'
+            console.log("redirect:", typeof redirectTo,  redirectTo, route.query.redirect)
+
+            //redirectTo = redirectTo ? redirectTo.replace(/"/g, '') : '/';
+
             router.push(redirectTo)
         } else {
             const msg = await res.text()
             error.value = msg || 'Login failed'
+            console.log("err is:", msg)
         }
 
     } catch (error) {
