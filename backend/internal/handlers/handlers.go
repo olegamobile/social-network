@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -195,4 +196,47 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
+}
+
+func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	UserIDString := r.URL.Query().Get("user_id")
+	if UserIDString == "" {
+		fmt.Println("empty usetId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+
+	UserID, err := strconv.Atoi(UserIDString)
+	if err != nil {
+		fmt.Println("can not convert userId")
+		return
+	}
+
+	PostIDstring := r.URL.Query().Get("post_id")
+	if PostIDstring == "" {
+		fmt.Println("empty postId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+	PostID, err := strconv.Atoi(PostIDstring)
+	if err != nil {
+		fmt.Println("can not convert postId")
+		return
+	}
+	comments, err := repository.ReadAllCommentsForPost(PostID, UserID)
+	fmt.Println("userId:", UserID)
+	fmt.Println("postid:", PostID)
+	fmt.Println(comments)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(comments)
+
 }
