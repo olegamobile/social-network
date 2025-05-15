@@ -311,9 +311,4 @@ const { logout } = useAuth()
 .router-link-active.navbar-link {
     background-color: #555;
 }
-
-/* .router-link-exact-active {
-    font-weight: bold;
-} */
-
 </style>
