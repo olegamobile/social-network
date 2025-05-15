@@ -26,8 +26,10 @@
 
                 <div v-if="form.avatarUrl" class="mt-2">
                     <p class="text-sm text-nordic-light">Current Avatar:</p>
-                    <img :src="form.avatarUrl" alt="Avatar" class="h-24 w-24 object-cover rounded-md border border-nordic-light" />
-                    <button type="button" @click="deleteAvatar" class="mt-2 text-sm text-red-600 hover:underline text-nordic-primary-accent hover:text-nordic-secondary-accent">Delete
+                    <img :src="form.avatarUrl" alt="Avatar"
+                        class="h-24 w-24 object-cover rounded-md border border-nordic-light" />
+                    <button type="button" @click="deleteAvatar"
+                        class="mt-2 text-sm text-red-600 hover:underline text-nordic-primary-accent hover:text-nordic-secondary-accent">Delete
                         Avatar</button>
                 </div>
                 <div v-else>
@@ -124,7 +126,7 @@ const updateProfile = async () => {
             // Signal to delete avatar
             formData.append('delete_avatar', 'true');
         }
-       
+
         const response = await fetch(`${apiUrl}/api/me/update`, {
             method: 'POST',
             body: formData,
@@ -136,7 +138,9 @@ const updateProfile = async () => {
             throw new Error(errData.message || 'Update failed');
         }
         const data = await response.json();
+        console.log("Updated data to userstore:", data)
         userStore.setUser(data);
+        console.log("User in userstore:", userStore.user)
 
         success.value = 'Profile updated successfully';
         error.value = null;

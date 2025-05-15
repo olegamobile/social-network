@@ -5,7 +5,6 @@ import (
 	"backend/internal/repository"
 	"backend/internal/utils"
 	"database/sql"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -113,12 +112,16 @@ func isAllowedImageExtension(ext string) bool {
 	return allowed[ext]
 }
 
-func UpdateUserProfile(userID int, data model.UpdateProfileData) (model.User, error) {
+func UpdateUserProfile(userID int, data model.UpdateProfileData) (model.User, string, int) {
 	var usr model.User
 	if strings.TrimSpace(data.FirstName) == "" || strings.TrimSpace(data.LastName) == "" || strings.TrimSpace(data.DOB) == "" {
-		return usr, errors.New("required fields missing")
+		return usr, "required fields missing", http.StatusBadRequest
 	}
 
-	usr, err := repository.UpdateUser(userID, data)
-	return usr, err
+	usr, errMsg, statusCode := repository.UpdateUser(userID, data)
+	if errMsg != "" {
+		return usr, errMsg, statusCode
+	}
+
+	return usr, "", http.StatusOK
 }

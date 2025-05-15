@@ -81,6 +81,7 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
+		fmt.Println("Error 1", err)
 		return
 	}
 
@@ -105,12 +106,15 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 		dst, err := os.Create(path)
 		if err != nil {
 			http.Error(w, "Failed to save avatar", http.StatusInternalServerError)
+			fmt.Println("Error 2", err)
 			return
 		}
 		defer dst.Close()
 		io.Copy(dst, file)
 
 		updateData.AvatarPath = &path
+	} else {
+		fmt.Println("No avatar file found at updating profile", err)
 	}
 
 	// Handle delete_avatar flag
@@ -118,14 +122,14 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 		updateData.DeleteAvatar = true
 	}
 
-	usr, err := service.UpdateUserProfile(userId, updateData)
-	if err != nil {
-		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
+	usr, errMsg, errStatus := service.UpdateUserProfile(userId, updateData)
+	if errMsg != "" {
+		http.Error(w, errMsg, errStatus)
+		fmt.Println("Error 3", errMsg)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	//json.NewEncoder(w).Encode(map[string]string{"message": "Profile updated"})
 	json.NewEncoder(w).Encode(usr)
 }
 

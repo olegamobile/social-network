@@ -264,7 +264,7 @@ func InsertUser(passwordHash []byte, email, firstName, lastName string, parsedDO
 	return "", http.StatusOK
 }
 
-func UpdateUser(userID int, data model.UpdateProfileData) (model.User, error) {
+func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, int) {
 	query := `
 		UPDATE users SET
 			first_name = ?,
@@ -286,15 +286,17 @@ func UpdateUser(userID int, data model.UpdateProfileData) (model.User, error) {
 	query += ` WHERE id = ?`
 	args = append(args, userID)
 
-	result, err := database.DB.Exec(query, args...)
-
 	var usr model.User
-	id, err := result.LastInsertId()
+
+	_, err := database.DB.Exec(query, args...)
 	if err != nil {
-		return usr, err
+		return usr, "Failed to update user", http.StatusInternalServerError
 	}
 
-	usr, err = GetUserById(int(id))
+	usr, err = GetUserById(userID)
+	if err != nil {
+		return usr, "Failed to get updated user", http.StatusInternalServerError
+	}
 
-	return usr, err
+	return usr, "", http.StatusOK
 }

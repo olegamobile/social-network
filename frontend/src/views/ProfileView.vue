@@ -8,7 +8,7 @@
                 <p><strong>Name:</strong> {{ user?.first_name }} {{ user?.last_name }}</p>
                 <p><strong>Email:</strong> {{ user?.email }}</p>
                 <p><strong>Birthday:</strong> {{ user?.birthday }}</p>
-                <p v-if="user?.username"><strong>Username:</strong> {{ user?.username }}</p>
+                <p v-if="user?.username && user?.username != 'null'"><strong>Username:</strong> {{ user?.username }}</p>
                 <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
             </template>
 
@@ -59,12 +59,12 @@ async function fetchUserAndPosts(userId) {
                 credentials: 'include' // Necessary to send cookie all the way to backend server
             })
 
-        if (userRes.status === 401) {
-            // Session is invalid — logout and redirect
-            logout()
-            router.push('/login')
-            return
-        }
+            if (userRes.status === 401) {
+                // Session is invalid — logout and redirect
+                logout()
+                router.push('/login')
+                return
+            }
 
             if (userRes.status === 404) {
                 errorStore.setError('User Not Found', `User with ID ${userId} does not exist.`)
@@ -84,12 +84,17 @@ async function fetchUserAndPosts(userId) {
             }
 
             user.value = await userRes.json()
+            console.log("User gotten from db:", user.value)
+
             user.value.birthday = new Date(user.value.birthday).toLocaleString("fi-FI", {
                 dateStyle: 'short',
             })
         } else {
-            console.log("User gotten from store")
+            console.log("User gotten from store:", userStore.user)
             user.value = userStore.user
+            user.value.birthday = new Date(user.value.birthday).toLocaleString("fi-FI", {
+                dateStyle: 'short',
+            })
         }
 
         // Fetch and filter posts
@@ -100,7 +105,6 @@ async function fetchUserAndPosts(userId) {
         if (!postsRes.ok) {
             throw new Error(`Failed to fetch posts: ${postsRes.status}`)
         }
-
         const allPosts = await postsRes.json()
         posts.value = allPosts.filter(p => p.user_id === Number(userId))
     } catch (err) {
@@ -123,12 +127,12 @@ watch(() => route.params.id, (newId) => {
 
 // Update own profile when userstore.user changes
 watch(
-  () => userStore.user,
-  (newUser) => {
-    if (route.params.id == newUser.id) {
-      user.value = newUser
+    () => userStore.user,
+    (newUser) => {
+        if (route.params.id == newUser.id) {
+            user.value = newUser
+        }
     }
-  }
 )
 
 </script>

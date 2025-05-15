@@ -146,7 +146,6 @@
                     @click="logout(); toggleMobileMenu()" data-title="Logout" aria-label="Logout">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
-                <!-- </div> -->
             </div>
 
             <!-- link to register or login -->
@@ -162,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
@@ -176,11 +175,23 @@ const isMobileMenuOpen = ref(false); // Controls mobile menu visibility
 const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
-const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reactive when destructured
+//const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reactive when destructured
+const user = ref(userStore.user)
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const isLoginPage = computed(() => route.path === '/login');
 const isRegisterPage = computed(() => route.path === '/register');
 const { logout } = useAuth()
+
+// Update own profile when userstore.user changes
+watch(
+    () => userStore.user,
+    (newUser) => {
+        if (route.params.id == newUser.id) {
+            user.value = newUser
+        }
+    }
+)
+
 </script>
 
 <style scoped>
