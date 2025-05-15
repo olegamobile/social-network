@@ -37,7 +37,7 @@ async function login() {
         })
         if (res.ok) {
             const data = await res.json()
-            console.log("data to store at login:", data.user)
+            //console.log("data to store at login:", data.user)
             userStore.setUser(data.user)
 
             // Navigate to what the user wanted or home 

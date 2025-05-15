@@ -6,10 +6,7 @@ import (
 	"backend/internal/service"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -79,50 +76,7 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		http.Error(w, "Error parsing form", http.StatusBadRequest)
-		fmt.Println("Error 1", err)
-		return
-	}
-
-	updateData := model.UpdateProfileData{
-		FirstName: r.FormValue("firstName"),
-		LastName:  r.FormValue("lastName"),
-		DOB:       r.FormValue("dob"),
-		Nickname:  r.FormValue("nickname"),
-		About:     r.FormValue("about"),
-	}
-
-	// Handle optional avatar
-	file, handler, err := r.FormFile("avatar")
-	if err == nil {
-		defer file.Close()
-
-		filename := fmt.Sprintf("avatar_%d%s", userId, filepath.Ext(handler.Filename))
-		path := filepath.Join("uploads", "avatars", filename)
-
-		os.MkdirAll(filepath.Dir(path), os.ModePerm)
-
-		dst, err := os.Create(path)
-		if err != nil {
-			http.Error(w, "Failed to save avatar", http.StatusInternalServerError)
-			fmt.Println("Error 2", err)
-			return
-		}
-		defer dst.Close()
-		io.Copy(dst, file)
-
-		updateData.AvatarPath = &path
-	} else {
-		fmt.Println("No avatar file found at updating profile", err)
-	}
-
-	// Handle delete_avatar flag
-	if r.FormValue("delete_avatar") == "true" {
-		updateData.DeleteAvatar = true
-	}
-
-	usr, errMsg, errStatus := service.UpdateUserProfile(userId, updateData)
+	usr, errMsg, errStatus := service.UpdateUserProfile(userId, r)
 	if errMsg != "" {
 		http.Error(w, errMsg, errStatus)
 		fmt.Println("Error 3", errMsg)

@@ -78,7 +78,7 @@ func RegisterUser(r *http.Request) (string, int) {
 		defer file.Close()
 
 		ext := filepath.Ext(header.Filename)
-		if ext == "" || !isAllowedImageExtension(ext) {
+		if ext == "" || !utils.IsAllowedImageExtension(ext) {
 			fmt.Println("05", err)
 			return "Unsupported image type", http.StatusBadRequest
 		}
@@ -91,10 +91,11 @@ func RegisterUser(r *http.Request) (string, int) {
 		}
 		defer out.Close()
 		io.Copy(out, file)
+
 		avatarPath.Valid = true
 		avatarPath.String = filename
 	} else {
-		fmt.Println("07", err)
+		fmt.Println("Image reading error at registering:", err)
 	}
 
 	errMsg, statusCode := repository.InsertUser(passwordHash, email, firstName, lastName, parsedDOB, avatarPath, utils.NullableString(nickname), utils.NullableString(about))
@@ -106,19 +107,54 @@ func RegisterUser(r *http.Request) (string, int) {
 }
 
 // Helper: check if extension is a valid image type
-func isAllowedImageExtension(ext string) bool {
-	ext = strings.ToLower(ext)
-	allowed := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
-	return allowed[ext]
-}
 
-func UpdateUserProfile(userID int, data model.UpdateProfileData) (model.User, string, int) {
+func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 	var usr model.User
-	if strings.TrimSpace(data.FirstName) == "" || strings.TrimSpace(data.LastName) == "" || strings.TrimSpace(data.DOB) == "" {
+
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		return usr, "Error parsing form", http.StatusBadRequest
+	}
+
+	updateData := model.UpdateProfileData{
+		FirstName: r.FormValue("firstName"),
+		LastName:  r.FormValue("lastName"),
+		DOB:       r.FormValue("dob"),
+		Nickname:  r.FormValue("nickname"),
+		About:     r.FormValue("about"),
+	}
+
+	// Handle optional avatar
+	file, handler, err := r.FormFile("avatar")
+	if err == nil {
+		defer file.Close()
+
+		filename := fmt.Sprintf("avatar_%d%s", userID, filepath.Ext(handler.Filename))
+		path := filepath.Join("uploads", "avatars", filename)
+
+		os.MkdirAll(filepath.Dir(path), os.ModePerm)
+
+		dst, err := os.Create(path)
+		if err != nil {
+			return usr, "Failed to save avatar", http.StatusInternalServerError
+		}
+		defer dst.Close()
+		io.Copy(dst, file)
+
+		updateData.AvatarPath = &path
+	} else {
+		fmt.Println("No avatar file found at updating profile", err)
+	}
+
+	// Handle delete_avatar flag
+	if r.FormValue("delete_avatar") == "true" {
+		updateData.DeleteAvatar = true
+	}
+
+	if strings.TrimSpace(updateData.FirstName) == "" || strings.TrimSpace(updateData.LastName) == "" || strings.TrimSpace(updateData.DOB) == "" {
 		return usr, "required fields missing", http.StatusBadRequest
 	}
 
-	usr, errMsg, statusCode := repository.UpdateUser(userID, data)
+	usr, errMsg, statusCode := repository.UpdateUser(userID, updateData)
 	if errMsg != "" {
 		return usr, errMsg, statusCode
 	}

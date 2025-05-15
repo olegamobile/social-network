@@ -7,7 +7,7 @@
                 <h3 class="text-lg font-semibold">User Info</h3>
                 <p><strong>Name:</strong> {{ user?.first_name }} {{ user?.last_name }}</p>
                 <p><strong>Email:</strong> {{ user?.email }}</p>
-                <p><strong>Birthday:</strong> {{ user?.birthday }}</p>
+                <p><strong>Birthday:</strong> {{ formattedBirthday }}</p>
                 <p v-if="user?.username && user?.username != 'null'"><strong>Username:</strong> {{ user?.username }}</p>
                 <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
             </template>
@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import PostsList from '@/components/PostsList.vue'
@@ -47,6 +47,16 @@ const router = useRouter()
 const errorStore = useErrorStore()
 const showEditForm = ref(false);
 const userStore = useUserStore()
+
+// Create another computed property for the formatted birthday
+const formattedBirthday = computed(() => {
+  if (user.value && user.value.birthday) {
+    return new Date(user.value.birthday).toLocaleString("fi-FI", {
+      dateStyle: 'short',
+    });
+  }
+  return '';
+});
 
 async function fetchUserAndPosts(userId) {
     try {
@@ -84,17 +94,8 @@ async function fetchUserAndPosts(userId) {
             }
 
             user.value = await userRes.json()
-            console.log("User gotten from db:", user.value)
-
-            user.value.birthday = new Date(user.value.birthday).toLocaleString("fi-FI", {
-                dateStyle: 'short',
-            })
         } else {
-            console.log("User gotten from store:", userStore.user)
             user.value = userStore.user
-            user.value.birthday = new Date(user.value.birthday).toLocaleString("fi-FI", {
-                dateStyle: 'short',
-            })
         }
 
         // Fetch and filter posts
