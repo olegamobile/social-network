@@ -88,11 +88,11 @@
 
                 <!-- link to register or login -->
                 <div class="hidden md:flex nav-icons" v-if="isLoginPage">
-                    <router-link to="/register" class="text-link" data-title="Home"
+                    <router-link to="/register" class="text-nordic-light" data-title="Home"
                         aria-label="Home">Register</router-link>
                 </div>
                 <div class="hidden md:flex nav-icons" v-if="isRegisterPage">
-                    <router-link to="/login" class="text-link" data-title="Home" aria-label="Home">Login</router-link>
+                    <router-link to="/login" class="text-nordic-light" data-title="Home" aria-label="Home">Login</router-link>
                 </div>
 
             </div>
@@ -172,10 +172,10 @@
 
             <!-- link to register or login -->
             <div class="nav-icons" v-if="isLoginPage">
-                <router-link to="/register" class="text-link" data-title="Home" aria-label="Home">Register</router-link>
+                <router-link to="/register" class="text-nordic-light" data-title="Home" aria-label="Home">Register</router-link>
             </div>
             <div class="nav-icons" v-if="isRegisterPage">
-                <router-link to="/login" class="text-link" data-title="Home" aria-label="Home">Login</router-link>
+                <router-link to="/login" class="text-nordic-light" data-title="Home" aria-label="Home">Login</router-link>
             </div>
         </div>
 
@@ -315,4 +315,5 @@ const { logout } = useAuth()
 /* .router-link-exact-active {
     font-weight: bold;
 } */
+
 </style>
