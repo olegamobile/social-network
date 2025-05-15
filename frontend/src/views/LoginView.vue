@@ -1,15 +1,20 @@
 <template>
-    <div class="login">
+    <div class="login-page bg-nordic-primary-bg min-h-screen flex flex-col">
         <TopBar />
+        
+        <div class="login px-4 mt-20 flex justify-center">
+        <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md border border-nordic-light">
+        <h2 class="text-2xl font-bold text-center text-nordic-light mb-6">Login</h2>
 
-        <h2 class="text-2xl font-bold mb-4">Login</h2>
-        <form @submit.prevent="login">
-            <input v-model="email" type="email" placeholder="Email" required autocomplete="email" />
-            <input v-model="password" type="password" placeholder="Password" required autocomplete="current-password" />
-            <button type="submit">Login</button>
+        <form @submit.prevent="login" class="flex flex-col gap-4">
+            <input v-model="email" type="email" placeholder="Email" required autocomplete="email" class="p-3 border border-nordic-light rounded-md focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent" />
+            <input v-model="password" type="password" placeholder="Password" required autocomplete="current-password" class="p-3 border border-nordic-light rounded-md focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent" />
+            <button type="submit" class="bg-nordic-primary-accent text-white font-medium py-2 rounded-md hover:bg-nordic-secondary-accent transition">Login</button>
             <p v-if="error">{{ error }}</p>
         </form>
     </div>
+</div>
+</div>
 </template>
 
 <script setup>
@@ -56,12 +61,3 @@ async function login() {
 
 }
 </script>
-
-<style scoped>
-.login {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    align-items: center;
-}
-</style>
