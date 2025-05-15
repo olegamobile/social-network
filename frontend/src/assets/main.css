@@ -4,6 +4,7 @@
     --nordic-text-dark: #263238;    /* Dark Slate Grey for primary text */
     --nordic-text-light: #546E7A;   /* Lighter Slate Grey for secondary text */
     --nordic-primary-accent: #607D8B;/* Muted Blue-Grey for active elements */
+    --nordic-secondary-accent: #769FCD;
     --nordic-border-light: #CFD8DC;  /* Light Grey for borders */
 }
 
