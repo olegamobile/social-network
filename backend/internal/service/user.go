@@ -108,6 +108,14 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 		About:     r.FormValue("about"),
 	}
 
+	if updateData.Nickname == "null" {
+		updateData.Nickname = ""
+	}
+
+	if updateData.About == "null" {
+		updateData.About = ""
+	}
+
 	// Handle optional avatar
 	file, header, err := r.FormFile("avatar")
 	if err == nil {
