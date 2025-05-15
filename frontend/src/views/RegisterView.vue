@@ -28,7 +28,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import TopBar from '@/components/TopBar.vue'; // Assuming TopBar is in components
+import TopBar from '@/components/TopBar.vue';
+import { useImageProcessor } from '@/composables/useImageProcessor';
 
 const form = ref({
     email: '',
@@ -50,6 +51,8 @@ const handleFileUpload = (event) => {
 };
 
 const register = async () => {
+    const { processAvatarImage } = useImageProcessor();
+
     try {
         const payload = {
             email: form.value.email,
@@ -67,10 +70,11 @@ const register = async () => {
             formData.append(key, value);
         }
         if (form.value.avatar) {
-            formData.append('avatar', form.value.avatar);
+            //formData.append('avatar', form.value.avatar);
+            const processedAvatar = await processAvatarImage(form.value.avatar);
+            formData.append('avatar', processedAvatar);
         }
 
-        // Replace this with your actual API endpoint:
         const response = await fetch(`${apiUrl}/api/register`, {
             method: 'POST',
             body: formData,

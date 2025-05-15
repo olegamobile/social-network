@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/database"
 	"backend/internal/model"
+	"backend/internal/utils"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -10,19 +11,16 @@ import (
 	"time"
 )
 
-// username > nickname
-// birthday > date_of_birth
-// null to
-
 func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 	var user model.User
 	var nickname sql.NullString
 	var about sql.NullString
+	var avatarUrl sql.NullString
 
 	err := database.DB.QueryRow(`
-	SELECT id, nickname, email, first_name, last_name, date_of_birth, password_hash, about_me
+	SELECT id, nickname, email, first_name, last_name, date_of_birth, password_hash, about_me, avatar_path
 	FROM users WHERE email = ?`, req.Email).
-		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &user.Password, &about)
+		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &user.Password, &about, &avatarUrl)
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
@@ -38,6 +36,12 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 		user.About = about.String
 	} else {
 		user.About = ""
+	}
+
+	if avatarUrl.Valid {
+		user.AvatarPath = avatarUrl.String
+	} else {
+		user.AvatarPath = ""
 	}
 
 	return user, err
@@ -67,11 +71,12 @@ func GetUserById(id int) (model.User, error) {
 	var user model.User
 	var nickname sql.NullString
 	var about sql.NullString
+	var avatarUrl sql.NullString
 
 	err := database.DB.QueryRow(`
-		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me
+		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path
 		FROM users WHERE id = ?`, id).
-		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &about)
+		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &about, &avatarUrl)
 
 	if nickname.Valid {
 		user.Username = nickname.String
@@ -85,11 +90,17 @@ func GetUserById(id int) (model.User, error) {
 		user.About = ""
 	}
 
+	if avatarUrl.Valid {
+		user.AvatarPath = avatarUrl.String
+	} else {
+		user.AvatarPath = ""
+	}
+
 	return user, err
 }
 
 func GetAllUsers() ([]model.User, error) {
-	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me FROM users")
+	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path FROM users")
 	defer rows.Close()
 
 	var users []model.User
@@ -97,8 +108,9 @@ func GetAllUsers() ([]model.User, error) {
 		var u model.User
 		var nickname sql.NullString
 		var about sql.NullString
+		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about)
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl)
 		if err != nil {
 			return users, err
 		}
@@ -112,6 +124,12 @@ func GetAllUsers() ([]model.User, error) {
 			u.About = about.String
 		} else {
 			u.About = ""
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
 		}
 
 		users = append(users, u)
@@ -146,7 +164,7 @@ func GetAllGroups() ([]model.Group, error) {
 
 func GetAllPosts() ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT posts.id, posts.user_id, users.first_name, users.last_name, posts.content, posts.created_at
+	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
 	FROM posts
 	JOIN users ON posts.user_id = users.id
 	ORDER BY posts.id DESC;
@@ -160,10 +178,19 @@ func GetAllPosts() ([]model.Post, error) {
 	for rows.Next() {
 		var p model.Post
 		var firstname, lastname string
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &p.Content, &p.CreatedAt)
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
+
+		if avatarUrl.Valid {
+			p.AvatarPath = avatarUrl.String
+		} else {
+			p.AvatarPath = ""
+		}
+
 		p.Username = firstname + " " + lastname
 		posts = append(posts, p)
 	}
@@ -198,7 +225,7 @@ func InsertPost(userID int, content string, privacy string) (int, string, error)
 func SearchUsers(query string) ([]model.User, error) {
 	q := "%" + query + "%" // Add wildcards for LIKE clause
 	rows, err := database.DB.Query(`
-		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me
+		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path
 		FROM users 
 		WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ?
 		`,
@@ -214,8 +241,9 @@ func SearchUsers(query string) ([]model.User, error) {
 		var u model.User
 		var nickname sql.NullString
 		var about sql.NullString
+		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about)
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -229,6 +257,12 @@ func SearchUsers(query string) ([]model.User, error) {
 			u.About = about.String
 		} else {
 			u.About = ""
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
 		}
 
 		users = append(users, u)
@@ -265,4 +299,41 @@ func InsertUser(passwordHash []byte, email, firstName, lastName string, parsedDO
 	}
 
 	return "", http.StatusOK
+}
+
+func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, int) {
+	query := `
+		UPDATE users SET
+			first_name = ?,
+			last_name = ?,
+			date_of_birth = ?,
+			nickname = ?,
+			about_me = ?,
+			updated_at = CURRENT_TIMESTAMP
+	`
+	args := []any{data.FirstName, data.LastName, data.DOB, utils.NullableString(data.Nickname), utils.NullableString(data.About)}
+
+	if data.DeleteAvatar {
+		query += `, avatar_path = NULL`
+	} else if data.AvatarPath.Valid {
+		query += `, avatar_path = ?`
+		args = append(args, data.AvatarPath)
+	}
+
+	query += ` WHERE id = ?`
+	args = append(args, userID)
+
+	var usr model.User
+
+	_, err := database.DB.Exec(query, args...)
+	if err != nil {
+		return usr, "Failed to update user", http.StatusInternalServerError
+	}
+
+	usr, err = GetUserById(userID)
+	if err != nil {
+		return usr, "Failed to get updated user", http.StatusInternalServerError
+	}
+
+	return usr, "", http.StatusOK
 }

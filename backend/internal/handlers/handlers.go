@@ -50,6 +50,43 @@ func HandleMe(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+func HandleRegister(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		fmt.Println("00")
+		return
+	}
+
+	errMsg, statusCode := service.RegisterUser(r)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		http.Error(w, errMsg, statusCode)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("User registered successfully"))
+}
+
+func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
+	//fmt.Println("updating profile")
+
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	usr, errMsg, errStatus := service.UpdateUserProfile(userId, r)
+	if errMsg != "" {
+		http.Error(w, errMsg, errStatus)
+		fmt.Println("Error 3", errMsg)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(usr)
+}
+
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	_, err := service.ValidateSession(r)
 	if err != nil {
@@ -158,21 +195,4 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
-}
-
-func HandleRegister(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		fmt.Println("00")
-		return
-	}
-
-	errMsg, statusCode := service.RegisterUser(r)
-	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
-		http.Error(w, errMsg, statusCode)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("User registered successfully"))
 }

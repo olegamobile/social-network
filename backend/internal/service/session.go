@@ -50,10 +50,6 @@ func Login(w http.ResponseWriter, r *http.Request) (model.User, int) {
 		return emptyUser, http.StatusUnauthorized
 	}
 
-	/* 	if user.Password != req.Password {
-		return user, http.StatusUnauthorized
-	} */
-
 	// Compare the entered password with the stored hashed password using bcrypt
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
@@ -66,6 +62,7 @@ func Login(w http.ResponseWriter, r *http.Request) (model.User, int) {
 		return user, http.StatusInternalServerError
 	}
 
+	user.Password = ""
 	return user, http.StatusOK
 }
 

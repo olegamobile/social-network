@@ -37,6 +37,7 @@ async function login() {
         })
         if (res.ok) {
             const data = await res.json()
+            //console.log("data to store at login:", data.user)
             userStore.setUser(data.user)
 
             // Navigate to what the user wanted or home 
@@ -45,7 +46,6 @@ async function login() {
         } else {
             const msg = await res.text()
             error.value = msg || 'Login failed'
-            console.log("err is:", msg)
         }
 
     } catch (error) {

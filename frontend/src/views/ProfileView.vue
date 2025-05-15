@@ -4,30 +4,45 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3 class="text-lg font-semibold">User Info</h3>
-                <p><strong>Name:</strong> {{ user?.first_name }} {{ user?.last_name }}</p>
+                <div class="flex flex-col items-center mb-4">
+                    <div v-if="user?.avatar_url" class="profile-avatar w-24 h-24 rounded-full overflow-hidden border border-nordic-light">
+                        <img :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
+                            class="w-full h-full object-cover" />
+                    </div>
+                </div>
+                <h2 class="text-lg font-semibold">{{ user?.first_name }} {{ user?.last_name }}</h2>
                 <p><strong>Email:</strong> {{ user?.email }}</p>
-                <p><strong>Birthday:</strong> {{ user?.birthday }}</p>
-                <p v-if="user?.username"><strong>Username:</strong> {{ user?.username }}</p>
-                <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
+                <p><strong>Birthday:</strong> {{ formattedBirthday }}</p>
+                <p v-if="user?.username && user?.username != 'null'"><strong>Username:</strong> {{ user?.username }}</p>
+                <p v-if="user?.about_me && user?.about_me != 'null'"><strong>About:</strong> {{ user?.about_me }}</p>
             </template>
 
             <template #main>
+                <button v-if="userStore.user && route.params.id == userStore.user.id"
+                    @click="showEditForm = !showEditForm"
+                    class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                    {{ showEditForm ? 'Close Editor' : 'Edit Profile' }}
+                </button>
+                <EditProfile v-if="showEditForm" />
+
                 <h2 class="text-2xl font-bold mb-4">{{ user?.first_name }}'s Posts</h2>
                 <PostsList :posts="posts" />
             </template>
+
         </TwoColumnLayout>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import PostsList from '@/components/PostsList.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useErrorStore } from '@/stores/error'
+import EditProfile from '@/components/EditProfile.vue'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const user = ref(null)
@@ -36,42 +51,56 @@ const apiUrl = import.meta.env.VITE_API_URL
 const { logout } = useAuth()
 const router = useRouter()
 const errorStore = useErrorStore()
+const showEditForm = ref(false);
+const userStore = useUserStore()
+
+// Compute formatted birthday so it doesn't affect userStore
+const formattedBirthday = computed(() => {
+    if (user.value && user.value.birthday) {
+        return new Date(user.value.birthday).toLocaleString("fi-FI", {
+            dateStyle: 'short',
+        });
+    }
+    return '';
+});
 
 async function fetchUserAndPosts(userId) {
     try {
-        // Fetch user info
-        const userRes = await fetch(`${apiUrl}/api/users/${userId}`, {
-            credentials: 'include' // Necessary to send cookie all the way to backend server
-        })
+        if (userId != userStore.user.id) {
 
-        if (userRes.status === 401) {
-            // Session is invalid — logout and redirect
-            logout()
-            router.push('/login')
-            return
+            // Fetch user info
+            const userRes = await fetch(`${apiUrl}/api/users/${userId}`, {
+                credentials: 'include' // Necessary to send cookie all the way to backend server
+            })
+
+            if (userRes.status === 401) {
+                // Session is invalid — logout and redirect
+                logout()
+                router.push('/login')
+                return
+            }
+
+            if (userRes.status === 404) {
+                errorStore.setError('User Not Found', `User with ID ${userId} does not exist.`)
+                router.push('/error')
+                return
+            }
+
+            if (userRes.status === 400) {
+                errorStore.setError('Bad request', `Failed to get user with ID ${userId}.`)
+                router.push('/error')
+                return
+            }
+
+            if (!userRes.ok) {
+                // Generic error
+                throw new Error(`Failed to fetch user: ${userRes.status}`)
+            }
+
+            user.value = await userRes.json()
+        } else {
+            user.value = userStore.user
         }
-
-        if (userRes.status === 404) {
-            errorStore.setError('User Not Found', `User with ID ${userId} does not exist.`)
-            router.push('/error')
-            return
-        }
-
-        if (userRes.status === 400) {
-            errorStore.setError('Bad request', `Failed to get user with ID ${userId}.`)
-            router.push('/error')
-            return
-        }
-
-        if (!userRes.ok) {
-            // Generic error
-            throw new Error(`Failed to fetch user: ${userRes.status}`)
-        }
-
-        user.value = await userRes.json()
-        user.value.birthday = new Date(user.value.birthday).toLocaleString("fi-FI", {
-            dateStyle: 'short',
-        })
 
         // Fetch and filter posts
         const postsRes = await fetch(`${apiUrl}/api/posts`, {
@@ -81,7 +110,6 @@ async function fetchUserAndPosts(userId) {
         if (!postsRes.ok) {
             throw new Error(`Failed to fetch posts: ${postsRes.status}`)
         }
-
         const allPosts = await postsRes.json()
         posts.value = allPosts.filter(p => p.user_id === Number(userId))
     } catch (err) {
@@ -101,6 +129,18 @@ onMounted(() => {
 watch(() => route.params.id, (newId) => {
     fetchUserAndPosts(newId)
 })
+
+// Update own profile when userstore.user changes
+watch(
+    () => userStore.user,
+    (newUser) => {
+        //console.log("new user in Profileview:", newUser)
+        if (newUser && route.params.id == newUser.id) {
+            user.value = newUser
+        }
+    }
+)
+
 </script>
 
 <style scoped>

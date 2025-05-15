@@ -1,9 +1,12 @@
 <template>
     <div class="post-card">
         <p class="post-content">{{ post.content }}</p>
-        <small class="post-date">
-            Posted by
-            <RouterLink :to="`/profile/${post.user_id}`" class="post-user">
+        <small class="post-date flex items-center">
+            <RouterLink :to="`/profile/${post.user_id}`" class="post-user flex items-center mr-2">
+                <div v-if="post.avatar_url" class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1">
+                    <img :src="`${apiUrl}/${post.avatar_url}`" alt="User Avatar"
+                        class="w-full h-full object-cover" />
+                </div>
                 {{ post.username }}
             </RouterLink>
             on {{ formattedDate }}
@@ -12,8 +15,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
+
+const apiUrl = import.meta.env.VITE_API_URL
 
 const { post } = defineProps({
     post: {
@@ -29,6 +34,7 @@ const formattedDate = computed(() => {
         timeStyle: 'medium'
     }).replace("klo ", "")
 })
+
 </script>
 
 
