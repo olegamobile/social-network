@@ -120,7 +120,7 @@ CREATE TABLE group_invitations (
     group_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     inviter_id INTEGER NOT NULL,
-    approval_status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
+    approval_status TEXT NOT NULL CHECK (approval_status IN ('pending', 'accepted', 'declined')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_by INTEGER,
     status TEXT NOT NULL CHECK (status IN ('enable', 'disable', 'delete')) DEFAULT 'enable',

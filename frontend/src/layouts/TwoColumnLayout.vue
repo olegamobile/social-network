@@ -1,11 +1,16 @@
 <template>
-  <div class="two-column-layout">
-    <aside class="sidebar">
-      <slot name="sidebar"></slot>
-    </aside>
-    <main class="main-content">
-      <slot name="main"></slot>
-    </main>
+  <div class="min-h-screen bg-nordic-primary-bg">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex flex-col md:flex-row md:space-x-8">
+        <aside class="w-full md:w-64 mb-6 md:mb-0 bg-white p-6 rounded-lg shadow-sm">
+          <slot name="sidebar"></slot>
+        </aside>
+
+        <main class="w-full md:flex-1">
+          <slot name="main"></slot>
+        </main>
+      </div>
+    </div>
   </div>
 </template>
 

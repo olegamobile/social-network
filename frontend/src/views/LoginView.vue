@@ -42,7 +42,6 @@ async function login() {
 
             // Navigate to what the user wanted or home 
             let redirectTo = route.query.redirect || '/'
-
             router.push(redirectTo)
         } else {
             const msg = await res.text()

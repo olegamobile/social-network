@@ -59,13 +59,12 @@ async function fetchUserAndPosts(userId) {
                 credentials: 'include' // Necessary to send cookie all the way to backend server
             })
 
-            if (userRes.status === 401) {
-                // Session is invalid — logout and redirect
-                console.log("Invalid session")
-                logout()
-                router.push('/login')
-                return
-            }
+        if (userRes.status === 401) {
+            // Session is invalid — logout and redirect
+            logout()
+            router.push('/login')
+            return
+        }
 
             if (userRes.status === 404) {
                 errorStore.setError('User Not Found', `User with ID ${userId} does not exist.`)
