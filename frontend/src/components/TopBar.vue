@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <!-- notifications and profile links -->
+                <!-- notifications and profile link -->
                 <div class="hidden md:flex md:items-center md:ml-4 space-x-2" v-if="!isLoginPage & !isRegisterPage">
                     <router-link to="/notifications" class="top-bar-button relative" data-title="Notifications"
                         aria-label="Notifications">
@@ -65,7 +65,9 @@
                         :class="{ 'active': $route.path === '/profile/' + user?.id }" data-title="Your Profile"
                         aria-label="Your Profile">
                         <div class="profile-avatar">
-                            <i class="fas fa-user"></i>
+                            <img v-if="user.avatar_url" :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
+                                class="h-full w-full object-cover rounded-full border border-nordic-light" />
+                            <i v-else class="fas fa-user"></i>
                         </div>
                         <span class="ml-2">{{ user?.first_name }}</span>
                     </router-link>
@@ -100,9 +102,9 @@
 
         <!-- mobile menu -->
         <div class="md:hidden" :class="{ 'hidden': !isMobileMenuOpen }" id="mobile-menu">
-
-            <!-- home, follows, groups, chats and events links -->
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" v-if="!isLoginPage & !isRegisterPage">
+
+                <!-- home, follows, groups, chats and events links -->
                 <router-link to="/" class="top-bar-button block" :class="{ 'active': $route.path === '/' }"
                     @click="toggleMobileMenu" data-title="Home" aria-label="Home">
                     <i class="fas fa-home"></i>Home
@@ -125,22 +127,28 @@
                     <i class="fas fa-calendar-alt"></i>Events
                 </router-link>
 
-                <!-- user, notifications and profile -->
+                <!-- notifications -->
                 <router-link to="/notifications" class="top-bar-button block relative"
-                    :class="{ 'active': $route.path === '/notifications' }" @click="toggleMobileMenu" data-title="Notifications"
-                    aria-label="Notifications">
+                    :class="{ 'active': $route.path === '/notifications' }" @click="toggleMobileMenu"
+                    data-title="Notifications" aria-label="Notifications">
                     <i class="fas fa-bell"></i>View notifications
                     <span class="absolute top-1 left-6 block h-2 w-2 rounded-full ring-1 ring-white bg-red-500"></span>
-                    
                 </router-link>
 
+                <!-- profile -->
                 <router-link v-if="user" :to="`/profile/${user.id}`" class="top-bar-button"
                     :class="{ 'active': $route.path === '/profile/' + user?.id }" data-title="Your Profile"
                     aria-label="Your Profile">
-                    <i class="fas fa-user"></i>
+                    <!-- <i class="fas fa-user"></i> -->
+                    <div class="profile-avatar">
+                        <img v-if="user.avatar_url" :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
+                            class="h-full w-full object-cover rounded-full border border-nordic-light" />
+                        <i v-else class="fas fa-user"></i>
+                    </div>
                     <span class="ml-2">{{ user?.first_name }}</span>
                 </router-link>
 
+                <!-- logout button -->
                 <button
                     class="block px-3 py-2 rounded-md text-base font-medium text-nordic-light hover:text-nordic-dark hover:bg-nordic-secondary-bg w-full text-left"
                     @click="logout(); toggleMobileMenu()" data-title="Logout" aria-label="Logout">
@@ -301,5 +309,4 @@ watch(
 .router-link-active.navbar-link {
     background-color: #555;
 }
-
 </style>

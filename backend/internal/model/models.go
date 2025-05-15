@@ -15,11 +15,12 @@ type User struct {
 }
 
 type Post struct {
-	ID        int    `json:"id"`
-	UserID    int    `json:"user_id"`
-	Username  string `json:"username"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"created_at"`
+	ID         int    `json:"id"`
+	UserID     int    `json:"user_id"`
+	Username   string `json:"username"`
+	AvatarPath string `json:"avatar_url"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"created_at"`
 }
 
 type LoginRequest struct {

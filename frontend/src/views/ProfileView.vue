@@ -4,8 +4,13 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <h3 class="text-lg font-semibold">User Info</h3>
-                <p><strong>Name:</strong> {{ user?.first_name }} {{ user?.last_name }}</p>
+                <div class="flex flex-col items-center mb-4">
+                    <div v-if="user?.avatar_url" class="profile-avatar w-24 h-24 rounded-full overflow-hidden border border-nordic-light">
+                        <img :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
+                            class="w-full h-full object-cover" />
+                    </div>
+                </div>
+                <h2 class="text-lg font-semibold">{{ user?.first_name }} {{ user?.last_name }}</h2>
                 <p><strong>Email:</strong> {{ user?.email }}</p>
                 <p><strong>Birthday:</strong> {{ formattedBirthday }}</p>
                 <p v-if="user?.username && user?.username != 'null'"><strong>Username:</strong> {{ user?.username }}</p>
@@ -13,7 +18,8 @@
             </template>
 
             <template #main>
-                <button v-if="userStore.user && route.params.id == userStore.user.id" @click="showEditForm = !showEditForm"
+                <button v-if="userStore.user && route.params.id == userStore.user.id"
+                    @click="showEditForm = !showEditForm"
                     class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
                     {{ showEditForm ? 'Close Editor' : 'Edit Profile' }}
                 </button>
@@ -50,12 +56,12 @@ const userStore = useUserStore()
 
 // Compute formatted birthday so it doesn't affect userStore
 const formattedBirthday = computed(() => {
-  if (user.value && user.value.birthday) {
-    return new Date(user.value.birthday).toLocaleString("fi-FI", {
-      dateStyle: 'short',
-    });
-  }
-  return '';
+    if (user.value && user.value.birthday) {
+        return new Date(user.value.birthday).toLocaleString("fi-FI", {
+            dateStyle: 'short',
+        });
+    }
+    return '';
 });
 
 async function fetchUserAndPosts(userId) {
@@ -106,6 +112,8 @@ async function fetchUserAndPosts(userId) {
         }
         const allPosts = await postsRes.json()
         posts.value = allPosts.filter(p => p.user_id === Number(userId))
+
+        console.log("posts value at profileview:", posts.value)
     } catch (err) {
         errorStore.setError('Error', 'Something went wrong while loading user data.')
         router.push('/error')

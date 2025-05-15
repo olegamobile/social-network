@@ -164,7 +164,7 @@ func GetAllGroups() ([]model.Group, error) {
 
 func GetAllPosts() ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT posts.id, posts.user_id, users.first_name, users.last_name, posts.content, posts.created_at
+	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
 	FROM posts
 	JOIN users ON posts.user_id = users.id
 	ORDER BY posts.id DESC;
@@ -178,10 +178,19 @@ func GetAllPosts() ([]model.Post, error) {
 	for rows.Next() {
 		var p model.Post
 		var firstname, lastname string
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &p.Content, &p.CreatedAt)
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
+
+		if avatarUrl.Valid {
+			p.AvatarPath = avatarUrl.String
+		} else {
+			p.AvatarPath = ""
+		}
+
 		p.Username = firstname + " " + lastname
 		posts = append(posts, p)
 	}

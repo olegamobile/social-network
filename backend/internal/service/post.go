@@ -35,6 +35,7 @@ func CreatePost(r *http.Request, userID int) (model.Post, int) {
 	post.ID = id
 	post.UserID = userID
 	post.Username = usr.FirstName + " " + usr.LastName
+	post.AvatarPath = usr.AvatarPath
 	post.Content = payload.Content
 	post.CreatedAt = createdAt
 
