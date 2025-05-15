@@ -124,19 +124,8 @@
                     @click="toggleMobileMenu" data-title="Events" aria-label="Events">
                     <i class="fas fa-calendar-alt"></i>Events
                 </router-link>
-                <!-- </div> -->
 
                 <!-- user, notifications and profile -->
-                <!-- <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" v-if="!isLoginPage & !isRegisterPage"> -->
-                <!-- <div class="flex items-center px-5"> -->
-                <!-- <div class="mt-3 px-2 space-y-1"> -->
-                <!--                     <div class="profile-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="ml-3">
-                        <div class="text-base font-medium leading-none text-nordic-dark">{{ user?.first_name }}</div>
-                        <div class="text-sm font-medium leading-none text-nordic-light">{{ user?.email }}</div>
-                    </div> -->
                 <router-link to="/notifications" class="top-bar-button block relative"
                     :class="{ 'active': $route.path === '/notifications' }" @click="toggleMobileMenu" data-title="Notifications"
                     aria-label="Notifications">
@@ -144,16 +133,6 @@
                     <span class="absolute top-1 left-6 block h-2 w-2 rounded-full ring-1 ring-white bg-red-500"></span>
                     
                 </router-link>
-
-                <!-- </div> -->
-
-                <!-- <div class="mt-3 px-2 space-y-1"> -->
-
-                <!-- <router-link v-if="user" :to="`/profile/${user.id}`"
-                        class="block px-3 py-2 rounded-md text-base font-medium text-nordic-light hover:text-nordic-dark hover:bg-nordic-secondary-bg"
-                        @click="toggleMobileMenu" data-title="Your Profile" aria-label="Your Profile">
-                        <i class="fas fa-user"></i> Profile
-                    </router-link> -->
 
                 <router-link v-if="user" :to="`/profile/${user.id}`" class="top-bar-button"
                     :class="{ 'active': $route.path === '/profile/' + user?.id }" data-title="Your Profile"
@@ -302,7 +281,6 @@ const { logout } = useAuth()
     /* Helps with vertical alignment */
 }
 
-/* .fa-bell, */
 .fa-user {
     margin-right: 0px !important;
 }
@@ -312,7 +290,4 @@ const { logout } = useAuth()
     background-color: #555;
 }
 
-/* .router-link-exact-active {
-    font-weight: bold;
-} */
 </style>

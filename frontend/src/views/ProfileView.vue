@@ -46,7 +46,6 @@ async function fetchUserAndPosts(userId) {
 
         if (userRes.status === 401) {
             // Session is invalid — logout and redirect
-            console.log("Invalid session")
             logout()
             router.push('/login')
             return

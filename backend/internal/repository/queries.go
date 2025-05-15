@@ -120,6 +120,30 @@ func GetAllUsers() ([]model.User, error) {
 	return users, nil
 }
 
+func GetAllGroups() ([]model.Group, error) {
+	rows, err := database.DB.Query(`
+		SELECT id, title, description 
+		FROM groups 
+		WHERE status = 'enable'
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
+
 func GetAllPosts() ([]model.Post, error) {
 	rows, err := database.DB.Query(`
 	SELECT posts.id, posts.user_id, users.first_name, users.last_name, posts.content, posts.created_at

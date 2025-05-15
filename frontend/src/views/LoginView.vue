@@ -41,10 +41,6 @@ async function login() {
 
             // Navigate to what the user wanted or home 
             let redirectTo = route.query.redirect || '/'
-            console.log("redirect:", typeof redirectTo,  redirectTo, route.query.redirect)
-
-            //redirectTo = redirectTo ? redirectTo.replace(/"/g, '') : '/';
-
             router.push(redirectTo)
         } else {
             const msg = await res.text()
