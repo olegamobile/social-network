@@ -116,6 +116,7 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 		if err != nil {
 			return usr, "Failed to save image", http.StatusInternalServerError
 		}
+		//fmt.Println("Form avatar found at:", updateData.AvatarPath.String)
 	} else {
 		fmt.Println("No avatar file found at updating profile:", err)
 	}
@@ -134,6 +135,8 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 		return usr, errMsg, statusCode
 	}
 
+	//fmt.Println("Updated user:", usr)
+
 	return usr, "", http.StatusOK
 }
 
@@ -142,14 +145,14 @@ func uploadAvatar(file multipart.File, header *multipart.FileHeader) (sql.NullSt
 
 	ext := filepath.Ext(header.Filename)
 	if ext == "" || !utils.IsAllowedImageExtension(ext) {
+		fmt.Println("bad extension:", ext)
 		return avatarPath, fmt.Errorf("illegal extension")
 	}
 	filename := fmt.Sprintf("avatars/%d%s", time.Now().UnixNano(), ext)
-	path := filepath.Join("uploads", "avatars", filename)
-	os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
-	dst, err := os.Create(path)
+	dst, err := os.Create(filename)
 	if err != nil {
+		fmt.Println("Error creating path at uploadAvatar:", err)
 		return avatarPath, err
 	}
 	defer dst.Close()
@@ -158,6 +161,7 @@ func uploadAvatar(file multipart.File, header *multipart.FileHeader) (sql.NullSt
 
 	avatarPath.Valid = true
 	avatarPath.String = filename
+	//fmt.Println("Avatar uploaded succesfully")
 
 	return avatarPath, nil
 }

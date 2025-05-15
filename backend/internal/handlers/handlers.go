@@ -68,15 +68,13 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("updating profile")
+	//fmt.Println("updating profile")
 
 	userId, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-
-	fmt.Println(r.Form)
 
 	usr, errMsg, errStatus := service.UpdateUserProfile(userId, r)
 	if errMsg != "" {

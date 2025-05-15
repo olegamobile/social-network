@@ -11,7 +11,7 @@ export const useUserStore = defineStore('user', () => {
         user.value = userData
     }
     const clearUser = () => {
-        user.value = null
+        if (user.value) user.value = null
     }
 
     // getters

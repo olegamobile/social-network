@@ -9,11 +9,11 @@
                 <p><strong>Email:</strong> {{ user?.email }}</p>
                 <p><strong>Birthday:</strong> {{ formattedBirthday }}</p>
                 <p v-if="user?.username && user?.username != 'null'"><strong>Username:</strong> {{ user?.username }}</p>
-                <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
+                <p v-if="user?.about_me && user?.about_me != 'null'"><strong>About:</strong> {{ user?.about_me }}</p>
             </template>
 
             <template #main>
-                <button v-if="route.params.id == userStore.user.id" @click="showEditForm = !showEditForm"
+                <button v-if="userStore.user && route.params.id == userStore.user.id" @click="showEditForm = !showEditForm"
                     class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
                     {{ showEditForm ? 'Close Editor' : 'Edit Profile' }}
                 </button>
@@ -48,7 +48,7 @@ const errorStore = useErrorStore()
 const showEditForm = ref(false);
 const userStore = useUserStore()
 
-// Create another computed property for the formatted birthday
+// Compute formatted birthday so it doesn't affect userStore
 const formattedBirthday = computed(() => {
   if (user.value && user.value.birthday) {
     return new Date(user.value.birthday).toLocaleString("fi-FI", {
@@ -60,9 +60,7 @@ const formattedBirthday = computed(() => {
 
 async function fetchUserAndPosts(userId) {
     try {
-
         if (userId != userStore.user.id) {
-
 
             // Fetch user info
             const userRes = await fetch(`${apiUrl}/api/users/${userId}`, {
@@ -130,7 +128,8 @@ watch(() => route.params.id, (newId) => {
 watch(
     () => userStore.user,
     (newUser) => {
-        if (route.params.id == newUser.id) {
+        //console.log("new user in Profileview:", newUser)
+        if (newUser && route.params.id == newUser.id) {
             user.value = newUser
         }
     }

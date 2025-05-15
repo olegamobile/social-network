@@ -3,14 +3,15 @@ package model
 import "database/sql"
 
 type User struct {
-	ID        int    `json:"id"`
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Birthday  string `json:"birthday"`
-	Password  string `json:"password"`
-	About     string `json:"about_me"`
+	ID         int    `json:"id"`
+	Username   string `json:"username"`
+	Email      string `json:"email"`
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+	Birthday   string `json:"birthday"`
+	Password   string `json:"password"`
+	About      string `json:"about_me"`
+	AvatarPath string `json:"avatar_url"`
 }
 
 type Post struct {

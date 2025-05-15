@@ -186,7 +186,8 @@ const { logout } = useAuth()
 watch(
     () => userStore.user,
     (newUser) => {
-        if (route.params.id == newUser.id) {
+        //console.log("new user:", newUser)
+        if (newUser && route.params.id == newUser.id) {
             user.value = newUser
         }
     }

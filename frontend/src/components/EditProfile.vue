@@ -26,7 +26,7 @@
 
                 <div v-if="form.avatarUrl" class="mt-2">
                     <p class="text-sm text-nordic-light">Current Avatar:</p>
-                    <img :src="form.avatarUrl" alt="Avatar"
+                    <img :src="`${apiUrl}/${form.avatarUrl}`" alt="Avatar"
                         class="h-24 w-24 object-cover rounded-md border border-nordic-light" />
                     <button type="button" @click="deleteAvatar"
                         class="mt-2 text-sm text-red-600 hover:underline text-nordic-primary-accent hover:text-nordic-secondary-accent">Delete
@@ -52,6 +52,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user'
+import { useImageProcessor } from '@/composables/useImageProcessor';
 
 const form = ref({
     email: '',
@@ -98,12 +99,16 @@ const fetchProfile = async () => {
             avatarUrl: data.avatar_url || null,
             password: '', // Don't pre-fill password
         };
+
+        //console.log("data from api/me in fetchP in Edit P:", data)
     } catch (err) {
         error.value = err.message;
     }
 };
 
 const updateProfile = async () => {
+    const { processAvatarImage } = useImageProcessor();
+
     try {
         const payload = {
             email: form.value.email,
@@ -121,8 +126,9 @@ const updateProfile = async () => {
         }
 
         if (form.value.avatar) {
-            formData.append('avatar', form.value.avatar);
-            console.log("appending avatar")
+            //formData.append('avatar', form.value.avatar);
+            const processedAvatar = await processAvatarImage(form.value.avatar);
+            formData.append('avatar', processedAvatar);
         } else if (form.value.avatarUrl === null) {
             formData.append('delete_avatar', 'true');
         }
@@ -138,6 +144,7 @@ const updateProfile = async () => {
             throw new Error(errData.message || 'Update failed');
         }
         const data = await response.json();
+
         userStore.setUser(data);
 
         success.value = 'Profile updated successfully';

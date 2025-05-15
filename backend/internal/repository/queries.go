@@ -15,11 +15,12 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 	var user model.User
 	var nickname sql.NullString
 	var about sql.NullString
+	var avatarUrl sql.NullString
 
 	err := database.DB.QueryRow(`
-	SELECT id, nickname, email, first_name, last_name, date_of_birth, password_hash, about_me
+	SELECT id, nickname, email, first_name, last_name, date_of_birth, password_hash, about_me, avatar_path
 	FROM users WHERE email = ?`, req.Email).
-		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &user.Password, &about)
+		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &user.Password, &about, &avatarUrl)
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
@@ -35,6 +36,12 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 		user.About = about.String
 	} else {
 		user.About = ""
+	}
+
+	if avatarUrl.Valid {
+		user.AvatarPath = avatarUrl.String
+	} else {
+		user.AvatarPath = ""
 	}
 
 	return user, err
@@ -64,11 +71,12 @@ func GetUserById(id int) (model.User, error) {
 	var user model.User
 	var nickname sql.NullString
 	var about sql.NullString
+	var avatarUrl sql.NullString
 
 	err := database.DB.QueryRow(`
-		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me
+		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path
 		FROM users WHERE id = ?`, id).
-		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &about)
+		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &about, &avatarUrl)
 
 	if nickname.Valid {
 		user.Username = nickname.String
@@ -82,11 +90,17 @@ func GetUserById(id int) (model.User, error) {
 		user.About = ""
 	}
 
+	if avatarUrl.Valid {
+		user.AvatarPath = avatarUrl.String
+	} else {
+		user.AvatarPath = ""
+	}
+
 	return user, err
 }
 
 func GetAllUsers() ([]model.User, error) {
-	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me FROM users")
+	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path FROM users")
 	defer rows.Close()
 
 	var users []model.User
@@ -94,8 +108,9 @@ func GetAllUsers() ([]model.User, error) {
 		var u model.User
 		var nickname sql.NullString
 		var about sql.NullString
+		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about)
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl)
 		if err != nil {
 			return users, err
 		}
@@ -109,6 +124,12 @@ func GetAllUsers() ([]model.User, error) {
 			u.About = about.String
 		} else {
 			u.About = ""
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
 		}
 
 		users = append(users, u)
@@ -195,7 +216,7 @@ func InsertPost(userID int, content string, privacy string) (int, string, error)
 func SearchUsers(query string) ([]model.User, error) {
 	q := "%" + query + "%" // Add wildcards for LIKE clause
 	rows, err := database.DB.Query(`
-		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me
+		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path
 		FROM users 
 		WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ?
 		`,
@@ -211,8 +232,9 @@ func SearchUsers(query string) ([]model.User, error) {
 		var u model.User
 		var nickname sql.NullString
 		var about sql.NullString
+		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about)
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -226,6 +248,12 @@ func SearchUsers(query string) ([]model.User, error) {
 			u.About = about.String
 		} else {
 			u.About = ""
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
 		}
 
 		users = append(users, u)

@@ -46,7 +46,6 @@ async function login() {
         } else {
             const msg = await res.text()
             error.value = msg || 'Login failed'
-            console.log("err is:", msg)
         }
 
     } catch (error) {
