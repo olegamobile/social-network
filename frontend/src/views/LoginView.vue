@@ -1,8 +1,8 @@
 <template>
-    <div class="login-page bg-nordic-primary-bg min-h-screen flex flex-col">
+    <div>
         <TopBar />
         
-        <div class="login px-4 mt-20 flex justify-center">
+        <div class="px-4 mt-20 flex justify-center">
         <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md border border-nordic-light">
         <h2 class="text-2xl font-bold text-center text-nordic-light mb-6">Login</h2>
 
