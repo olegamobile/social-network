@@ -76,6 +76,8 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(r.Form)
+
 	usr, errMsg, errStatus := service.UpdateUserProfile(userId, r)
 	if errMsg != "" {
 		http.Error(w, errMsg, errStatus)

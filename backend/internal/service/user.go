@@ -117,7 +117,7 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 			return usr, "Failed to save image", http.StatusInternalServerError
 		}
 	} else {
-		fmt.Println("No avatar file found at updating profile", err)
+		fmt.Println("No avatar file found at updating profile:", err)
 	}
 
 	// Handle delete_avatar flag

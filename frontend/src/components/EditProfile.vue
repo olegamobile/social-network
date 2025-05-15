@@ -122,8 +122,8 @@ const updateProfile = async () => {
 
         if (form.value.avatar) {
             formData.append('avatar', form.value.avatar);
+            console.log("appending avatar")
         } else if (form.value.avatarUrl === null) {
-            // Signal to delete avatar
             formData.append('delete_avatar', 'true');
         }
 
@@ -138,9 +138,7 @@ const updateProfile = async () => {
             throw new Error(errData.message || 'Update failed');
         }
         const data = await response.json();
-        console.log("Updated data to userstore:", data)
         userStore.setUser(data);
-        console.log("User in userstore:", userStore.user)
 
         success.value = 'Profile updated successfully';
         error.value = null;
