@@ -112,8 +112,6 @@ async function fetchUserAndPosts(userId) {
         }
         const allPosts = await postsRes.json()
         posts.value = allPosts.filter(p => p.user_id === Number(userId))
-
-        console.log("posts value at profileview:", posts.value)
     } catch (err) {
         errorStore.setError('Error', 'Something went wrong while loading user data.')
         router.push('/error')

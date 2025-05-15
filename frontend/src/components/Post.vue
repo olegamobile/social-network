@@ -35,10 +35,6 @@ const formattedDate = computed(() => {
     }).replace("klo ", "")
 })
 
-onMounted(()=>{
-    console.log(post)
-})
-
 </script>
 
 
