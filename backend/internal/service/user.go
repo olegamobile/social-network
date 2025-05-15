@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -76,24 +77,10 @@ func RegisterUser(r *http.Request) (string, int) {
 	file, header, err := r.FormFile("avatar")
 	if err == nil {
 		defer file.Close()
-
-		ext := filepath.Ext(header.Filename)
-		if ext == "" || !utils.IsAllowedImageExtension(ext) {
-			fmt.Println("05", err)
-			return "Unsupported image type", http.StatusBadRequest
-		}
-
-		filename := fmt.Sprintf("avatars/%d%s", time.Now().UnixNano(), ext)
-		out, err := os.Create(filename)
+		avatarPath, err = uploadAvatar(file, header)
 		if err != nil {
-			fmt.Println("06", err)
 			return "Failed to save image", http.StatusInternalServerError
 		}
-		defer out.Close()
-		io.Copy(out, file)
-
-		avatarPath.Valid = true
-		avatarPath.String = filename
 	} else {
 		fmt.Println("Image reading error at registering:", err)
 	}
@@ -105,8 +92,6 @@ func RegisterUser(r *http.Request) (string, int) {
 
 	return "", http.StatusOK
 }
-
-// Helper: check if extension is a valid image type
 
 func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 	var usr model.User
@@ -124,23 +109,13 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 	}
 
 	// Handle optional avatar
-	file, handler, err := r.FormFile("avatar")
+	file, header, err := r.FormFile("avatar")
 	if err == nil {
 		defer file.Close()
-
-		filename := fmt.Sprintf("avatar_%d%s", userID, filepath.Ext(handler.Filename))
-		path := filepath.Join("uploads", "avatars", filename)
-
-		os.MkdirAll(filepath.Dir(path), os.ModePerm)
-
-		dst, err := os.Create(path)
+		updateData.AvatarPath, err = uploadAvatar(file, header)
 		if err != nil {
-			return usr, "Failed to save avatar", http.StatusInternalServerError
+			return usr, "Failed to save image", http.StatusInternalServerError
 		}
-		defer dst.Close()
-		io.Copy(dst, file)
-
-		updateData.AvatarPath = &path
 	} else {
 		fmt.Println("No avatar file found at updating profile", err)
 	}
@@ -160,4 +135,29 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 	}
 
 	return usr, "", http.StatusOK
+}
+
+func uploadAvatar(file multipart.File, header *multipart.FileHeader) (sql.NullString, error) {
+	var avatarPath sql.NullString
+
+	ext := filepath.Ext(header.Filename)
+	if ext == "" || !utils.IsAllowedImageExtension(ext) {
+		return avatarPath, fmt.Errorf("illegal extension")
+	}
+	filename := fmt.Sprintf("avatars/%d%s", time.Now().UnixNano(), ext)
+	path := filepath.Join("uploads", "avatars", filename)
+	os.MkdirAll(filepath.Dir(path), os.ModePerm)
+
+	dst, err := os.Create(path)
+	if err != nil {
+		return avatarPath, err
+	}
+	defer dst.Close()
+
+	io.Copy(dst, file)
+
+	avatarPath.Valid = true
+	avatarPath.String = filename
+
+	return avatarPath, nil
 }

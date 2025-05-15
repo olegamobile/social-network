@@ -278,9 +278,9 @@ func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, i
 
 	if data.DeleteAvatar {
 		query += `, avatar_path = NULL`
-	} else if data.AvatarPath != nil {
+	} else if data.AvatarPath.Valid {
 		query += `, avatar_path = ?`
-		args = append(args, *data.AvatarPath)
+		args = append(args, data.AvatarPath)
 	}
 
 	query += ` WHERE id = ?`

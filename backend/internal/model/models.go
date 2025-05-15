@@ -1,5 +1,7 @@
 package model
 
+import "database/sql"
+
 type User struct {
 	ID        int    `json:"id"`
 	Username  string `json:"username"`
@@ -25,12 +27,13 @@ type LoginRequest struct {
 }
 
 type UpdateProfileData struct {
-	FirstName    string
-	LastName     string
-	DOB          string
-	Nickname     string
-	About        string
-	AvatarPath   *string
+	FirstName string
+	LastName  string
+	DOB       string
+	Nickname  string
+	About     string
+	//AvatarPath   *string
+	AvatarPath   sql.NullString
 	DeleteAvatar bool
 }
 
