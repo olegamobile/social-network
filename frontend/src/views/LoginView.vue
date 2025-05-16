@@ -57,7 +57,6 @@ async function login() {
             userStore.setUser(data.user)
 
             wsStore.connect(`${wsUrl}/ws`)
-            //watch(wsStore.message, (newMessage) => {
             watch(() => wsStore.message, (newMessage) => {
                 if (newMessage?.type === 'welcome') {
                     console.log('WebSocket authenticated successfully')

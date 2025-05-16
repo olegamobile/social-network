@@ -26,8 +26,6 @@ var (
 
 // Handle WebSocket connections
 func HandleWSConnections(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("attempt at websocket connection")
-
 	userID, err := service.ValidateSession(r)
 	if err != nil {
 		fmt.Println("error validating user at HandleWSConnections", err)
@@ -74,12 +72,8 @@ func HandleWSConnections(w http.ResponseWriter, r *http.Request) {
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			// Client disconnected or sent invalid JSON
-			fmt.Println("error reading msg in websocket loop:", err)
-			fmt.Println("the message:", msg)
 			break
 		}
-
-		fmt.Println("received ws msg:", msg)
 
 		switch msg["type"] {
 		case "typing":
@@ -92,6 +86,9 @@ func HandleWSConnections(w http.ResponseWriter, r *http.Request) {
 		case "ping":
 			fmt.Println("Connetion", userKey, "pinged")
 		case "chat_message":
+			fmt.Println("Got chat message:", msg)
+			// TODO: store message into database and (if possible?) send to other user.
+		case "notification":
 			fmt.Println("Got chat message:", msg)
 			// TODO: store message into database and (if possible?) send to other user.
 		default:
