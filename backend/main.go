@@ -25,6 +25,8 @@ func setHandlers() {
 	http.HandleFunc("/api/me", middleware.WithCORS(handlers.HandleMe))
 	http.HandleFunc("/api/me/update", middleware.WithCORS(handlers.HandleUpdateMe))
 	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))
+	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections))
+	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 
 	// Serve the avatars directory as static content with CORS
 	fs := http.FileServer(http.Dir("./avatars"))
