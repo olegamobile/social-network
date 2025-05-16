@@ -11,23 +11,21 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func UserById(r *http.Request) (model.User, int) {
+func UserById(userId, targetId int) (model.User, int) {
 	var usr model.User
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/users/")
-	id, err := strconv.Atoi(idStr)
+	getFull, err := repository.ViewFullProfileOrNot(userId, targetId)
 	if err != nil {
 		return usr, http.StatusBadRequest
 	}
 
-	usr, err = repository.GetUserById(id)
+	usr, err = repository.GetUserById(targetId, getFull)
 	if err != nil {
 		return usr, http.StatusNotFound
 	}
@@ -106,6 +104,10 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 		DOB:       r.FormValue("dob"),
 		Nickname:  r.FormValue("nickname"),
 		About:     r.FormValue("about"),
+	}
+
+	if r.FormValue("is_public") == "true" {
+		updateData.IsPublic = true
 	}
 
 	if updateData.Nickname == "null" {

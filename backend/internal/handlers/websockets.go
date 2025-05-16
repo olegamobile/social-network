@@ -34,7 +34,7 @@ func HandleWSConnections(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := repository.GetUserById(userID)
+	user, err := repository.GetUserById(userID, true)
 	if err != nil {
 		fmt.Println("Error getting user in ws connections:", err)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -18,6 +18,7 @@ func setHandlers() {
 	http.HandleFunc("/api/users/", middleware.WithCORS(handlers.HandleUserByID)) // With trailing slash
 	http.HandleFunc("/api/users/search", middleware.WithCORS(handlers.SearchUsers))
 	http.HandleFunc("/api/posts", middleware.WithCORS(handlers.GetPosts))
+	http.HandleFunc("/api/posts/", middleware.WithCORS(handlers.HandlePostsByUserId)) // With trailing slash
 	http.HandleFunc("/api/groups", middleware.WithCORS(handlers.GetGroups))
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
 	http.HandleFunc("/api/register", middleware.WithCORS(handlers.HandleRegister))

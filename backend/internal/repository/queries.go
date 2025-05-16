@@ -18,9 +18,9 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 	var avatarUrl sql.NullString
 
 	err := database.DB.QueryRow(`
-	SELECT id, nickname, email, first_name, last_name, date_of_birth, password_hash, about_me, avatar_path
+	SELECT id, nickname, email, first_name, last_name, date_of_birth, password_hash, about_me, avatar_path, is_public
 	FROM users WHERE email = ?`, req.Email).
-		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &user.Password, &about, &avatarUrl)
+		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &user.Password, &about, &avatarUrl, &user.IsPublic)
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
@@ -67,16 +67,50 @@ func DeleteSessionById(id string) error {
 	return err
 }
 
-func GetUserById(id int) (model.User, error) {
+func ViewFullProfileOrNot(userId, targetId int) (bool, error) {
+	if userId == targetId {
+		return true, nil
+	}
+
+	db := database.DB
+
+	var isPublic bool
+	err := db.QueryRow("SELECT is_public FROM users WHERE id = ?", targetId).Scan(&isPublic)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// target user not found
+			return false, fmt.Errorf("target user not found")
+		}
+		return false, err
+	}
+
+	if isPublic {
+		return true, nil
+	}
+
+	var exists bool
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT 1 FROM follow_requests
+			WHERE follower_id = ? AND followed_id = ? AND approval_status = 'accepted'
+		)`, userId, targetId).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
+func GetUserById(id int, viewFull bool) (model.User, error) {
 	var user model.User
 	var nickname sql.NullString
 	var about sql.NullString
 	var avatarUrl sql.NullString
 
 	err := database.DB.QueryRow(`
-		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path
+		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public
 		FROM users WHERE id = ?`, id).
-		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &about, &avatarUrl)
+		Scan(&user.ID, &nickname, &user.Email, &user.FirstName, &user.LastName, &user.Birthday, &about, &avatarUrl, &user.IsPublic)
 
 	if nickname.Valid {
 		user.Username = nickname.String
@@ -96,11 +130,18 @@ func GetUserById(id int) (model.User, error) {
 		user.AvatarPath = ""
 	}
 
+	if !viewFull {
+		user.Email = ""
+		user.Birthday = ""
+		user.About = ""
+	}
+
 	return user, err
 }
 
+// This function should not be used in the final version
 func GetAllUsers() ([]model.User, error) {
-	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path FROM users")
+	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public FROM users")
 	defer rows.Close()
 
 	var users []model.User
@@ -110,7 +151,7 @@ func GetAllUsers() ([]model.User, error) {
 		var about sql.NullString
 		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl)
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl, &u.IsPublic)
 		if err != nil {
 			return users, err
 		}
@@ -198,6 +239,45 @@ func GetAllPosts() ([]model.Post, error) {
 	return posts, nil
 }
 
+func GetPostsByUserId(targetId int) ([]model.Post, error) {
+	rows, err := database.DB.Query(`
+	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE posts.user_id = ?
+	ORDER BY posts.id DESC;`, targetId)
+
+	if err != nil {
+		fmt.Println("rows error at GetPostsByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []model.Post
+	for rows.Next() {
+		var p model.Post
+		var firstname, lastname string
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt)
+		if err != nil {
+			fmt.Println("scan error at GetPostsByUserId", err)
+			return nil, err
+		}
+
+		if avatarUrl.Valid {
+			p.AvatarPath = avatarUrl.String
+		} else {
+			p.AvatarPath = ""
+		}
+
+		p.Username = firstname + " " + lastname
+		posts = append(posts, p)
+	}
+
+	return posts, nil
+}
+
 func InsertPost(userID int, content string, privacy string) (int, string, error) {
 	result, err := database.DB.Exec(
 		"INSERT INTO posts (user_id, content, privacy_level) VALUES (?, ?, ?)",
@@ -225,7 +305,7 @@ func InsertPost(userID int, content string, privacy string) (int, string, error)
 func SearchUsers(query string) ([]model.User, error) {
 	q := "%" + query + "%" // Add wildcards for LIKE clause
 	rows, err := database.DB.Query(`
-		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path
+		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public
 		FROM users 
 		WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ?
 		`,
@@ -243,7 +323,7 @@ func SearchUsers(query string) ([]model.User, error) {
 		var about sql.NullString
 		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl)
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl, u.IsPublic)
 		if err != nil {
 			return nil, err
 		}
@@ -309,9 +389,12 @@ func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, i
 			date_of_birth = ?,
 			nickname = ?,
 			about_me = ?,
+			is_public = ?,
 			updated_at = CURRENT_TIMESTAMP
 	`
-	args := []any{data.FirstName, data.LastName, data.DOB, utils.NullableString(data.Nickname), utils.NullableString(data.About)}
+	args := []any{data.FirstName, data.LastName, data.DOB, utils.NullableString(data.Nickname), utils.NullableString(data.About), data.IsPublic}
+
+	fmt.Println("data at UpdateUser:", data)
 
 	if data.DeleteAvatar {
 		query += `, avatar_path = NULL`
@@ -330,7 +413,7 @@ func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, i
 		return usr, "Failed to update user", http.StatusInternalServerError
 	}
 
-	usr, err = GetUserById(userID)
+	usr, err = GetUserById(userID, true)
 	if err != nil {
 		return usr, "Failed to get updated user", http.StatusInternalServerError
 	}

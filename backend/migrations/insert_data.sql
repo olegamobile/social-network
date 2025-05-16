@@ -65,6 +65,7 @@ INSERT INTO follow_requests (follower_id, followed_id, approval_status, created_
 (11, 8, 'pending', CURRENT_TIMESTAMP),
 (13, 5, 'accepted', CURRENT_TIMESTAMP),
 (1, 9, 'pending', CURRENT_TIMESTAMP),
+(11, 13, 'accepted', CURRENT_TIMESTAMP),
 (3, 11, 'accepted', CURRENT_TIMESTAMP);
 
 -- Insert 15 groups (7 columns)

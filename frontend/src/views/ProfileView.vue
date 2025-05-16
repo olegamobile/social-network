@@ -11,10 +11,10 @@
                     </div>
                 </div>
                 <h2 class="text-lg font-semibold">{{ user?.first_name }} {{ user?.last_name }}</h2>
-                <p><strong>Email:</strong> {{ user?.email }}</p>
-                <p><strong>Birthday:</strong> {{ formattedBirthday }}</p>
-                <p v-if="user?.username && user?.username != 'null'"><strong>Username:</strong> {{ user?.username }}</p>
-                <p v-if="user?.about_me && user?.about_me != 'null'"><strong>About:</strong> {{ user?.about_me }}</p>
+                <p v-if="user?.email"><strong>Email:</strong> {{ user?.email }}</p>
+                <p v-if="formattedBirthday"><strong>Birthday:</strong> {{ formattedBirthday }}</p>
+                <p v-if="user?.username"><strong>Username:</strong> {{ user?.username }}</p>
+                <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
             </template>
 
             <template #main>
@@ -103,16 +103,18 @@ async function fetchUserAndPosts(userId) {
         }
 
         // Fetch and filter posts
-        const postsRes = await fetch(`${apiUrl}/api/posts`, {
+        const postsRes = await fetch(`${apiUrl}/api/posts/${userId}`, {     //
             credentials: 'include'
         })
 
         if (!postsRes.ok) {
             throw new Error(`Failed to fetch posts: ${postsRes.status}`)
         }
-        const allPosts = await postsRes.json()
-        posts.value = allPosts.filter(p => p.user_id === Number(userId))
+        const userPosts = await postsRes.json()
+        if (userPosts) posts.value.push(...userPosts)
+
     } catch (err) {
+        console.log("error fetching posts:", err)
         errorStore.setError('Error', 'Something went wrong while loading user data.')
         router.push('/error')
         return
