@@ -5,16 +5,21 @@
         <TwoColumnLayout>
             <template #sidebar>
                 <div class="flex flex-col items-center mb-4">
-                    <div v-if="user?.avatar_url" class="profile-avatar w-24 h-24 rounded-full overflow-hidden border border-nordic-light">
+                    <div v-if="user?.avatar_url"
+                        class="profile-avatar w-24 h-24 rounded-full overflow-hidden border border-nordic-light">
                         <img :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
                             class="w-full h-full object-cover" />
                     </div>
                 </div>
                 <h2 class="text-lg font-semibold">{{ user?.first_name }} {{ user?.last_name }}</h2>
+                <br />
                 <p v-if="user?.email"><strong>Email:</strong> {{ user?.email }}</p>
                 <p v-if="formattedBirthday"><strong>Birthday:</strong> {{ formattedBirthday }}</p>
                 <p v-if="user?.username"><strong>Username:</strong> {{ user?.username }}</p>
                 <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
+                <br />
+                <p v-if="user?.is_public">Public profile</p>
+                <p v-if="!user?.is_public">Private profile</p>
             </template>
 
             <template #main>
@@ -24,6 +29,8 @@
                     {{ showEditForm ? 'Close Editor' : 'Edit Profile' }}
                 </button>
                 <EditProfile v-if="showEditForm" />
+
+
 
                 <h2 class="text-2xl font-bold mb-4">{{ user?.first_name }}'s Posts</h2>
                 <PostsList :posts="posts" />
@@ -101,6 +108,17 @@ async function fetchUserAndPosts(userId) {
         } else {
             user.value = userStore.user
         }
+
+        // Get follow status
+        const followRes = await fetch(`${apiUrl}/api/following/${userId}`, {     //
+            credentials: 'include'
+        })
+
+        if (!followRes.ok) {
+            throw new Error(`Failed to fetch follow info: ${followRes.status}`)
+        }
+        const followStatus = await followRes.json()
+        console.log("follow at profile view:", followStatus)
 
         // Fetch and filter posts
         const postsRes = await fetch(`${apiUrl}/api/posts/${userId}`, {     //

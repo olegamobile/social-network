@@ -239,3 +239,27 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
 }
+
+func HandleFollowing(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/following/")
+	targetId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	followStatus, statusCode := service.GetFollowSatatus(userId, targetId)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		http.Error(w, http.StatusText(statusCode), statusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(followStatus)
+}

@@ -15,10 +15,10 @@ import (
 func setHandlers() {
 	// CORS to allow developement on same address
 	http.HandleFunc("/api/users", middleware.WithCORS(handlers.GetUsers))
-	http.HandleFunc("/api/users/", middleware.WithCORS(handlers.HandleUserByID)) // With trailing slash
+	http.HandleFunc("/api/users/", middleware.WithCORS(handlers.HandleUserByID)) // with trailing slash
 	http.HandleFunc("/api/users/search", middleware.WithCORS(handlers.SearchUsers))
 	http.HandleFunc("/api/posts", middleware.WithCORS(handlers.GetPosts))
-	http.HandleFunc("/api/posts/", middleware.WithCORS(handlers.HandlePostsByUserId)) // With trailing slash
+	http.HandleFunc("/api/posts/", middleware.WithCORS(handlers.HandlePostsByUserId)) // with trailing slash
 	http.HandleFunc("/api/groups", middleware.WithCORS(handlers.GetGroups))
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
 	http.HandleFunc("/api/register", middleware.WithCORS(handlers.HandleRegister))
@@ -26,6 +26,7 @@ func setHandlers() {
 	http.HandleFunc("/api/me", middleware.WithCORS(handlers.HandleMe))
 	http.HandleFunc("/api/me/update", middleware.WithCORS(handlers.HandleUpdateMe))
 	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))
+	http.HandleFunc("/api/following/", middleware.WithCORS(handlers.HandleFollowing)) // trailing slash
 	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections))
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 

@@ -175,3 +175,34 @@ func uploadAvatar(file multipart.File, header *multipart.FileHeader) (sql.NullSt
 
 	return avatarPath, nil
 }
+
+func GetFollowSatatus(userId, targetId int) (string, int) {
+
+	if userId == targetId {
+		return "me", http.StatusOK
+	}
+
+	isPublic, statusCode := repository.ProfilePrivacyByUserId(targetId)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		return "", statusCode
+	}
+
+	approval, statusCode := repository.FollowApproval(userId, targetId)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		return "", statusCode
+	}
+
+	if approval == "accepted" { // no difference between private and public profile
+		return "accepted", http.StatusOK
+	}
+
+	if approval == "pending" { // always private profile
+		return "pending", http.StatusOK
+	}
+
+	// no difference between declined and no status
+	if isPublic {
+		return "not following public", http.StatusOK
+	}
+	return "not following private", http.StatusOK
+}

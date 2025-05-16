@@ -420,3 +420,26 @@ func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, i
 
 	return usr, "", http.StatusOK
 }
+
+func ProfilePrivacyByUserId(targetId int) (bool, int) {
+	var isPublic bool
+	err := database.DB.QueryRow("SELECT is_public FROM users WHERE id = ?", targetId).Scan(&isPublic)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, http.StatusBadRequest
+		}
+		return false, http.StatusInternalServerError
+	}
+	return isPublic, http.StatusOK
+}
+
+func FollowApproval(userId, targetId int) (string, int) {
+	var approval string
+	err := database.DB.QueryRow(`
+			SELECT approval_status FROM follow_requests
+			WHERE follower_id = ? AND followed_id = ?`, userId, targetId).Scan(&approval)
+	if err != nil && err != sql.ErrNoRows {
+		return "", http.StatusInternalServerError
+	}
+	return approval, http.StatusOK
+}
