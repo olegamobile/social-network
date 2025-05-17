@@ -27,6 +27,7 @@ func setHandlers() {
 	http.HandleFunc("/api/me/update", middleware.WithCORS(handlers.HandleUpdateMe))
 	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))
 	http.HandleFunc("/api/following/", middleware.WithCORS(handlers.HandleFollowing)) // trailing slash
+	http.HandleFunc("/api/follow", middleware.WithCORS(handlers.HandleFollowAction))
 	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections))
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 

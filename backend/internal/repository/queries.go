@@ -443,3 +443,23 @@ func FollowApproval(userId, targetId int) (string, int) {
 	}
 	return approval, http.StatusOK
 }
+
+func SendFollowRequest(followerID, followedID int) error {
+	_, err := database.DB.Exec(`
+        INSERT INTO follow_requests (follower_id, followed_id, approval_status)
+        VALUES (?, ?, 'pending')
+        ON CONFLICT(follower_id, followed_id) DO UPDATE SET approval_status='pending'
+    `, followerID, followedID)
+
+	return err
+}
+
+func StartToFollow(followerID, followedID int) error {
+	_, err := database.DB.Exec(`
+        INSERT INTO follow_requests (follower_id, followed_id, approval_status)
+        VALUES (?, ?, 'accepted')
+        ON CONFLICT(follower_id, followed_id) DO UPDATE SET approval_status='accepted'
+    `, followerID, followedID)
+
+	return err
+}

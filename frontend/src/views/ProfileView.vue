@@ -191,8 +191,8 @@ async function handleFollowAction() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                credentials: 'include'
             },
+            credentials: 'include',
             body: JSON.stringify({
                 target_id: user.value.id,
                 action: action
@@ -202,7 +202,7 @@ async function handleFollowAction() {
         if (!res.ok) throw new Error('Failed to update follow status')
 
         // Get follow status again
-        const followRes = await fetch(`${apiUrl}/api/following/${userId}`, {     //
+        const followRes = await fetch(`${apiUrl}/api/following/${user.value.id}`, {     //
             credentials: 'include'
         })
         if (!followRes.ok) {

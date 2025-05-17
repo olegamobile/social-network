@@ -45,3 +45,8 @@ type Group struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
+
+type FollowRequest struct {
+	TargetID int    `json:"target_id"`
+	Action   string `json:"action"` // "request", "follow", "unfollow"
+}
