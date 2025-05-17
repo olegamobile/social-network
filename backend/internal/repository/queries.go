@@ -432,34 +432,3 @@ func ProfilePrivacyByUserId(targetId int) (bool, int) {
 	}
 	return isPublic, http.StatusOK
 }
-
-func FollowApproval(userId, targetId int) (string, int) {
-	var approval string
-	err := database.DB.QueryRow(`
-			SELECT approval_status FROM follow_requests
-			WHERE follower_id = ? AND followed_id = ?`, userId, targetId).Scan(&approval)
-	if err != nil && err != sql.ErrNoRows {
-		return "", http.StatusInternalServerError
-	}
-	return approval, http.StatusOK
-}
-
-func SendFollowRequest(followerID, followedID int) error {
-	_, err := database.DB.Exec(`
-        INSERT INTO follow_requests (follower_id, followed_id, approval_status)
-        VALUES (?, ?, 'pending')
-        ON CONFLICT(follower_id, followed_id) DO UPDATE SET approval_status='pending'
-    `, followerID, followedID)
-
-	return err
-}
-
-func StartToFollow(followerID, followedID int) error {
-	_, err := database.DB.Exec(`
-        INSERT INTO follow_requests (follower_id, followed_id, approval_status)
-        VALUES (?, ?, 'accepted')
-        ON CONFLICT(follower_id, followed_id) DO UPDATE SET approval_status='accepted'
-    `, followerID, followedID)
-
-	return err
-}

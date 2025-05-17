@@ -28,6 +28,11 @@ func setHandlers() {
 	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))
 	http.HandleFunc("/api/following/", middleware.WithCORS(handlers.HandleFollowing)) // trailing slash
 	http.HandleFunc("/api/follow", middleware.WithCORS(handlers.HandleFollowAction))
+	http.HandleFunc("/api/followers", middleware.WithCORS(handlers.GetFollowers))
+	http.HandleFunc("/api/followed", middleware.WithCORS(handlers.GetFollowedUsers))
+	http.HandleFunc("/api/follow/requests/sent", middleware.WithCORS(handlers.GetSentFollowRequests))
+	http.HandleFunc("/api/follow/requests/received", middleware.WithCORS(handlers.GetReceivedFollowRequests))
+
 	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections))
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 
