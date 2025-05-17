@@ -4,6 +4,22 @@
 
         <TwoColumnLayout>
             <template #sidebar>
+
+                <!-- follow button -->
+                <div v-if="showFollowButton" class="mb-2">
+                    <button :disabled="followStatus === 'pending'" @click="handleFollowAction"
+                        class="px-4 py-2 rounded text-white" :class="followButtonClass">
+                        {{
+                            followStatus === 'not following public' ? 'Follow' :
+                                followStatus === 'not following private' ? 'Request to Follow' :
+                                    followStatus === 'accepted' ? 'Stop Following' :
+                                        followStatus === 'pending' ? 'Follow Requested' :
+                                            ''
+                        }}
+                    </button>
+                </div>
+
+                <!-- avatar image -->
                 <div class="flex flex-col items-center mb-4">
                     <div v-if="user?.avatar_url"
                         class="profile-avatar w-24 h-24 rounded-full overflow-hidden border border-nordic-light">
@@ -11,18 +27,23 @@
                             class="w-full h-full object-cover" />
                     </div>
                 </div>
+
+                <!-- first and last name -->
                 <h2 class="text-lg font-semibold">{{ user?.first_name }} {{ user?.last_name }}</h2>
                 <br />
+                <!-- info: show if following or public -->
                 <p v-if="user?.email"><strong>Email:</strong> {{ user?.email }}</p>
                 <p v-if="formattedBirthday"><strong>Birthday:</strong> {{ formattedBirthday }}</p>
                 <p v-if="user?.username"><strong>Username:</strong> {{ user?.username }}</p>
                 <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
                 <br />
+                <!-- profile type -->
                 <p v-if="user?.is_public">Public profile</p>
                 <p v-if="!user?.is_public">Private profile</p>
             </template>
 
             <template #main>
+                <!-- edit profile button and form -->
                 <button v-if="userStore.user && route.params.id == userStore.user.id"
                     @click="showEditForm = !showEditForm"
                     class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
@@ -30,8 +51,7 @@
                 </button>
                 <EditProfile v-if="showEditForm" />
 
-
-
+                <!-- user's posts -->
                 <h2 class="text-2xl font-bold mb-4">{{ user?.first_name }}'s Posts</h2>
                 <PostsList :posts="posts" />
             </template>
@@ -60,6 +80,7 @@ const router = useRouter()
 const errorStore = useErrorStore()
 const showEditForm = ref(false);
 const userStore = useUserStore()
+const followStatus = ref('')
 
 // Compute formatted birthday so it doesn't affect userStore
 const formattedBirthday = computed(() => {
@@ -67,6 +88,24 @@ const formattedBirthday = computed(() => {
         return new Date(user.value.birthday).toLocaleString("fi-FI", {
             dateStyle: 'short',
         });
+    }
+    return '';
+});
+
+const showFollowButton = computed(() =>
+    ['not following private', 'not following public', 'accepted', 'pending'].includes(followStatus.value)
+)
+
+const followButtonClass = computed(() => {
+    if (followStatus.value === 'not following public' || followStatus.value === 'not following private') {
+        return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
+    }
+    if (followStatus.value === 'accepted') {
+        //return 'bg-nordic-text-light hover:bg-nordic-primary-accent text-black';  // doesn't work for some reason
+        return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
+    }
+    if (followStatus.value === 'pending') {
+        return 'bg-nordic-secondary-bg text-nordic-light cursor-not-allowed';
     }
     return '';
 });
@@ -117,8 +156,8 @@ async function fetchUserAndPosts(userId) {
         if (!followRes.ok) {
             throw new Error(`Failed to fetch follow info: ${followRes.status}`)
         }
-        const followStatus = await followRes.json()
-        console.log("follow at profile view:", followStatus)
+        followStatus.value = await followRes.json()
+        console.log("follow at profile view:", followStatus.value)
 
         // Fetch and filter posts
         const postsRes = await fetch(`${apiUrl}/api/posts/${userId}`, {     //
@@ -136,6 +175,42 @@ async function fetchUserAndPosts(userId) {
         errorStore.setError('Error', 'Something went wrong while loading user data.')
         router.push('/error')
         return
+    }
+}
+
+async function handleFollowAction() {
+    if (followStatus.value === 'pending') return
+
+    let action = ''
+    if (followStatus.value === 'not following private') action = 'request'
+    else if (followStatus.value === 'not following public') action = 'follow'
+    else if (followStatus.value === 'accepted') action = 'unfollow'
+
+    try {
+        const res = await fetch(`${apiUrl}/api/follow`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                credentials: 'include'
+            },
+            body: JSON.stringify({
+                target_id: user.value.id,
+                action: action
+            })
+        })
+
+        if (!res.ok) throw new Error('Failed to update follow status')
+
+        // Get follow status again
+        const followRes = await fetch(`${apiUrl}/api/following/${userId}`, {     //
+            credentials: 'include'
+        })
+        if (!followRes.ok) {
+            throw new Error(`Failed to fetch follow info: ${followRes.status}`)
+        }
+        followStatus.value = await followRes.json()
+    } catch (err) {
+        console.error(err)
     }
 }
 
