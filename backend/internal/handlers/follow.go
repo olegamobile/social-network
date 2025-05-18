@@ -79,9 +79,15 @@ func HandleFollowAction(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
-	userId, err := service.ValidateSession(r)
+	_, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/api/followers/"))
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
@@ -95,9 +101,15 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFollowedUsers(w http.ResponseWriter, r *http.Request) {
-	userId, err := service.ValidateSession(r)
+	_, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/api/followed/"))
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 

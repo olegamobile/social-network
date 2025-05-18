@@ -40,6 +40,8 @@
                 <!-- profile type -->
                 <p v-if="user?.is_public">Public profile</p>
                 <p v-if="!user?.is_public">Private profile</p>
+                <br/>
+                <FollowsInSidebar v-if="formattedBirthday" :userId="user.id"/>   <!-- birthday exists = allowed to view -->
             </template>
 
             <template #main>
@@ -70,6 +72,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useErrorStore } from '@/stores/error'
 import EditProfile from '@/components/EditProfile.vue'
 import { useUserStore } from '@/stores/user'
+import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
 
 const route = useRoute()
 const user = ref(null)
@@ -157,7 +160,7 @@ async function fetchUserAndPosts(userId) {
             throw new Error(`Failed to fetch follow info: ${followRes.status}`)
         }
         followStatus.value = await followRes.json()
-        console.log("follow at profile view:", followStatus.value)
+        //console.log("follow at profile view:", followStatus.value)
 
         // Fetch and filter posts
         const postsRes = await fetch(`${apiUrl}/api/posts/${userId}`, {     //

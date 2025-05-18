@@ -203,6 +203,38 @@ func GetAllGroups() ([]model.Group, error) {
 	return groups, nil
 }
 
+func GetGroupsByUserId(userId int) ([]model.Group, error) {
+	// group info from groups where that id can be found on same row as userId on group_members
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	JOIN group_members gm ON g.id = gm.group_id
+	WHERE gm.user_id = ? AND g.status = 'enable' AND gm.status = 'enable' AND gm.approval_status = 'accepted' ;
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupsByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupsByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	//fmt.Println("user groups:", groups)
+
+	return groups, nil
+}
+
 func GetAllPosts() ([]model.Post, error) {
 	rows, err := database.DB.Query(`
 	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
@@ -431,4 +463,86 @@ func ProfilePrivacyByUserId(targetId int) (bool, int) {
 		return false, http.StatusInternalServerError
 	}
 	return isPublic, http.StatusOK
+}
+
+// GetSuggestedUsers finds non-followed non-self users who either:
+// - follow or are followed by a user the active user follows or is followed by
+// - are in the same group as the active user
+// - follow the active user
+func GetSuggestedUsers(userID int) ([]model.User, error) {
+
+	// 1. Not userids active follows
+
+	query := `
+SELECT DISTINCT u.id, u.first_name, u.last_name, u.avatar_path, u.nickname
+FROM users u
+WHERE u.id != ?
+AND u.id NOT IN (
+
+	-- 0. Not users already followed
+    SELECT followed_id FROM follow_requests
+    WHERE follower_id = ? AND approval_status = 'accepted'
+)
+AND u.id IN (
+
+    -- 1. Friends-of-friends: Followed by or following someone the user follows or is followed by
+    SELECT fr2.followed_id FROM follow_requests fr1
+    JOIN follow_requests fr2 ON fr1.followed_id = fr2.follower_id
+    WHERE fr1.follower_id = ? AND fr1.approval_status = 'accepted' AND fr2.approval_status = 'accepted'
+    
+    UNION
+
+    SELECT fr2.follower_id FROM follow_requests fr1
+    JOIN follow_requests fr2 ON fr1.follower_id = fr2.followed_id
+    WHERE fr1.followed_id = ? AND fr1.approval_status = 'accepted' AND fr2.approval_status = 'accepted'
+
+    -- 2. In the same group with accepted membership
+    UNION
+
+    SELECT gm2.user_id FROM group_members gm1
+    JOIN group_members gm2 ON gm1.group_id = gm2.group_id
+    WHERE gm1.user_id = ? AND gm1.approval_status = 'accepted'
+    AND gm2.approval_status = 'accepted'
+
+    -- 3. Follow the user
+    UNION
+
+    SELECT follower_id FROM follow_requests
+    WHERE followed_id = ? AND approval_status = 'accepted'
+)
+`
+	rows, err := database.DB.Query(query, userID, userID, userID, userID, userID, userID)
+	if err != nil {
+		fmt.Println("query error at GetSuggestedUsers:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+	for rows.Next() {
+		var u model.User
+		var nickname sql.NullString
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &avatarUrl, &nickname)
+		if err != nil {
+			fmt.Println("scan error at GetSuggestedUsers:", err)
+			return nil, err
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
+		}
+
+		if nickname.Valid {
+			u.Username = nickname.String
+		} else {
+			u.Username = ""
+		}
+
+		users = append(users, u)
+	}
+	return users, nil
 }

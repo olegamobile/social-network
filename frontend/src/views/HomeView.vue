@@ -4,38 +4,9 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Following</h3>
-                    <ul v-if="mockFollowing.length > 0" class="space-y-2">
-                        <li v-for="user in mockFollowing" :key="user.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                            {{ user.name }}
-                        </li>
-                    </ul>
-                    <p v-else class="text-nordic-light italic">Not following anyone yet.</p>
-                </div>
-
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followers</h3>
-                    <ul v-if="mockFollowers.length > 0" class="space-y-2">
-                        <li v-for="user in mockFollowers" :key="user.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                            {{ user.name }}
-                        </li>
-                    </ul>
-                    <p v-else class="text-nordic-light italic">No followers yet.</p>
-                </div>
-
-                <div>
-                    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Groups</h3>
-                    <ul v-if="mockGroups.length > 0" class="space-y-2">
-                        <li v-for="group in mockGroups" :key="group.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                            {{ group.name }}
-                        </li>
-                    </ul>
-                    <p v-else class="text-nordic-light italic">Not a member of any groups yet.</p>
-                </div>
+                <FollowsInSidebar :userId="user.id" /> <!-- not user.value.id ! -->
+                <br/>
+                <GroupsInSidebar/>
             </template>
 
             <template #main>
@@ -58,33 +29,24 @@ import PostsList from '@/components/PostsList.vue'
 import { useAuth } from '@/composables/useAuth'
 import NewPostForm from '@/components/NewPostForm.vue'
 import { useErrorStore } from '@/stores/error'
+import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia';
+import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
 
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const { logout } = useAuth()
 const router = useRouter()
 const errorStore = useErrorStore()
-
-// Mock data for sidebar (replace with actual data fetching if needed)
-const mockFollowing = ref([
-    { id: 'f1', name: '@bob_s CoolUser' },
-    { id: 'f2', name: '@john_doe_artist' },
-    { id: 'f3', name: '@alice_in_wonderdev' },
-]);
-const mockFollowers = ref([
-    { id: 'fl1', name: '@charlie_codes' },
-]);
-const mockGroups = ref([
-    { id: 'g1', name: 'Vue Virtuosos' },
-    { id: 'g2', name: 'Nordic Design Fans' },
-    { id: 'g3', name: 'Tailwind CSS Masters' },
-]);
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
 }
 
-onMounted(async () => {
+async function getAllPosts() {
     try {
         const res = await fetch(`${apiUrl}/api/posts`, {
             credentials: 'include' // This sends the session cookie with the request
@@ -110,15 +72,15 @@ onMounted(async () => {
         router.push('/error')
         return
     }
+}
 
+onMounted(()=>{
+    getAllPosts()
 })
 </script>
 
 <style scoped>
-
-
 .home-page-wrapper {
-  min-height: 100vh;
+    min-height: 100vh;
 }
-
 </style>

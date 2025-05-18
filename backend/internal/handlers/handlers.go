@@ -239,3 +239,35 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
 }
+
+func GetSuggestedUsers(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	suggestions, err := repository.GetSuggestedUsers(userId)
+	if err != nil {
+		http.Error(w, "Failed to fetch suggestions", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(suggestions)
+}
+
+func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := repository.GetGroupsByUserId(userId)
+	if err != nil {
+		http.Error(w, "Failed to fetch groups", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(groups)
+}

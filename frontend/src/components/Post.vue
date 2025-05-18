@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const apiUrl = import.meta.env.VITE_API_URL

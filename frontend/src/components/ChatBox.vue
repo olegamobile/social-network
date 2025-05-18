@@ -55,7 +55,7 @@ const newMessage = ref('')
 const websocketStore = useWebSocketStore()
 //const isConnected = ref(websocketStore.isConnected)
 const { isConnected } = storeToRefs(websocketStore)
-const userStore = useUserStore();
+const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 
 watch(() => websocketStore.message, (newMessage) => {
