@@ -125,12 +125,12 @@ function declineAction(id) {
 }
 
 .accept-button {
-    background-color: var(--nordic-secondary-accent);
+    background-color: var(--nordic-primary-accent);
     color: white;
 }
 
 .accept-button:hover {
-    background-color: #5c8ab4;
+    background-color: var(--nordic-secondary-accent);
 }
 
 .decline-button {
