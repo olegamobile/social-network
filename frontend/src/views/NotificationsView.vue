@@ -11,7 +11,8 @@
 
             <template #main>
                 <h2 class="text-2xl font-bold mb-4">{{ showCurrent ? 'Current' : 'Old' }} Notifications</h2>
-                <NotificationsList :notifications="filteredNotifications" />
+                <NotificationsList :notifications="filteredNotifications" @close="handleClose" @accept="handleAccept"
+                    @decline="handleDecline" />
             </template>
         </TwoColumnLayout>
     </div>
@@ -36,6 +37,19 @@ const mockNotifications = ref([
 const filteredNotifications = computed(() =>
     mockNotifications.value.filter(n => n.isOld !== showCurrent.value)
 )
+
+function handleClose(id) {
+  const n = mockNotifications.value.find(n => n.id === id)
+  if (n) n.isOld = true // or false, depending on your logic
+}
+
+function handleAccept(id) {
+  // Accept logic (e.g., call API, then remove)
+}
+
+function handleDecline(id) {
+  // Decline logic (e.g., call API, then remove)
+}
 </script>
 
 <style scoped>
