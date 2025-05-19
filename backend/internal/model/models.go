@@ -8,19 +8,32 @@ type User struct {
 	Email      string `json:"email"`
 	FirstName  string `json:"first_name"`
 	LastName   string `json:"last_name"`
-	Birthday   string `json:"birthday"`
+	Birthday   string `json:"birthday"` // Birthday can be used to check if returned profile is partly hidden or not
 	Password   string `json:"password"`
 	About      string `json:"about_me"`
 	AvatarPath string `json:"avatar_url"`
+	IsPublic   bool   `json:"is_public"`
 }
 
-type Post struct {
+/* type Post struct {
 	ID         int    `json:"id"`
 	UserID     int    `json:"user_id"`
 	Username   string `json:"username"`
 	AvatarPath string `json:"avatar_url"`
 	Content    string `json:"content"`
 	CreatedAt  string `json:"created_at"`
+} */
+
+type Post struct {
+	ID         int     `json:"id"`
+	UserID     int     `json:"user_id"`
+	Username   string  `json:"username"`
+	AvatarPath string  `json:"avatar_url"`
+	Content    string  `json:"content"`
+	ImagePath  *string `json:"image_path,omitempty"`
+	GroupID    *int    `json:"group_id,omitempty"` // nil for regular posts
+	GroupName  *string `json:"group_name,omitempty"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 type LoginRequest struct {
@@ -29,18 +42,23 @@ type LoginRequest struct {
 }
 
 type UpdateProfileData struct {
-	FirstName string
-	LastName  string
-	DOB       string
-	Nickname  string
-	About     string
-	//AvatarPath   *string
+	FirstName    string
+	LastName     string
+	DOB          string
+	Nickname     string
+	About        string
 	AvatarPath   sql.NullString
 	DeleteAvatar bool
+	IsPublic     bool
 }
 
 type Group struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+}
+
+type FollowRequest struct {
+	TargetID int    `json:"target_id"`
+	Action   string `json:"action"` // "request", "follow", "unfollow"
 }
