@@ -64,15 +64,17 @@ async function getHomeFeed() {
 
         if (!res.ok) {
             // Handle other non-successful HTTP statuses (e.g., 400, 404, 500)
-            //const errorData = await res.json().catch(() => ({ message: 'Failed to fetch posts and parse error.' }));
+            const errorData = await res.json().catch(() => ({ message: 'Failed to fetch posts and parse error.' }));
 
-            const errorData = await res.json()
+/*             const errorData = await res.json()
             console.log("homefeed returned some error status:", res.status)
-            console.log("err data:", errorData)
+            console.log("err data:", errorData) */
             throw new Error(errorData.message || `HTTP error ${res.status}`);
         }
 
         posts.value = await res.json()
+
+        console.log(posts.value)
     } catch (error) {
         errorStore.setError('Error Loading Posts', error.message || 'An unexpected error occurred while trying to load posts. Please try again later.');
         router.push('/error')
