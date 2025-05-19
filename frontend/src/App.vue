@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div class="app-container">
     <router-view />
   </div>
 </template>
@@ -11,7 +11,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-#app {
+.app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;

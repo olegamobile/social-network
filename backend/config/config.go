@@ -6,6 +6,7 @@ import (
 )
 
 const DBPath = "data/app.db"
+const MigrationsPath = "migrations"
 
 var (
 	Port        string
