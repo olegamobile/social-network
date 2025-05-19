@@ -4,9 +4,9 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <FollowsInSidebar :userId="user.id" v-if="user"/> <!-- not user.value.id ! -->
-                <br/>
-                <GroupsInSidebar/>
+                <FollowsInSidebar :userId="user.id" v-if="user" /> <!-- not user.value.id ! -->
+                <br />
+                <GroupsInSidebar />
             </template>
 
             <template #main>
@@ -14,7 +14,7 @@
 
                 <NewPostForm @post-submitted="handlePostSubmitted" class="mb-8" />
 
-                <PostsList :posts="posts" />
+                <PostsList ref="postsListRef" :posts="posts" />
             </template>
         </TwoColumnLayout>
     </div>
@@ -23,7 +23,7 @@
 <script setup>
 import TopBar from '../components/TopBar.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import PostsList from '@/components/PostsList.vue'
 import { useAuth } from '@/composables/useAuth'
@@ -33,6 +33,7 @@ import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia';
 import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
+import throttle from 'lodash.throttle';
 
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
@@ -42,14 +43,29 @@ const errorStore = useErrorStore()
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 
+let cursor = ref(null); // last post’s created_at
+const limit = 10;
+const isLoading = ref(false);
+const hasMore = ref(true); // To avoid loading forever
+const postsListRef = ref(null); // To access the sentinel in PostsList
+
+
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
 }
 
-async function getHomeFeed() {
+async function _getHomeFeed() {
+    if (isLoading.value || !hasMore.value) return;
+    isLoading.value = true;
+
     try {
+        const params = new URLSearchParams();
+        if (cursor.value) params.append('cursor', cursor.value);
+        params.append('limit', limit);
+
         //const res = await fetch(`${apiUrl}/api/posts`, {
-        const res = await fetch(`${apiUrl}/api/homefeed`, {
+        //const res = await fetch(`${apiUrl}/api/homefeed`, {
+        const res = await fetch(`${apiUrl}/api/homefeed?${params.toString()}`, {
             credentials: 'include' // This sends the session cookie with the request
         });
 
@@ -58,32 +74,63 @@ async function getHomeFeed() {
             console.log("homefeed returned 401 status")
             errorStore.setError('Session Expired', 'Your session has expired. Please log in again.');
             logout(); // your logout function
-            router.push('/login');
+            router.push('/login')
             return;
         }
 
         if (!res.ok) {
             // Handle other non-successful HTTP statuses (e.g., 400, 404, 500)
             const errorData = await res.json().catch(() => ({ message: 'Failed to fetch posts and parse error.' }));
-
-/*             const errorData = await res.json()
-            console.log("homefeed returned some error status:", res.status)
-            console.log("err data:", errorData) */
-            throw new Error(errorData.message || `HTTP error ${res.status}`);
+            isLoading.value = false
+            throw new Error(errorData.message || `HTTP error ${res.status}`)
         }
 
-        posts.value = await res.json()
+        //posts.value = await res.json()
+        const newPosts = await res.json()
 
-        console.log(posts.value)
+        // Update cursor to the created_at of the last post received
+        if (newPosts.length > 0) {
+            cursor.value = newPosts[newPosts.length - 1].created_at
+            posts.value.push(...newPosts); // append to existing posts
+        } else {
+            hasMore.value = false
+        }
+
+        isLoading.value = false
     } catch (error) {
+        isLoading.value = false
         errorStore.setError('Error Loading Posts', error.message || 'An unexpected error occurred while trying to load posts. Please try again later.');
         router.push('/error')
         return
     }
 }
 
-onMounted(()=>{
-    getHomeFeed()
+
+// 🔁 Create a throttled version
+const getHomeFeed = throttle(_getHomeFeed, 1000);
+
+onMounted(async () => {
+    await getHomeFeed()
+
+    // Wait for posts to render so sentinel is in DOM
+    await nextTick();
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            const entry = entries[0];
+            if (entry.isIntersecting) {
+                getHomeFeed();
+            }
+        },
+        {
+            root: null, // viewport
+            threshold: 0.5
+        }
+    );
+
+    if (postsListRef.value?.scrollObserver) {
+        observer.observe(postsListRef.value.scrollObserver);
+    }
 })
 </script>
 

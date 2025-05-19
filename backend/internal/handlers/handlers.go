@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -190,9 +191,25 @@ func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := repository.GetFeedPosts(userId)
+	cursor := r.URL.Query().Get("cursor")
+	limitStr := r.URL.Query().Get("limit")
+	limit := 10 // default
+	if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+		limit = l
+	}
+
+	//var cursorTime time.Time
+	cursorTime := time.Now().UTC() // use current time by default
+
+	if cursor != "" {
+		t, err := time.Parse(time.RFC3339, cursor)
+		if err == nil {
+			cursorTime = t
+		}
+	}
+
+	posts, err := repository.GetFeedPostsBefore(userId, cursorTime, limit)
 	if err != nil {
-		//http.Error(w, "Unauthorized or failed to fetch feed", http.StatusUnauthorized)
 		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
 		return
 	}

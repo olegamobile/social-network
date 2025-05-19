@@ -620,3 +620,13 @@ INSERT INTO post_privacy (post_id, user_id, created_at, updated_at, updated_by, 
 (7, 2, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (8, 4, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (10, 11, CURRENT_TIMESTAMP, NULL, NULL, 'enable');
+
+
+-- Update tables with random times for created_at
+UPDATE posts SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE comments SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE group_posts SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE group_comments SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE messages SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE group_messages SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE notifications SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
