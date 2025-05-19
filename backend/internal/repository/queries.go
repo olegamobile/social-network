@@ -271,9 +271,12 @@ func GetAllPosts() ([]model.Post, error) {
 	return posts, nil
 }
 
-func GetFeedPosts(userID int) ([]model.Post, error) {
+// GetFeedPostsBefore gets posts from userID user's follows and groups
+// using cursor-based pagination: anything before the previous post (cursorTime)
+// up to limit (default 10) items.
+func GetFeedPostsBefore(userID int, cursorTime time.Time, limit int) ([]model.Post, error) {
 	query := `
-    -- Regular posts (user + followed users)
+    -- Regular posts
     SELECT DISTINCT
         p.id,
         p.user_id,
@@ -294,11 +297,12 @@ func GetFeedPosts(userID int) ([]model.Post, error) {
               SELECT followed_id FROM follow_requests
               WHERE follower_id = ? AND approval_status = 'accepted'
           )
-    )
-    
+          )
+      AND p.created_at < ?
+        
     UNION ALL
     
-    -- Group posts (groups the user belongs to)
+    -- Group posts
     SELECT DISTINCT
         gp.id,
         gp.user_id,
@@ -316,12 +320,14 @@ func GetFeedPosts(userID int) ([]model.Post, error) {
     JOIN groups g ON gp.group_id = g.id
     JOIN users u ON gp.user_id = u.id
     WHERE gp.status = 'enable'
+      AND gp.created_at < ?
     
-    ORDER BY created_at_sort DESC;`
+    ORDER BY created_at_sort DESC
+    LIMIT ?;`
 
-	rows, err := database.DB.Query(query, userID, userID, userID)
+	rows, err := database.DB.Query(query, userID, userID, cursorTime, userID, cursorTime, limit)
 	if err != nil {
-		fmt.Println("query err at GetFeedPosts:", err)
+		fmt.Println("query err at GetFeedPostsBefore:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -345,7 +351,7 @@ func GetFeedPosts(userID int) ([]model.Post, error) {
 			&post.CreatedAt,
 		)
 		if err != nil {
-			fmt.Println("scan rows err at GetFeedPosts:", err)
+			fmt.Println("scan rows err at GetFeedPostsBefore:", err)
 			return nil, err
 		}
 		if avatarUrl.Valid {
