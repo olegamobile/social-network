@@ -224,10 +224,10 @@ CREATE TABLE notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     type TEXT NOT NULL CHECK (type IN ('follow_request', 'group_invitation', 'group_join_request', 'event_creation')),
-    related_id INTEGER NOT NULL,
-    group_id INTEGER NOT NULL,
-    event_id INTEGER NOT NULL,
-    content TEXT NOT NULL,
+    follow_req_id INTEGER, 
+    group_invite_id INTEGER,
+    event_id INTEGER,
+    content TEXT,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
@@ -235,7 +235,8 @@ CREATE TABLE notifications (
     status TEXT NOT NULL CHECK (status IN ('enable', 'disable', 'delete')) DEFAULT 'enable',
     FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (follow_req_id) REFERENCES follow_requests(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_invite_id) REFERENCES group_invitations(id) ON DELETE CASCADE,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 );
 

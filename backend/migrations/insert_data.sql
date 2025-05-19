@@ -17,15 +17,6 @@ INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, a
 ('aziz.bek@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Aziz', 'Bek', '1985-07-10', NULL, 'AzizB', NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('zara.khan@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Zara', 'Khan', '1996-12-25', NULL, NULL, 'Enjoys reading and learning new languages.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable');
 
--- Insert sessions (5 columns)
-INSERT INTO sessions (user_id, session_token, expires_at, created_at) VALUES
-(1, 'token_amina_123', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(2, 'token_yusuf_456', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(5, 'token_emma_789', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(7, 'token_sofia_012', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(9, 'token_olivia_345', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(11, 'token_lena_678', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(13, 'token_aziz_901', '2025-06-14 20:15:00', CURRENT_TIMESTAMP);
 
 -- Insert posts (8 columns, image_path always included)
 INSERT INTO posts (user_id, content, image_path, privacy_level, created_at, updated_at, updated_by, status) VALUES
@@ -591,27 +582,27 @@ INSERT INTO group_messages (group_id, sender_id, content, created_at, updated_at
 (15, 1, 'Coffee tasting event, who’s coming?', CURRENT_TIMESTAMP, NULL, NULL, 'enable');
 
 -- Insert notifications (12 columns)
-INSERT INTO notifications (user_id, type, related_id, group_id, event_id, content, is_read, created_at, updated_at, updated_by, status) VALUES
-(3, 'follow_request', 5, 0, 0, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 'group_invitation', 2, 2, 0, 'You’ve been invited to Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 'event_creation', 3, 3, 3, 'New event: Book Discussion in Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(8, 'group_join_request', 2, 2, 0, 'Mia wants to join Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(13, 'group_invitation', 4, 4, 0, 'You’ve been invited to Photography Hub.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(1, 'event_creation', 5, 5, 5, 'New event: Group Run in Fitness Fanatics.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(9, 'group_join_request', 7, 7, 0, 'Zara wants to join Travel Explorers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'follow_request', 3, 0, 0, 'Aziz wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(11, 'event_creation', 8, 8, 8, 'New event: Jam Session in Music Makers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(2, 'group_invitation', 9, 9, 0, 'You’ve been invited to Tech Talk.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(14, 'group_join_request', 10, 10, 0, 'Luca wants to join Yoga & Meditation.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(7, 'event_creation', 11, 11, 11, 'New event: Game Night in Gamers Guild.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(12, 'follow_request', 1, 0, 0, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 'group_invitation', 12, 12, 0, 'You’ve been invited to Plant Parents.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(8, 'event_creation', 13, 13, 13, 'New event: History Trivia in History Buffs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(10, 'group_join_request', 14, 14, 0, 'Finn wants to join Code Crafters.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 'follow_request', 9, 0, 0, 'Olivia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(1, 'event_creation', 15, 15, 15, 'New event: Coffee Tasting in Coffee Connoisseurs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(3, 'group_invitation', 6, 6, 0, 'You’ve been invited to Baking Buddies.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'group_join_request', 1, 1, 0, 'Amina wants to join Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable');
+INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, event_id, content, is_read, created_at, updated_at, updated_by, status) VALUES
+(3, 'follow_request', 5, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(6, 'group_invitation', NULL, 2, NULL, 'You’ve been invited to Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(4, 'event_creation', NULL, NULL, 3, 'New event: Book Discussion in Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(8, 'group_join_request', NULL, NULL, NULL, 'Mia wants to join Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(13, 'group_invitation', NULL, 4, NULL, 'You’ve been invited to Photography Hub.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'event_creation', NULL, NULL, 5, 'New event: Group Run in Fitness Fanatics.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(9, 'group_join_request', NULL, NULL, NULL, 'Zara wants to join Travel Explorers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(5, 'follow_request', 3, NULL, NULL, 'Aziz wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(11, 'event_creation', NULL, NULL, 8, 'New event: Jam Session in Music Makers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(2, 'group_invitation', NULL, 9, NULL, 'You’ve been invited to Tech Talk.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(14, 'group_join_request', NULL, NULL, NULL, 'Luca wants to join Yoga & Meditation.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(7, 'event_creation', NULL, NULL, 11, 'New event: Game Night in Gamers Guild.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(12, 'follow_request', 1, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(4, 'group_invitation', NULL, 12, NULL, 'You’ve been invited to Plant Parents.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(8, 'event_creation', NULL, NULL, 13, 'New event: History Trivia in History Buffs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(10, 'group_join_request', NULL, NULL, NULL, 'Finn wants to join Code Crafters.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(6, 'follow_request', 9, NULL, NULL, 'Olivia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'event_creation', NULL, NULL, 15, 'New event: Coffee Tasting in Coffee Connoisseurs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(3, 'group_invitation', NULL, 6, NULL, 'You’ve been invited to Baking Buddies.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(5, 'group_join_request', NULL, NULL, NULL, 'Amina wants to join Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable');
 
 -- Insert post privacy (7 columns)
 INSERT INTO post_privacy (post_id, user_id, created_at, updated_at, updated_by, status) VALUES

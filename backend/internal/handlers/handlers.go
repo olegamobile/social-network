@@ -289,3 +289,71 @@ func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(groups)
 }
+
+// GetNotifications handles GET /api/notifications and returns all notifications for the authenticated user.
+func GetNotifications(w http.ResponseWriter, r *http.Request) {
+    userID, err := service.ValidateSession(r)
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    notifications, err := repository.GetAllNotificatons(userID)
+    if err != nil {
+        http.Error(w, "Failed to fetch notifications", http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(notifications)
+}
+
+// GetNotificationByID handles GET /api/notifications/{id} and returns a single notification for the authenticated user.
+func GetNotificationByID(w http.ResponseWriter, r *http.Request) {
+    userID, err := service.ValidateSession(r)
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    idStr := strings.TrimPrefix(r.URL.Path, "/api/notifications/")
+    notificationID, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "Invalid notification ID", http.StatusBadRequest)
+        return
+    }
+
+    notification, err := repository.GetNotification(userID, notificationID)
+    if err != nil {
+        http.Error(w, "Notification not found", http.StatusNotFound)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(notification)
+}
+
+// ReadNotification handles POST /api/notifications/{id}/read to mark a notification as read.
+func ReadNotification(w http.ResponseWriter, r *http.Request) {
+    userID, err := service.ValidateSession(r)
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    idStr := strings.TrimPrefix(r.URL.Path, "/api/notifications/")
+    idStr = strings.TrimSuffix(idStr, "/read")
+    notificationID, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "Invalid notification ID", http.StatusBadRequest)
+        return
+    }
+
+    err = repository.MarkNotificationAsRead(userID, notificationID)
+    if err != nil {
+        http.Error(w, "Failed to mark notification as read", http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+}

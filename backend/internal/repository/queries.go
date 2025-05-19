@@ -637,3 +637,50 @@ AND u.id IN (
 	}
 	return users, nil
 }
+
+
+func GetAllNotificatons(userID int) ([]model.Notification, error) {
+	rows, err := database.DB.Query(`
+		SELECT id, type, user_id, follow_req_id, group_invite_id, event_id, content
+		FROM notifications 
+		WHERE status = 'enable' AND user_id = ?
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var notifications []model.Notification
+	for rows.Next() {
+		var n model.Notification
+		err := rows.Scan(&n.ID, &n.Type, &n.UserID, &n.FollowReqID, &n.GroupInviteID, &n.EventID, &n.Content)
+		if err != nil {
+			return notifications, err
+		}
+		notifications = append(notifications, n)
+	}
+
+	return notifications, nil
+}
+
+func GetNotification(userID int, notificationID int) (model.Notification, error) {
+    var n model.Notification
+    err := database.DB.QueryRow(`
+        SELECT id, type, user_id, follow_req_id, group_invite_id, event_id, content
+        FROM notifications
+        WHERE id = ? AND user_id = ? AND status = 'enable'
+    `, notificationID, userID).Scan(&n.ID, &n.Type, &n.UserID, &n.FollowReqID, &n.GroupInviteID, &n.EventID, &n.Content)
+    if err != nil {
+        return n, err
+    }
+    return n, nil
+}
+
+func MarkNotificationAsRead(userID int, notificationID int) error {
+    _, err := database.DB.Exec(`
+        UPDATE notifications
+        SET is_read = 1, updated_at = CURRENT_TIMESTAMP, updated_by = ?
+        WHERE id = ? AND user_id = ? AND status = 'enable'
+    `, userID, notificationID, userID)
+    return err
+}
