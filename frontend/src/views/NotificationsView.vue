@@ -86,6 +86,26 @@ async function readNotification(id) {
     }
 }
 
+async function approveFollowRequest(id, action) {
+    try {
+        const res = await fetch(`${apiUrl}/api/follow/requests/${id}/${action}`, {
+            credentials: 'include'
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to accept/decline follow request: ${res.status}`)
+
+    } catch (err) {
+        errorStore.setError('Error', `Error while accepting/declining follow request`)
+        router.push('/error')
+    }
+}
+
 
 onMounted(() => {
     fetchNotifications()
@@ -94,17 +114,24 @@ onMounted(() => {
 
 function handleClose(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
-    if (n) n.is_read = true // or false, depending on your logic
+    if (n) n.is_read = true
     readNotification(n.id)
 }
 
 function handleAccept(id) {
-    // Accept logic (e.g., call API, then remove)
+    const n = fetchedNotifications.value.find(n => n.id === id)
+    if (!n.is_read) n.is_read = true
+    readNotification(n.id)
+    approveFollowRequest(n.follow_req_id, 'accept')
 }
 
 function handleDecline(id) {
-    // Decline logic (e.g., call API, then remove)
+    const n = fetchedNotifications.value.find(n => n.id === id)
+    if (!n.is_read) n.is_read = true
+    readNotification(n.id)
+    approveFollowRequest(n.follow_req_id, 'decline')
 }
+
 </script>
 
 <style scoped>

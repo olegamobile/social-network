@@ -153,3 +153,49 @@ func GetReceivedFollowRequests(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(users)
 }
+
+func HandleFollowRequestApprove(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		fmt.Println("Method not allowed at HandleFollowRequestApprove")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("ValidateSession error at HandleFollowRequestApprove:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	data := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/follow/requests/"), "/")
+	if len(data) != 2 {
+		http.Error(w, "Invalid request action syntax", http.StatusBadRequest)
+		return
+	}
+
+	action := data[1]
+	requestID, err := strconv.Atoi(data[0])
+	if err != nil {
+		http.Error(w, "Invalid request ID", http.StatusBadRequest)
+		return
+	}
+
+	var statusCode int
+	switch action {
+	case "accept":
+		statusCode = service.AcceptFollowRequest(userID, requestID)
+	case "decline":
+		statusCode = service.AcceptFollowRequest(userID, requestID)
+	default:
+		http.Error(w, "Unknown action", http.StatusBadRequest)
+	}
+
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		fmt.Println("error code at HandleFollowRequestApprove:", statusCode)
+		http.Error(w, http.StatusText(statusCode), statusCode)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
