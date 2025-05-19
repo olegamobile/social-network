@@ -29,18 +29,18 @@
                 </div>
 
                 <!-- first and last name -->
-                <h2 class="text-lg font-semibold">{{ user?.first_name }} {{ user?.last_name }}</h2>
-                <br />
+                <h3 class="text-xl font-semibold text-nordic-dark mb-3">{{ user?.first_name }} {{ user?.last_name }}</h3>
+
                 <!-- info: show if following or public -->
-                <p v-if="user?.email"><strong>Email:</strong> {{ user?.email }}</p>
-                <p v-if="formattedBirthday"><strong>Birthday:</strong> {{ formattedBirthday }}</p>
-                <p v-if="user?.username"><strong>Username:</strong> {{ user?.username }}</p>
-                <p v-if="user?.about_me"><strong>About:</strong> {{ user?.about_me }}</p>
-                <br />
+                <p v-if="user?.email" class="mb-3"><strong>Email:</strong><br>{{ user?.email }}</p>
+                <p v-if="formattedBirthday" class="mb-3"><strong>Birthday:</strong><br>{{ formattedBirthday }}</p>
+                <p v-if="user?.username" class="mb-3"><strong>Username:</strong><br>{{ user?.username }}</p>
+                <p v-if="user?.about_me" class="mb-3"><strong>About:</strong><br>{{ user?.about_me }}</p>
+
                 <!-- profile type -->
-                <p v-if="user?.is_public">Public profile</p>
-                <p v-if="!user?.is_public">Private profile</p>
-                <br/>
+                <p v-if="user?.is_public" class="mt-3 mb-7"><strong>Public profile</strong></p>
+                <p v-if="!user?.is_public" class="mt-3 mb-7"><strong>Private profile</strong></p>
+
                 <FollowsInSidebar v-if="formattedBirthday" :userId="user.id"/>   <!-- birthday exists = allowed to view -->
             </template>
 
