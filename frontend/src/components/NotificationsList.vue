@@ -3,34 +3,24 @@
         <li v-for="notification in notifications" :key="notification.id" class="notification-item">
             <div class="notification-content">
                 <span class="notification-text">
-                    {{ notification.text }}
+                    {{ notification.content }}
                 </span>
 
                 <!-- Close Button -->
-                <button class="close-button" @click="closeNotification(notification.id)">
+                <button class="close-button" @click="closeNotification(notification.id)" v-if="!notification.is_read">
                     &times;
                 </button>
             </div>
 
-            <!-- Accept/Decline Buttons (different button text for events) -->
-            <div v-if="notification.type === 'event_creation'" class="action-buttons">
+            <!-- Accept/Decline Buttons -->
+            <div class="action-buttons" v-if="notification.pending">
                 <button class="accept-button" @click="acceptAction(notification.id)">
-                    Going
+                    {{ notification.type === 'event_creation' ? 'Going' : 'Accept' }}
                 </button>
                 <button class="decline-button" @click="declineAction(notification.id)">
-                    Not going
+                    {{ notification.type === 'event_creation' ? 'Not going' : 'Decline' }}
                 </button>
             </div>
-            <div v-else class="action-buttons">
-                <button class="accept-button" @click="acceptAction(notification.id)">
-                    Accept
-                </button>
-                <button class="decline-button" @click="declineAction(notification.id)">
-                    Decline
-                </button>
-            </div>
-
-
         </li>
     </ul>
 </template>

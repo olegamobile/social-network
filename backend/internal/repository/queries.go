@@ -644,10 +644,9 @@ AND u.id IN (
 	return users, nil
 }
 
-
 func GetAllNotificatons(userID int) ([]model.Notification, error) {
 	rows, err := database.DB.Query(`
-		SELECT id, type, user_id, follow_req_id, group_invite_id, event_id, content
+		SELECT id, type, user_id, follow_req_id, group_invite_id, event_id, content, is_read
 		FROM notifications 
 		WHERE status = 'enable' AND user_id = ?
 	`, userID)
@@ -659,7 +658,7 @@ func GetAllNotificatons(userID int) ([]model.Notification, error) {
 	var notifications []model.Notification
 	for rows.Next() {
 		var n model.Notification
-		err := rows.Scan(&n.ID, &n.Type, &n.UserID, &n.FollowReqID, &n.GroupInviteID, &n.EventID, &n.Content)
+		err := rows.Scan(&n.ID, &n.Type, &n.UserID, &n.FollowReqID, &n.GroupInviteID, &n.EventID, &n.Content, &n.IsRead)
 		if err != nil {
 			return notifications, err
 		}
@@ -670,23 +669,87 @@ func GetAllNotificatons(userID int) ([]model.Notification, error) {
 }
 
 func GetNotification(userID int, notificationID int) (model.Notification, error) {
-    var n model.Notification
-    err := database.DB.QueryRow(`
+	var n model.Notification
+	err := database.DB.QueryRow(`
         SELECT id, type, user_id, follow_req_id, group_invite_id, event_id, content
         FROM notifications
         WHERE id = ? AND user_id = ? AND status = 'enable'
     `, notificationID, userID).Scan(&n.ID, &n.Type, &n.UserID, &n.FollowReqID, &n.GroupInviteID, &n.EventID, &n.Content)
-    if err != nil {
-        return n, err
-    }
-    return n, nil
+	if err != nil {
+		return n, err
+	}
+	return n, nil
 }
 
 func MarkNotificationAsRead(userID int, notificationID int) error {
-    _, err := database.DB.Exec(`
+	_, err := database.DB.Exec(`
         UPDATE notifications
         SET is_read = 1, updated_at = CURRENT_TIMESTAMP, updated_by = ?
         WHERE id = ? AND user_id = ? AND status = 'enable'
     `, userID, notificationID, userID)
-    return err
+	return err
+}
+
+func CheckFollowRequestStatus(followRequestID int) bool {
+	status := ""
+	err := database.DB.QueryRow(`
+        SELECT approval_status
+        FROM follow_requests
+        WHERE id = ?
+    `, followRequestID).Scan(&status)
+	if err != nil {
+		return false
+	}
+	if status == "pending" {
+		return true
+	}
+	return false
+}
+
+func CheckInvitationStatus(groupInvitationID int) bool {
+	status := ""
+	err := database.DB.QueryRow(`
+        SELECT approval_status
+        FROM group_invitations
+        WHERE id = ?
+    `, groupInvitationID).Scan(&status)
+	if err != nil {
+		return false
+	}
+	if status == "pending" {
+		return true
+	}
+	return false
+}
+
+func CheckJoinRequestStatus(userID, groupID int) bool {
+	status := ""
+	err := database.DB.QueryRow(`
+        SELECT approval_status
+        FROM group_members
+        WHERE user_id = ? AND group_id = ?
+    `, userID, groupID).Scan(&status)
+	if err != nil {
+		return false
+	}
+	if status == "pending" {
+		return true
+	}
+	return false
+}
+
+func CheckEventInvitationStatus(userID, eventID int) bool {
+	status := ""
+	err := database.DB.QueryRow(`
+        SELECT response
+        FROM event_responses
+        WHERE user_id = ? AND event_id = ? 
+    `, userID, eventID).Scan(&status)
+	if err != nil {
+		return false
+	}
+	if status == "pending" {
+		return true
+	}
+	return false
 }

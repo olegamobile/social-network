@@ -71,5 +71,6 @@ type Notification struct {
 	GroupInviteID *int    `json:"group_invite_id,omitempty"`
 	EventID       *int    `json:"event_id,omitempty"`
 	Content       *string `json:"content,omitempty"`
-	CreatedAt     string  `json:"created_at"`
+	IsRead        *bool   `json:"is_read,omitempty"`
+	Pending       bool    `json:"pending"`
 }
