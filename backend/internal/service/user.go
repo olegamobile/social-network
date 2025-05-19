@@ -11,23 +11,21 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func UserById(r *http.Request) (model.User, int) {
+func UserById(userId, targetId int) (model.User, int) {
 	var usr model.User
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/users/")
-	id, err := strconv.Atoi(idStr)
+	getFull, err := repository.ViewFullProfileOrNot(userId, targetId)
 	if err != nil {
 		return usr, http.StatusBadRequest
 	}
 
-	usr, err = repository.GetUserById(id)
+	usr, err = repository.GetUserById(targetId, getFull)
 	if err != nil {
 		return usr, http.StatusNotFound
 	}
@@ -108,6 +106,10 @@ func UpdateUserProfile(userID int, r *http.Request) (model.User, string, int) {
 		About:     r.FormValue("about"),
 	}
 
+	if r.FormValue("is_public") == "true" {
+		updateData.IsPublic = true
+	}
+
 	if updateData.Nickname == "null" {
 		updateData.Nickname = ""
 	}
@@ -172,4 +174,35 @@ func uploadAvatar(file multipart.File, header *multipart.FileHeader) (sql.NullSt
 	//fmt.Println("Avatar uploaded succesfully")
 
 	return avatarPath, nil
+}
+
+func GetFollowSatatus(userId, targetId int) (string, int) {
+
+	if userId == targetId {
+		return "me", http.StatusOK
+	}
+
+	isPublic, statusCode := repository.ProfilePrivacyByUserId(targetId)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		return "", statusCode
+	}
+
+	approval, statusCode := repository.FollowApproval(userId, targetId)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		return "", statusCode
+	}
+
+	if approval == "accepted" { // no difference between private and public profile
+		return "accepted", http.StatusOK
+	}
+
+	if approval == "pending" { // always private profile
+		return "pending", http.StatusOK
+	}
+
+	// no difference between declined and no status
+	if isPublic {
+		return "not following public", http.StatusOK
+	}
+	return "not following private", http.StatusOK
 }

@@ -2,18 +2,18 @@
 
 -- Insert users (14 columns, all specified)
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, avatar_path, nickname, about_me, is_public, created_at, updated_at, updated_by, status) VALUES
-('emma.bauer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Emma', 'Bauer', '1993-03-22', NULL, 'EmB', 'Loves painting and coffee shops.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('liam.muller@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Liam', 'Müller', '1987-09-14', NULL, 'LiamM', 'Avid cyclist and tech enthusiast.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('sofia.vogel@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Sofia', 'Vogel', '1995-06-30', NULL, 'Sofi', 'Enjoys yoga and travel.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('noah.fischer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Noah', 'Fischer', '1990-12-05', NULL, 'NoahF', 'Music lover and amateur chef.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('olivia.schreiber@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Olivia', 'Schreiber', '1992-08-17', NULL, 'Liv', 'Bookworm and nature enthusiast.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('luca.klein@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Luca', 'Klein', '1989-04-11', NULL, 'LucaK', 'Gamer and coffee addict.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('mia.wagner@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Mia', 'Wagner', '1997-01-25', NULL, 'MiaW', 'Aspiring photographer.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('elias.schmidt@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Elias', 'Schmidt', '1986-10-03', NULL, 'Eli', 'Hiker and history buff.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('lena.herrmann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Lena', 'Herrmann', '1994-07-19', NULL, 'LenaH', 'Loves baking and gardening.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('finn.zimmermann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Finn', 'Zimmermann', '1991-11-08', NULL, 'FinnZ', 'Tech geek and sci-fi fan.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('amina.ali@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Amina', 'Ali', '1990-05-15', NULL, NULL, NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('yusuf.kamau@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Yusuf', 'Kamau', '1988-11-20', NULL, 'Yus', 'Loves hiking and photography.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('emma.bauer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Emma', 'Bauer', '1993-03-22', 'avatars/1747642156208195000.jpeg', 'EmB', 'Loves painting and coffee shops.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('liam.muller@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Liam', 'Müller', '1987-09-14', 'avatars/1747642184916489000.webp', 'LiamM', 'Avid cyclist and tech enthusiast.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('sofia.vogel@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Sofia', 'Vogel', '1995-06-30', 'avatars/1747642206647198000.jpeg', 'Sofi', 'Enjoys yoga and travel.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('noah.fischer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Noah', 'Fischer', '1990-12-05', 'avatars/1747642227982390000.jpeg', 'NoahF', 'Music lover and amateur chef.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('olivia.schreiber@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Olivia', 'Schreiber', '1992-08-17', 'avatars/1747642249397877000.webp', 'Liv', 'Bookworm and nature enthusiast.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('luca.klein@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Luca', 'Klein', '1989-04-11', 'avatars/1747642275289046000.webp', 'LucaK', 'Gamer and coffee addict.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('mia.wagner@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Mia', 'Wagner', '1997-01-25', 'avatars/1747642297774998000.jpeg', 'MiaW', 'Aspiring photographer.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('elias.schmidt@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Elias', 'Schmidt', '1986-10-03', 'avatars/1747642317912843000.jpeg', 'Eli', 'Hiker and history buff.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('lena.herrmann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Lena', 'Herrmann', '1994-07-19', 'avatars/1747642338716395000.jpeg', 'LenaH', 'Loves baking and gardening.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('finn.zimmermann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Finn', 'Zimmermann', '1991-11-08', 'avatars/1747642362945352000.jpeg', 'FinnZ', 'Tech geek and sci-fi fan.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('amina.ali@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Amina', 'Ali', '1990-05-15', 'avatars/1747642384091203000.jpeg', NULL, NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('yusuf.kamau@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Yusuf', 'Kamau', '1988-11-20', 'avatars/1747642408504644000.jpeg', 'Yus', 'Loves hiking and photography.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('aziz.bek@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Aziz', 'Bek', '1985-07-10', NULL, 'AzizB', NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('zara.khan@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Zara', 'Khan', '1996-12-25', NULL, NULL, 'Enjoys reading and learning new languages.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable');
 
@@ -65,6 +65,7 @@ INSERT INTO follow_requests (follower_id, followed_id, approval_status, created_
 (11, 8, 'pending', CURRENT_TIMESTAMP),
 (13, 5, 'accepted', CURRENT_TIMESTAMP),
 (1, 9, 'pending', CURRENT_TIMESTAMP),
+(11, 13, 'accepted', CURRENT_TIMESTAMP),
 (3, 11, 'accepted', CURRENT_TIMESTAMP);
 
 -- Insert 15 groups (7 columns)

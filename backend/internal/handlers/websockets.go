@@ -34,7 +34,7 @@ func HandleWSConnections(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := repository.GetUserById(userID)
+	user, err := repository.GetUserById(userID, true)
 	if err != nil {
 		fmt.Println("Error getting user in ws connections:", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -84,7 +84,7 @@ func HandleWSConnections(w http.ResponseWriter, r *http.Request) {
 				})
 			}
 		case "ping":
-			fmt.Println("Connetion", userKey, "pinged")
+			fmt.Println("Connection", userKey, "pinged")
 		case "chat_message":
 			fmt.Println("Got chat message:", msg)
 			// TODO: store message into database and (if possible?) send to other user.

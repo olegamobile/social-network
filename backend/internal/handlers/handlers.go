@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +42,7 @@ func HandleMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := repository.GetUserById(userID)
+	user, err := repository.GetUserById(userID, true)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
@@ -119,13 +121,20 @@ func GetGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleUserByID(w http.ResponseWriter, r *http.Request) {
-	_, err := service.ValidateSession(r)
+	userId, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	usr, statusCode := service.UserById(r)
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/users/")
+	targetId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	usr, statusCode := service.UserById(userId, targetId)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // Error code
 		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
@@ -174,6 +183,58 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(posts)
 }
 
+func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	posts, err := repository.GetFeedPosts(userId)
+	if err != nil {
+		//http.Error(w, "Unauthorized or failed to fetch feed", http.StatusUnauthorized)
+		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+}
+
+func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/posts/")
+	targetId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	viewPosts, err := repository.ViewFullProfileOrNot(userId, targetId)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	var posts []model.Post
+
+	if viewPosts {
+		posts, err = repository.GetPostsByUserId(targetId)
+		if err != nil {
+			http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+}
+
 // handleCreatePost adds a post to the database and returns the new one
 func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -195,4 +256,36 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
+}
+
+func GetSuggestedUsers(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	suggestions, err := repository.GetSuggestedUsers(userId)
+	if err != nil {
+		http.Error(w, "Failed to fetch suggestions", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(suggestions)
+}
+
+func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := repository.GetGroupsByUserId(userId)
+	if err != nil {
+		http.Error(w, "Failed to fetch groups", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(groups)
 }

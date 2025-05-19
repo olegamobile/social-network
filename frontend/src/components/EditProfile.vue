@@ -19,6 +19,15 @@
             <textarea v-model="form.about" placeholder="About Me (Optional)" rows="3"
                 class="w-full px-4 py-2 border border-nordic-light rounded-md focus:outline-none focus:ring focus:ring-gray-200 resize-none text-nordic-dark"></textarea>
 
+            <div>
+                <label for="privacy" class="block text-sm font-medium text-nordic-light mb-1">Profile Privacy</label>
+                <select v-model="form.isPublic" id="privacy"
+                    class="w-full px-4 py-2 border border-nordic-light rounded-md focus:outline-none focus:ring focus:ring-gray-200 text-nordic-dark">
+                    <option :value="true">Public</option>
+                    <option :value="false">Private</option>
+                </select>
+            </div>
+
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-nordic-light">Avatar/Image (Optional):</label>
                 <input type="file" @change="handleFileUpload" accept="image/*"
@@ -36,6 +45,9 @@
                     <span class="block text-sm font-medium text-nordic-light">No current avatar</span>
                 </div>
             </div>
+
+
+
 
             <button type="submit"
                 class="w-full bg-nordic-primary-accent text-white py-2 px-4 rounded-md hover:bg-nordic-secondary-accent transition">Save
@@ -64,6 +76,7 @@ const form = ref({
     about: '',
     avatar: null,
     avatarUrl: null,
+    isPublic: false,
 });
 
 const error = ref(null);
@@ -97,6 +110,7 @@ const fetchProfile = async () => {
             nickname: data.username || '',
             about: data.about_me || '',
             avatarUrl: data.avatar_url || null,
+            isPublic: data.is_public ?? false,
             password: '', // Don't pre-fill password
         };
 
@@ -118,6 +132,7 @@ const updateProfile = async () => {
             dob: form.value.dob,
             nickname: form.value.nickname || null,
             about: form.value.about || null,
+            is_public: form.value.isPublic,
         };
 
         const formData = new FormData();
@@ -126,7 +141,6 @@ const updateProfile = async () => {
         }
 
         if (form.value.avatar) {
-            //formData.append('avatar', form.value.avatar);
             const processedAvatar = await processAvatarImage(form.value.avatar);
             formData.append('avatar', processedAvatar);
         } else if (form.value.avatarUrl === null) {
