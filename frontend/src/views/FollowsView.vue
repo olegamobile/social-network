@@ -24,7 +24,7 @@
           </div>
         </div>
 
-        <div v-if="searchResults.length > 0" class="mb-8">
+        <div v-if="searchResults && searchResults.length > 0" class="mb-8">
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Search Results</h3>
           <ul class="space-y-2">
             <li v-for="user in searchResults" :key="user.id"

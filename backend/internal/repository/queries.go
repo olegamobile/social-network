@@ -271,6 +271,95 @@ func GetAllPosts() ([]model.Post, error) {
 	return posts, nil
 }
 
+func GetFeedPosts(userID int) ([]model.Post, error) {
+	query := `
+    -- Regular posts (user + followed users)
+    SELECT DISTINCT
+        p.id,
+        p.user_id,
+        u.first_name,
+        u.last_name,
+        u.avatar_path,
+        p.content,
+        p.image_path,
+        NULL AS group_id,
+        NULL AS group_name,
+        p.created_at AS created_at_sort
+    FROM posts p
+    JOIN users u ON p.user_id = u.id
+    WHERE p.status = 'enable'
+      AND (
+          p.user_id = ?
+          OR p.user_id IN (
+              SELECT followed_id FROM follow_requests
+              WHERE follower_id = ? AND approval_status = 'accepted'
+          )
+    )
+    
+    UNION ALL
+    
+    -- Group posts (groups the user belongs to)
+    SELECT DISTINCT
+        gp.id,
+        gp.user_id,
+        u.first_name,
+        u.last_name,
+        u.avatar_path,
+        gp.content,
+        gp.image_path,
+        gp.group_id,
+        g.title AS group_name,
+        gp.created_at AS created_at_sort
+    FROM group_posts gp
+    JOIN group_members gm ON gp.group_id = gm.group_id
+        AND gm.user_id = ? AND gm.approval_status = 'accepted'
+    JOIN groups g ON gp.group_id = g.id
+    JOIN users u ON gp.user_id = u.id
+    WHERE gp.status = 'enable'
+    
+    ORDER BY created_at_sort DESC;`
+
+	rows, err := database.DB.Query(query, userID, userID, userID)
+	if err != nil {
+		fmt.Println("query err at GetFeedPosts:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []model.Post
+	for rows.Next() {
+		var post model.Post
+		var firstname, lastname string
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(
+			&post.ID,
+			&post.UserID,
+			&firstname,
+			&lastname,
+			&avatarUrl,
+			&post.Content,
+			&post.ImagePath,
+			&post.GroupID,
+			&post.GroupName,
+			&post.CreatedAt,
+		)
+		if err != nil {
+			fmt.Println("scan rows err at GetFeedPosts:", err)
+			return nil, err
+		}
+		if avatarUrl.Valid {
+			post.AvatarPath = avatarUrl.String
+		} else {
+			post.AvatarPath = ""
+		}
+		post.Username = firstname + " " + lastname
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
 func GetPostsByUserId(targetId int) ([]model.Post, error) {
 	rows, err := database.DB.Query(`
 	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
@@ -344,6 +433,7 @@ func SearchUsers(query string) ([]model.User, error) {
 		q, q, q,
 	)
 	if err != nil {
+		fmt.Println("query error at SearchUsers:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -355,8 +445,9 @@ func SearchUsers(query string) ([]model.User, error) {
 		var about sql.NullString
 		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl, u.IsPublic)
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl, &u.IsPublic)
 		if err != nil {
+			fmt.Println("scan error at SearchUsers:", err)
 			return nil, err
 		}
 		if nickname.Valid {

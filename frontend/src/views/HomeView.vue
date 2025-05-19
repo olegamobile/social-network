@@ -4,7 +4,7 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <FollowsInSidebar :userId="user.id" /> <!-- not user.value.id ! -->
+                <FollowsInSidebar :userId="user.id" v-if="user"/> <!-- not user.value.id ! -->
                 <br/>
                 <GroupsInSidebar/>
             </template>
@@ -46,14 +46,16 @@ const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
 }
 
-async function getAllPosts() {
+async function getHomeFeed() {
     try {
-        const res = await fetch(`${apiUrl}/api/posts`, {
+        //const res = await fetch(`${apiUrl}/api/posts`, {
+        const res = await fetch(`${apiUrl}/api/homefeed`, {
             credentials: 'include' // This sends the session cookie with the request
         });
 
         if (res.status === 401) {
             // Session is invalid — logout and redirect
+            console.log("homefeed returned 401 status")
             errorStore.setError('Session Expired', 'Your session has expired. Please log in again.');
             logout(); // your logout function
             router.push('/login');
@@ -62,7 +64,11 @@ async function getAllPosts() {
 
         if (!res.ok) {
             // Handle other non-successful HTTP statuses (e.g., 400, 404, 500)
-            const errorData = await res.json().catch(() => ({ message: 'Failed to fetch posts and parse error.' }));
+            //const errorData = await res.json().catch(() => ({ message: 'Failed to fetch posts and parse error.' }));
+
+            const errorData = await res.json()
+            console.log("homefeed returned some error status:", res.status)
+            console.log("err data:", errorData)
             throw new Error(errorData.message || `HTTP error ${res.status}`);
         }
 
@@ -75,7 +81,7 @@ async function getAllPosts() {
 }
 
 onMounted(()=>{
-    getAllPosts()
+    getHomeFeed()
 })
 </script>
 

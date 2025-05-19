@@ -183,6 +183,24 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(posts)
 }
 
+func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	posts, err := repository.GetFeedPosts(userId)
+	if err != nil {
+		//http.Error(w, "Unauthorized or failed to fetch feed", http.StatusUnauthorized)
+		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+}
+
 func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)
 	if err != nil {
