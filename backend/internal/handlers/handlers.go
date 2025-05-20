@@ -90,23 +90,7 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(usr)
 }
 
-/* func GetUsers(w http.ResponseWriter, r *http.Request) {
-	_, err := service.ValidateSession(r)
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	users, err := repository.GetAllUsers()
-	if err != nil {
-		http.Error(w, "Users not found", http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(users)
-} */
-
-func GetGroups(w http.ResponseWriter, r *http.Request) {
+/* func GetGroups(w http.ResponseWriter, r *http.Request) {
 	_, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -116,6 +100,46 @@ func GetGroups(w http.ResponseWriter, r *http.Request) {
 	groups, err := repository.GetAllGroups()
 	if err != nil {
 		http.Error(w, "Users not found", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(groups)
+} */
+
+func HandleSuggestGroups(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := repository.GetRecommendedGroups(userId)
+	if err != nil {
+		http.Error(w, "Could not fetch recommended groups", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(groups)
+}
+
+func SearchGroups(w http.ResponseWriter, r *http.Request) {
+	_, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		json.NewEncoder(w).Encode([]model.Group{}) // Return empty array for empty query
+		return
+	}
+
+	groups, err := repository.SearchGroups(query)
+	if err != nil {
+		http.Error(w, "Error searching groups", http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(groups)
@@ -166,23 +190,6 @@ func SearchUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(users)
 }
-
-/* func GetPosts(w http.ResponseWriter, r *http.Request) {
-	_, err := service.ValidateSession(r)
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	posts, err := repository.GetAllPosts()
-	if err != nil {
-		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
-} */
 
 func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)

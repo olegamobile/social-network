@@ -4,7 +4,7 @@
 
     <TwoColumnLayout>
       <template #sidebar>
-        <FollowsInSidebar :userId="user.id"/>
+        <FollowsInSidebar :userId="user.id" />
         <br />
         <RequestsInSidebar />
       </template>
@@ -12,6 +12,7 @@
       <template #main>
         <h2 class="text-3xl font-bold text-nordic-dark mb-6">Explore Users</h2>
 
+        <!-- search box -->
         <div class="max-w-lg w-full lg:max-w-xs mb-6">
           <label for="search-users" class="sr-only">Search</label>
           <div class="relative">
@@ -24,6 +25,7 @@
           </div>
         </div>
 
+        <!-- search results -->
         <div v-if="searchResults && searchResults.length > 0" class="mb-8">
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Search Results</h3>
           <ul class="space-y-2">
@@ -37,6 +39,7 @@
         </div>
         <p v-else-if="searchInitiated" class="text-nordic-light italic mb-6">No users found.</p>
 
+        <!-- user suggestions -->
         <div>
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Suggested Users</h3>
           <ul v-if="users.length > 0" class="space-y-2">
@@ -66,6 +69,7 @@ import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
 import RequestsInSidebar from '@/components/RequestsInSidebar.vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia';
+import throttle from 'lodash.throttle';
 
 const apiUrl = import.meta.env.VITE_API_URL
 const errorStore = useErrorStore()
@@ -78,7 +82,7 @@ const { logout } = useAuth()
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 
-async function searchUsers() {
+async function _searchUsers() {
   searchInitiated.value = true;
   searchResults.value = [];
 
@@ -136,6 +140,8 @@ async function fetchUserSuggestions() {
     router.push('/error')
   }
 }
+
+const searchUsers = throttle(_searchUsers, 1000)
 
 onMounted(() => {
   fetchUserSuggestions()

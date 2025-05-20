@@ -20,7 +20,9 @@ func setHandlers() {
 	//http.HandleFunc("/api/posts", middleware.WithCORS(handlers.GetPosts))
 	http.HandleFunc("/api/posts/", middleware.WithCORS(handlers.HandlePostsByUserId))
 	http.HandleFunc("/api/homefeed", middleware.WithCORS(handlers.GetFeedPosts))
-	http.HandleFunc("/api/groups", middleware.WithCORS(handlers.GetGroups))
+	//http.HandleFunc("/api/groups", middleware.WithCORS(handlers.GetGroups))
+	http.HandleFunc("/api/suggestgroups", middleware.WithCORS(handlers.HandleSuggestGroups))
+	http.HandleFunc("/api/groups/search", middleware.WithCORS(handlers.SearchGroups))
 	http.HandleFunc("/api/groups/", middleware.WithCORS(handlers.HandleGroupsByUserId)) // groups with user id
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
 	http.HandleFunc("/api/register", middleware.WithCORS(handlers.HandleRegister))

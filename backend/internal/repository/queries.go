@@ -178,10 +178,10 @@ func GetUserById(id int, viewFull bool) (model.User, error) {
 	return users, nil
 } */
 
-func GetAllGroups() ([]model.Group, error) {
+/* func GetAllGroups() ([]model.Group, error) {
 	rows, err := database.DB.Query(`
-		SELECT id, title, description 
-		FROM groups 
+		SELECT id, title, description
+		FROM groups
 		WHERE status = 'enable'
 	`)
 	if err != nil {
@@ -200,7 +200,7 @@ func GetAllGroups() ([]model.Group, error) {
 	}
 
 	return groups, nil
-}
+} */
 
 func GetGroupsByUserId(userId int) ([]model.Group, error) {
 	// group info from groups where that id can be found on same row as userId on group_members
@@ -643,4 +643,82 @@ AND u.id IN (
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func GetRecommendedGroups(userID int) ([]model.Group, error) {
+	query := `
+		SELECT DISTINCT g.id, g.title, g.description
+		FROM groups g
+		JOIN group_members gm ON g.id = gm.group_id
+		WHERE gm.approval_status = 'accepted'
+		  AND gm.user_id IN (
+		      SELECT followed_id FROM follow_requests
+		      WHERE follower_id = ? AND approval_status = 'accepted'
+		      UNION
+		      SELECT follower_id FROM follow_requests
+		      WHERE followed_id = ? AND approval_status = 'accepted'
+		      UNION
+		      SELECT gm2.user_id
+		      FROM group_members gm1
+		      JOIN group_members gm2 ON gm1.group_id = gm2.group_id
+		      WHERE gm1.user_id = ? AND gm1.approval_status = 'accepted'
+		        AND gm2.approval_status = 'accepted'
+		        AND gm2.user_id != ?
+		  )
+		  AND g.status = 'enable'
+		  AND g.id NOT IN (
+		      SELECT group_id FROM group_members
+		      WHERE user_id = ? AND approval_status = 'accepted'
+		  );
+	`
+
+	rows, err := database.DB.Query(query, userID, userID, userID, userID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description); err != nil {
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
+
+func SearchGroups(query string) ([]model.Group, error) {
+	searchTerm := "%" + query + "%"
+	sqlQuery := `
+		SELECT id, title, description
+		FROM groups
+		WHERE status = 'enable'
+		  AND (title LIKE ? OR description LIKE ?)
+		ORDER BY
+		  CASE
+		    WHEN title LIKE ? THEN 0
+		    ELSE 1
+		  END,
+		  title ASC;
+	`
+
+	rows, err := database.DB.Query(sqlQuery, searchTerm, searchTerm, searchTerm)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		if err := rows.Scan(&g.ID, &g.Title, &g.Description); err != nil {
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
 }
