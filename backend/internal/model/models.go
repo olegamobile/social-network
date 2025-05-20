@@ -71,3 +71,21 @@ type Event struct {
 	Description string `json:"description"`
 	DateTime    string `json:"datetime"`
 }
+
+type Notification struct {
+	ID            int     `json:"id"`
+	Type          string  `json:"type"` // 'follow_request', 'group_invitation', 'group_join_request', 'event_creation'
+	UserID        int     `json:"user_id"`
+	SenderID      *int    `json:"sender_id,omitempty"`
+	SenderName    *string `json:"sender_name,omitempty"`
+	FollowReqID   *int    `json:"follow_req_id,omitempty"`
+	GroupInviteID *int    `json:"group_invite_id,omitempty"`
+	GroupID       *int    `json:"group_id,omitempty"`
+	GroupTitle    *string `json:"group_title,omitempty"`
+	EventID       *int    `json:"event_id,omitempty"`
+	EventTitle    *string `json:"event_title,omitempty"`
+	Content       *string `json:"content,omitempty"`
+	IsRead        *bool   `json:"is_read,omitempty"`
+	Pending       bool    `json:"pending"`
+	CreatedAt     string  `json:"created_at"`
+}
