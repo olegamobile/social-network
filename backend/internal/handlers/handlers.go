@@ -328,20 +328,33 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i := range notifications {
+		var pending bool
+		var err error
+
 		switch notifications[i].Type {
 		case "follow_request":
-			notifications[i].Pending = repository.CheckFollowRequestStatus(notifications[i].ID)
+			pending, err = repository.CheckFollowRequestStatus(*notifications[i].FollowReqID)
 		case "group_invitation":
-			notifications[i].Pending = repository.CheckInvitationStatus(notifications[i].ID)
+			pending, err = repository.CheckInvitationStatus(*notifications[i].GroupInviteID)
 		case "group_join_request":
-			notifications[i].Pending = repository.CheckJoinRequestStatus(notifications[i].UserID, notifications[i].ID)
+			pending, err = repository.CheckJoinRequestStatus(notifications[i].UserID, *notifications[i].GroupID)
 		case "event_creation":
-			notifications[i].Pending = repository.CheckEventInvitationStatus(notifications[i].UserID, notifications[i].ID)
+			pending, err = repository.CheckEventInvitationStatus(notifications[i].UserID, *notifications[i].EventID)
 		}
+
+		if err != nil {
+			http.Error(w, "Failed to check notification status", http.StatusInternalServerError)
+			return
+		}
+		notifications[i].Pending = pending
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(notifications)
+	if err := json.NewEncoder(w).Encode(notifications); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
 }
 
 // GetNotificationByID handles GET /api/notifications/{id} and returns a single notification for the authenticated user.
