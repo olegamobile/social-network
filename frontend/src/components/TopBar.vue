@@ -55,9 +55,9 @@
                     <router-link to="/notifications" class="top-bar-button relative" data-title="Notifications"
                         aria-label="Notifications">
                         <span class="sr-only">View notifications</span>
-                        <i class="fas fa-bell"></i>
+                        <i class="fas fa-bell bell"></i>
                         <span v-if="newNotificationsCount > 0"
-                            class="absolute top-0 right-0 block h-5 w-5 rounded-full ring-1 ring-white bg-red-500 text-white text-xs flex items-center justify-center">
+                            class="absolute top-0 right-0 block h-4 w-4 rounded-full ring-1 ring-white bg-red-500 text-white text-xs flex items-center justify-center">
                             {{ newNotificationsCount }}
                         </span>
                     </router-link>
@@ -131,7 +131,7 @@
                 <router-link to="/notifications" class="top-bar-button block relative"
                     :class="{ 'active': $route.path === '/notifications' }" @click="toggleMobileMenu"
                     data-title="Notifications" aria-label="Notifications">
-                    <i class="fas fa-bell"></i>View notifications
+                    <i class="fas fa-bell bell"></i>View notifications
                     <span v-if="newNotificationsCount > 0"
                         class="absolute top-0 left-6 block h-5 w-5 rounded-full ring-1 ring-white bg-red-500 text-white text-xs flex items-center justify-center">
                         {{ newNotificationsCount }}
@@ -190,7 +190,7 @@ const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 const { user } = storeToRefs(userStore); // storeToRefs() ensures user is reactive when destructured
-const apiUrl = import.meta.env.VITE_API_URL || '/api';
+const apiUrl = import.meta.env.VITE_API_URL;
 const isLoginPage = computed(() => route.path === '/login');
 const isRegisterPage = computed(() => route.path === '/register');
 const { logout } = useAuth();
@@ -198,7 +198,7 @@ const { logout } = useAuth();
 // Fetch new notifications count on component mount
 async function fetchNewNotificationsCount() {
     try {
-        const response = await fetch(`${apiUrl}/notifications/new`, {
+        const response = await fetch(`${apiUrl}/api/notifications/new`, {
             credentials: 'include'
         });
         if (response.ok) {
@@ -350,5 +350,9 @@ const setupWebSocket = () => {
 .router-link-active.text-link,
 .router-link-active.navbar-link {
     background-color: #555;
+}
+
+.bell {
+        margin-right: 0px !important;
 }
 </style>
