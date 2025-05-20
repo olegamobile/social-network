@@ -62,3 +62,12 @@ type FollowRequest struct {
 	TargetID int    `json:"target_id"`
 	Action   string `json:"action"` // "request", "follow", "unfollow"
 }
+
+type Event struct {
+	ID          int    `json:"id"`
+	Group       string `json:"group"`
+	GroupID     int    `json:"group_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	DateTime    string `json:"datetime"`
+}

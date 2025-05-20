@@ -64,10 +64,11 @@ const errorStore = useErrorStore()
 const apiUrl = import.meta.env.VITE_API_URL
 const group = ref(null)
 const posts = ref([])
+const members = ref([])
 
 const isMember = ref(true) // Mock check
 const showJoinLeaveButton = ref[true]
-const events = [
+const events = ref([
     {
         "id": 1,
         "title": "party",
@@ -81,20 +82,9 @@ const events = [
         "title": "dull boy",
         "time": "internally"
     }
-]
-
-const members = ref([
-    {
-        "id": 1,
-        "name": "Mellow Cat",
-    }, {
-        "id": 2,
-        "title": "Jock Strap",
-    }, {
-        "id": 3,
-        "title": "Heidi Woo",
-    }
 ])
+
+
 
 function requestMembership() {
     alert('Membership requested!')
@@ -141,7 +131,7 @@ async function getGroup(groupId) {
 
 async function getPosts(groupId) {        // Fetch and filter posts
     try {
-        const postsRes = await fetch(`${apiUrl}/api/groupposts/${groupId}`, {     //
+        const postsRes = await fetch(`${apiUrl}/api/group/posts/${groupId}`, {     //
             credentials: 'include'
         })
 
@@ -160,7 +150,7 @@ async function getPosts(groupId) {        // Fetch and filter posts
 
 async function getMembers(groupId) {        // Fetch and filter posts
     try {
-        const membsRes = await fetch(`${apiUrl}/api/groupmembers/${groupId}`, {     //
+        const membsRes = await fetch(`${apiUrl}/api/group/members/${groupId}`, {     //
             credentials: 'include'
         })
 
@@ -177,9 +167,31 @@ async function getMembers(groupId) {        // Fetch and filter posts
     }
 }
 
+async function getEvents(groupId) {        // Fetch and filter posts
+    try {
+        const eventsRes = await fetch(`${apiUrl}/api/group/events/${groupId}`, {     //
+            credentials: 'include'
+        })
+
+        if (!eventsRes.ok) {
+            throw new Error(`Failed to fetch posts: ${eventsRes.status}`)
+        }
+        const groupEvs = await eventsRes.json()
+        if (groupEvs) events.value = groupEvs
+
+        console.log("events gotten:", events.value)
+    } catch (error) {
+        console.log("error fetching group events:", error)
+        errorStore.setError('Error', 'Something went wrong while loading group events data.')
+        router.push('/error')
+        return
+    }
+}
+
 onMounted(() => {
     getGroup(route.params.id)
     getPosts(route.params.id)
     getMembers(route.params.id)
+    getEvents(route.params.id)
 })
 </script>

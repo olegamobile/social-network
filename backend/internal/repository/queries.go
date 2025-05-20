@@ -832,3 +832,30 @@ func GetGroupMembersByGroupId(groupId int) ([]model.User, error) {
 
 	return users, nil
 }
+
+func GetGroupEventsByGroupId(groupId int) ([]model.Event, error) {
+	rows, err := database.DB.Query(`
+	SELECT e.id, g.title, e.group_id, e.title, e.description, e.event_datetime
+	FROM events e
+	JOIN groups g ON e.group_id = g.id
+	WHERE e.group_id = ?;`, groupId)
+
+	if err != nil {
+		fmt.Println("rows error at GetGroupMembersByGroupId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []model.Event
+	for rows.Next() {
+		var e model.Event
+		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.Title, &e.Description, &e.DateTime)
+		if err != nil {
+			fmt.Println("scan error at GetPostsByUserId", err)
+			return nil, err
+		}
+		events = append(events, e)
+	}
+
+	return events, nil
+}
