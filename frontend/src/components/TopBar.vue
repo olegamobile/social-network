@@ -3,7 +3,6 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-wrap items-center justify-between py-4">
                 <div class="flex items-center">
-
                     <!-- title -->
                     <router-link to="/" class="flex-shrink-0 text-2xl font-bold text-nordic-primary-accent"
                         aria-label="Home">
@@ -52,13 +51,15 @@
                 </div>
 
                 <!-- notifications and profile link -->
-                <div class="hidden md:flex md:items-center md:ml-4 space-x-2" v-if="!isLoginPage & !isRegisterPage">
+                <div class="hidden md:flex md:items-center md:ml-4 space-x-2" v-if="!isLoginPage && !isRegisterPage">
                     <router-link to="/notifications" class="top-bar-button relative" data-title="Notifications"
                         aria-label="Notifications">
                         <span class="sr-only">View notifications</span>
                         <i class="fas fa-bell"></i>
-                        <span
-                            class="absolute top-2 right-3 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
+                        <span v-if="newNotificationsCount > 0"
+                            class="absolute top-0 right-0 block h-5 w-5 rounded-full ring-1 ring-white bg-red-500 text-white text-xs flex items-center justify-center">
+                            {{ newNotificationsCount }}
+                        </span>
                     </router-link>
 
                     <router-link v-if="user" :to="`/profile/${user.id}`" class="top-bar-button"
@@ -94,16 +95,15 @@
                         aria-label="Home">Register</router-link>
                 </div>
                 <div class="hidden md:flex nav-icons" v-if="isRegisterPage">
-                    <router-link to="/login" class="text-nordic-light" data-title="Home" aria-label="Home">Login</router-link>
+                    <router-link to="/login" class="text-nordic-light" data-title="Home"
+                        aria-label="Home">Login</router-link>
                 </div>
-
             </div>
         </div>
 
         <!-- mobile menu -->
         <div class="md:hidden" :class="{ 'hidden': !isMobileMenuOpen }" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" v-if="!isLoginPage & !isRegisterPage">
-
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" v-if="!isLoginPage && !isRegisterPage">
                 <!-- home, follows, groups, chats and events links -->
                 <router-link to="/" class="top-bar-button block" :class="{ 'active': $route.path === '/' }"
                     @click="toggleMobileMenu" data-title="Home" aria-label="Home">
@@ -132,14 +132,16 @@
                     :class="{ 'active': $route.path === '/notifications' }" @click="toggleMobileMenu"
                     data-title="Notifications" aria-label="Notifications">
                     <i class="fas fa-bell"></i>View notifications
-                    <span class="absolute top-1 left-6 block h-2 w-2 rounded-full ring-1 ring-white bg-red-500"></span>
+                    <span v-if="newNotificationsCount > 0"
+                        class="absolute top-0 left-6 block h-5 w-5 rounded-full ring-1 ring-white bg-red-500 text-white text-xs flex items-center justify-center">
+                        {{ newNotificationsCount }}
+                    </span>
                 </router-link>
 
                 <!-- profile -->
                 <router-link v-if="user" :to="`/profile/${user.id}`" class="top-bar-button"
                     :class="{ 'active': $route.path === '/profile/' + user?.id }" data-title="Your Profile"
                     aria-label="Your Profile">
-                    <!-- <i class="fas fa-user"></i> -->
                     <div class="profile-avatar">
                         <img v-if="user.avatar_url" :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
                             class="h-full w-full object-cover rounded-full border border-nordic-light" />
@@ -158,37 +160,89 @@
 
             <!-- link to register or login -->
             <div class="nav-icons" v-if="isLoginPage">
-                <router-link to="/register" class="text-nordic-light" data-title="Home" aria-label="Home">Register</router-link>
+                <router-link to="/register" class="text-nordic-light" data-title="Home"
+                    aria-label="Home">Register</router-link>
             </div>
             <div class="nav-icons" v-if="isRegisterPage">
-                <router-link to="/login" class="text-nordic-light" data-title="Home" aria-label="Home">Login</router-link>
+                <router-link to="/login" class="text-nordic-light" data-title="Home"
+                    aria-label="Home">Login</router-link>
             </div>
         </div>
-
     </nav>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
+import { useErrorStore } from '@/stores/error';
 import { useAuth } from '@/composables/useAuth';
 
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
+const errorStore = useErrorStore();
 const isMobileMenuOpen = ref(false); // Controls mobile menu visibility
+const newNotificationsCount = ref(0); // Reactive state for notification count
 
 const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
-const { user } = storeToRefs(userStore)  // storeToRefs() ensures user is reactive when destructured
-const apiUrl = import.meta.env.VITE_API_URL || '/api'
+const { user } = storeToRefs(userStore); // storeToRefs() ensures user is reactive when destructured
+const apiUrl = import.meta.env.VITE_API_URL || '/api';
 const isLoginPage = computed(() => route.path === '/login');
 const isRegisterPage = computed(() => route.path === '/register');
-const { logout } = useAuth()
+const { logout } = useAuth();
 
+// Fetch new notifications count on component mount
+async function fetchNewNotificationsCount() {
+    try {
+        const response = await fetch(`${apiUrl}/notifications/new`, {
+            credentials: 'include'
+        });
+        if (response.ok) {
+            const data = await response.json();
+            newNotificationsCount.value = data.count || 0; // Assuming API returns { count: number }
+        } else {
+            errorStore.setError('Error', 'Failed to load new notifications count.');
+        }
+    } catch (error) {
+        errorStore.setError('Error', 'Failed to load new notifications count.');
+    }
+}
+
+onMounted(() => {
+    fetchNewNotificationsCount()
+})
+
+
+// Placeholder for WebSocket setup
+// This can be implemented later when WebSocket is available
+const setupWebSocket = () => {
+    // Example WebSocket connection (uncomment and configure when ready)
+    /*
+    const ws = new WebSocket(`ws://${apiUrl.replace('http', 'ws')}/notifications`);
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        newNotificationsCount.value = data.count || 0; // Update count from WebSocket
+    };
+    ws.onopen = () => {
+        console.log('WebSocket connected');
+    };
+    ws.onerror = (error) => {
+        errorStore.setError('Error', 'WebSocket connection failed.');
+    };
+    ws.onclose = () => {
+        console.log('WebSocket closed');
+    };
+    */
+};
+
+// Call WebSocket setup when ready (uncomment when implementing)
+// onMounted(() => {
+//     setupWebSocket();
+// });
 </script>
 
 <style scoped>
