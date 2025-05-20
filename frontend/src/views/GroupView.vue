@@ -5,7 +5,7 @@
         <TwoColumnLayout>
             <template #sidebar>
 
-                <!-- join/leaave button -->
+                <!-- join/leave button -->
                 <div v-if="showJoinLeaveButton" class="mb-2">
                     <button @click="joinOrLeave" class="px-4 py-2 rounded text-white" :class="followButtonClass">
                         {{
@@ -65,25 +65,10 @@ const apiUrl = import.meta.env.VITE_API_URL
 const group = ref(null)
 const posts = ref([])
 const members = ref([])
+const events = ref([])
 
 const isMember = ref(true) // Mock check
 const showJoinLeaveButton = ref[true]
-const events = ref([
-    {
-        "id": 1,
-        "title": "party",
-        "time": "tomorrow"
-    }, {
-        "id": 2,
-        "title": "work",
-        "time": "forever"
-    }, {
-        "id": 3,
-        "title": "dull boy",
-        "time": "internally"
-    }
-])
-
 
 
 function requestMembership() {

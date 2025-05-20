@@ -110,8 +110,8 @@ func ViewFullGroupOrNot(userId, targetId int) (bool, error) {
 	FROM group_members 
 	WHERE group_id = ? AND user_id = ? AND approval_status = 'accepted' AND status = 'enable'`, targetId, userId).Scan(&grId)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return false, fmt.Errorf("target group not found")
+		if err == sql.ErrNoRows { // No membership found so no permission to view full group
+			return false, nil
 		}
 		return false, err
 	}

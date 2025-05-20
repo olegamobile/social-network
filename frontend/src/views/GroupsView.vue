@@ -34,7 +34,7 @@
                         </li>
                     </ul>
                 </div>
-                <p v-else-if="searchInitiated" class="text-nordic-light italic mb-6">No users found.</p>
+                <p v-else-if="searchInitiated" class="text-nordic-light italic mb-6">No groups found</p>
 
                 <!-- suggested groups -->
                 <div>
