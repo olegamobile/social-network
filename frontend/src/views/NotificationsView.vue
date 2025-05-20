@@ -5,37 +5,133 @@
         <TwoColumnLayout>
             <template #sidebar>
                 <h3 class="text-lg font-semibold">Notifications</h3>
-                <button @click="showCurrent = true" :class="{ active: showCurrent }">Current</button>
-                <button @click="showCurrent = false" :class="{ active: !showCurrent }">Old</button>
+                <button @click="showCurrent = true" :class="{ active: showCurrent }">
+                    Current ({{fetchedNotifications.filter(n => !n.is_read).length}})
+                </button>
+                <button @click="showCurrent = false" :class="{ active: !showCurrent }">
+                    Old ({{fetchedNotifications.filter(n => n.is_read).length}})
+                </button>
             </template>
 
             <template #main>
                 <h2 class="text-2xl font-bold mb-4">{{ showCurrent ? 'Current' : 'Old' }} Notifications</h2>
-                <NotificationsList :notifications="filteredNotifications" />
+                <NotificationsList :notifications="filteredNotifications" @close="handleClose" @accept="handleAccept"
+                    @decline="handleDecline" />
             </template>
         </TwoColumnLayout>
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import NotificationsList from '@/components/NotificationsList.vue'
+import { useErrorStore } from '@/stores/error'
+import { useAuth } from '@/composables/useAuth'
 
 const showCurrent = ref(true)
+const apiUrl = import.meta.env.VITE_API_URL
+const errorStore = useErrorStore()
+const router = useRouter()
+const { logout } = useAuth()
 
-const mockNotifications = ref([
-    { id: 1, text: "Omar accepted your follow request", isOld: false },
-    { id: 2, text: "There's a new event 'Graduation Party' in your group 'Batch of 2024", isOld: false },
-    { id: 3, text: "Dolgorsürengiin accepted your follow request", isOld: false },
-    { id: 4, text: "You were removed from the group 'Old Friends'", isOld: true },
-    { id: 5, text: "New message from Alex", isOld: true }
-])
+const fetchedNotifications = ref([])
 
 const filteredNotifications = computed(() =>
-    mockNotifications.value.filter(n => n.isOld !== showCurrent.value)
+    fetchedNotifications.value.filter(n => n.is_read !== showCurrent.value)
 )
+
+
+async function fetchNotifications() {
+    try {
+        const res = await fetch(`${apiUrl}/api/notifications`, {
+            credentials: 'include'
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to fetch notifications: ${res.status}`)
+
+        fetchedNotifications.value = await res.json()
+
+    } catch (err) {
+        errorStore.setError('Error', 'Something went wrong while fetching notifications.')
+        router.push('/error')
+    }
+}
+
+async function readNotification(id) {
+    try {
+        const res = await fetch(`${apiUrl}/api/notifications/${id}/read`, {
+            credentials: 'include'
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to mark notification ${id} as read: ${res.status}`)
+
+    } catch (err) {
+        errorStore.setError('Error', `Error while marking notification ${id} as read`)
+        router.push('/error')
+    }
+}
+
+async function approveFollowRequest(id, action) {
+    try {
+        const res = await fetch(`${apiUrl}/api/follow/requests/${id}/${action}`, {
+            credentials: 'include'
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to accept/decline follow request: ${res.status}`)
+
+    } catch (err) {
+        errorStore.setError('Error', `Error while accepting/declining follow request`)
+        router.push('/error')
+    }
+}
+
+
+onMounted(() => {
+    fetchNotifications()
+})
+
+
+function handleClose(id) {
+    const n = fetchedNotifications.value.find(n => n.id === id)
+    if (n) n.is_read = true
+    readNotification(n.id)
+}
+
+function handleAccept(id) {
+    const n = fetchedNotifications.value.find(n => n.id === id)
+    if (!n.is_read) n.is_read = true
+    readNotification(n.id)
+    approveFollowRequest(n.follow_req_id, 'accept')
+}
+
+function handleDecline(id) {
+    const n = fetchedNotifications.value.find(n => n.id === id)
+    if (!n.is_read) n.is_read = true
+    readNotification(n.id)
+    approveFollowRequest(n.follow_req_id, 'decline')
+}
+
 </script>
 
 <style scoped>
