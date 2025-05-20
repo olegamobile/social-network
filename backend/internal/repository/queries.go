@@ -139,8 +139,7 @@ func GetUserById(id int, viewFull bool) (model.User, error) {
 	return user, err
 }
 
-// This function should not be used in the final version
-func GetAllUsers() ([]model.User, error) {
+/* func GetAllUsers() ([]model.User, error) {
 	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public FROM users")
 	defer rows.Close()
 
@@ -177,7 +176,7 @@ func GetAllUsers() ([]model.User, error) {
 	}
 
 	return users, nil
-}
+} */
 
 func GetAllGroups() ([]model.Group, error) {
 	rows, err := database.DB.Query(`
@@ -235,7 +234,7 @@ func GetGroupsByUserId(userId int) ([]model.Group, error) {
 	return groups, nil
 }
 
-func GetAllPosts() ([]model.Post, error) {
+/* func GetAllPosts() ([]model.Post, error) {
 	rows, err := database.DB.Query(`
 	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
 	FROM posts
@@ -269,12 +268,12 @@ func GetAllPosts() ([]model.Post, error) {
 	}
 
 	return posts, nil
-}
+} */
 
 // GetFeedPostsBefore gets posts from userID user's follows and groups
 // using cursor-based pagination: anything before the previous post (cursorTime)
 // up to limit (default 10) items.
-func GetFeedPostsBefore(userID int, cursorTime time.Time, limit int) ([]model.Post, error) {
+func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int) ([]model.Post, error) {
 	query := `
     -- Regular posts
     SELECT DISTINCT
@@ -299,6 +298,7 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit int) ([]model.Po
           )
           )
       AND p.created_at < ?
+	  AND p.id != ?
         
     UNION ALL
     
@@ -321,11 +321,12 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit int) ([]model.Po
     JOIN users u ON gp.user_id = u.id
     WHERE gp.status = 'enable'
       AND gp.created_at < ?
+	  AND gp.id != ?
     
     ORDER BY created_at_sort DESC
     LIMIT ?;`
 
-	rows, err := database.DB.Query(query, userID, userID, cursorTime, userID, cursorTime, limit)
+	rows, err := database.DB.Query(query, userID, userID, cursorTime, lastPostId, userID, cursorTime, lastPostId, limit)
 	if err != nil {
 		fmt.Println("query err at GetFeedPostsBefore:", err)
 		return nil, err

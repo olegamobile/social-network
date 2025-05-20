@@ -90,7 +90,7 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(usr)
 }
 
-func GetUsers(w http.ResponseWriter, r *http.Request) {
+/* func GetUsers(w http.ResponseWriter, r *http.Request) {
 	_, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -104,7 +104,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(users)
-}
+} */
 
 func GetGroups(w http.ResponseWriter, r *http.Request) {
 	_, err := service.ValidateSession(r)
@@ -167,7 +167,7 @@ func SearchUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-func GetPosts(w http.ResponseWriter, r *http.Request) {
+/* func GetPosts(w http.ResponseWriter, r *http.Request) {
 	_, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -182,7 +182,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
-}
+} */
 
 func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)
@@ -193,12 +193,16 @@ func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
 
 	cursor := r.URL.Query().Get("cursor")
 	limitStr := r.URL.Query().Get("limit")
-	limit := 10 // default
+	lastPostIdStr := r.URL.Query().Get("last_post_id")
+	limit := 10
+	lastPostId := 0
 	if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
 		limit = l
 	}
+	if lpid, err := strconv.Atoi(lastPostIdStr); err == nil && lpid > 0 {
+		lastPostId = lpid
+	}
 
-	//var cursorTime time.Time
 	cursorTime := time.Now().UTC() // use current time by default
 
 	if cursor != "" {
@@ -208,7 +212,9 @@ func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	posts, err := repository.GetFeedPostsBefore(userId, cursorTime, limit)
+	cursorTime = cursorTime.Truncate(time.Second)
+
+	posts, err := repository.GetFeedPostsBefore(userId, cursorTime, limit, lastPostId)
 	if err != nil {
 		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
 		return
