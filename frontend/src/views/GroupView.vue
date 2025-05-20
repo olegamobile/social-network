@@ -4,31 +4,45 @@
 
         <TwoColumnLayout>
             <template #sidebar>
+
+                <!-- join/leaave button -->
+                <div v-if="showJoinLeaveButton" class="mb-2">
+                    <button @click="joinOrLeave" class="px-4 py-2 rounded text-white" :class="followButtonClass">
+                        {{
+                            membershipStatus === 'pending' ? 'Request Sent' :
+                                membershipStatus === 'accepted' ? 'Leave Group' :
+                                    membershipStatus === 'declined' ? 'Request to Join' :
+                                        membershipStatus === 'admin' ? 'Remove Group' :
+                                            ''
+                        }}
+                    </button>
+                </div>
+
                 <div v-if="group">
                     <h2 class="text-2xl font-bold mb-4">{{ group.title }}</h2>
                     <p>{{ group.description }}</p>
 
-                    <template v-if="isMember">
-                        <h4>Events</h4>
-                        <EventList :events="events" small />
-                        <RouterLink :to="`/chats/${group.id}`">Go to Chat</RouterLink>
+                    <div v-if="isMember">
 
-                        <h4>Members</h4>
+                        <EventList :events="events" small class="my-4" />
+                        <RouterLink :to="`/chats/${group.id}`" class="my-4">Go to Chat</RouterLink>
+
+                        <h4 class="mt-4">Members</h4>
                         <ul>
-                            <li v-for="member in group.members" :key="member.id">
-                                {{ member.name }}
+                            <li v-for="member in members" :key="member.id">
+                                {{ member.username }}
                             </li>
                         </ul>
-                    </template>
+                    </div>
                 </div>
             </template>
 
             <template #main>
-                <div v-if="isMember">
-                    <PostsList :posts="group.posts" />
+                <div v-if="isMember && posts">
+                    <PostsList :posts="posts" />
                 </div>
                 <div v-else>
-                    <button @click="requestMembership">Request Membership</button>
+                    <button @click="requestMembership">No membership or no posts</button>
                 </div>
             </template>
         </TwoColumnLayout>
@@ -48,16 +62,39 @@ const route = useRoute()
 const router = useRouter()
 const errorStore = useErrorStore()
 const apiUrl = import.meta.env.VITE_API_URL
-const groupId = route.params.id
 const group = ref(null)
+const posts = ref([])
 
+const isMember = ref(true) // Mock check
+const showJoinLeaveButton = ref[true]
+const events = [
+    {
+        "id": 1,
+        "title": "party",
+        "time": "tomorrow"
+    }, {
+        "id": 2,
+        "title": "work",
+        "time": "forever"
+    }, {
+        "id": 3,
+        "title": "dull boy",
+        "time": "internally"
+    }
+]
 
-const isMember = ref(groupId === '1') // Mock check
-const events = [{
-    "id": 1,
-    "title": "party",
-    "time": "tomorrow"
-}]
+const members = ref([
+    {
+        "id": 1,
+        "name": "Mellow Cat",
+    }, {
+        "id": 2,
+        "title": "Jock Strap",
+    }, {
+        "id": 3,
+        "title": "Heidi Woo",
+    }
+])
 
 function requestMembership() {
     alert('Membership requested!')
@@ -70,9 +107,7 @@ async function getGroup(groupId) {
             credentials: 'include'
         })
 
-
-        if (groupRes.status === 401) {
-            // Session is invalid — logout and redirect
+        if (groupRes.status === 401) { // Session is invalid — logout and redirect
             logout()
             router.push('/login')
             return
@@ -96,8 +131,6 @@ async function getGroup(groupId) {
         }
 
         group.value = await groupRes.json()
-        console.log("group value:", group.value)
-
     } catch (err) {
         console.log("error fetching group:", err)
         errorStore.setError('Error', 'Something went wrong while loading group data.')
@@ -106,7 +139,47 @@ async function getGroup(groupId) {
     }
 }
 
+async function getPosts(groupId) {        // Fetch and filter posts
+    try {
+        const postsRes = await fetch(`${apiUrl}/api/groupposts/${groupId}`, {     //
+            credentials: 'include'
+        })
+
+        if (!postsRes.ok) {
+            throw new Error(`Failed to fetch posts: ${postsRes.status}`)
+        }
+        const groupPosts = await postsRes.json()
+        if (groupPosts) posts.value.push(...groupPosts)
+    } catch (error) {
+        console.log("error fetching group posts:", error)
+        errorStore.setError('Error', 'Something went wrong while loading group posts data.')
+        router.push('/error')
+        return
+    }
+}
+
+async function getMembers(groupId) {        // Fetch and filter posts
+    try {
+        const membsRes = await fetch(`${apiUrl}/api/groupmembers/${groupId}`, {     //
+            credentials: 'include'
+        })
+
+        if (!membsRes.ok) {
+            throw new Error(`Failed to fetch posts: ${membsRes.status}`)
+        }
+        const groupMembs = await membsRes.json()
+        if (groupMembs) members.value = groupMembs
+    } catch (error) {
+        console.log("error fetching group members:", error)
+        errorStore.setError('Error', 'Something went wrong while loading group members data.')
+        router.push('/error')
+        return
+    }
+}
+
 onMounted(() => {
     getGroup(route.params.id)
+    getPosts(route.params.id)
+    getMembers(route.params.id)
 })
 </script>

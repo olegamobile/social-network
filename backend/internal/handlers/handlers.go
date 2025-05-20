@@ -246,7 +246,7 @@ func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	viewPosts, err := repository.ViewFullProfileOrNot(userId, targetId)
+	viewProfile, err := repository.ViewFullProfileOrNot(userId, targetId)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -254,7 +254,7 @@ func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 
 	var posts []model.Post
 
-	if viewPosts {
+	if viewProfile {
 		posts, err = repository.GetPostsByUserId(targetId)
 		if err != nil {
 			http.Error(w, "Failed to get posts", http.StatusInternalServerError)
@@ -264,6 +264,74 @@ func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
+}
+
+func HandlePostsByGroupId(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/groupposts/")
+	targetId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	viewGroup, err := repository.ViewFullGroupOrNot(userId, targetId)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	var posts []model.Post
+
+	if viewGroup {
+		posts, err = repository.GetGroupPostsByGroupId(targetId)
+		if err != nil {
+			http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+}
+
+func HandleMembersByGroupId(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/groupmembers/")
+	targetId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	viewGroup, err := repository.ViewFullGroupOrNot(userId, targetId)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	var users []model.User
+
+	if viewGroup {
+		users, err = repository.GetGroupMembersByGroupId(targetId)
+		if err != nil {
+			http.Error(w, "Failed to get group members", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }
 
 // handleCreatePost adds a post to the database and returns the new one

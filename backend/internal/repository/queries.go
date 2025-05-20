@@ -102,6 +102,22 @@ func ViewFullProfileOrNot(userId, targetId int) (bool, error) {
 	return exists, nil
 }
 
+func ViewFullGroupOrNot(userId, targetId int) (bool, error) {
+	db := database.DB
+	var grId int
+	err := db.QueryRow(`
+	SELECT id 
+	FROM group_members 
+	WHERE group_id = ? AND user_id = ? AND approval_status = 'accepted' AND status = 'enable'`, targetId, userId).Scan(&grId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, fmt.Errorf("target group not found")
+		}
+		return false, err
+	}
+	return true, nil
+}
+
 func GetUserById(id int, viewFull bool) (model.User, error) {
 	var user model.User
 	var nickname sql.NullString
@@ -738,4 +754,81 @@ func GetGroupById(groupId int) (model.Group, error) {
 	}
 
 	return group, nil
+}
+
+func GetGroupPostsByGroupId(groupId int) ([]model.Post, error) {
+	rows, err := database.DB.Query(`
+	SELECT gp.id, gp.user_id, gp.image_path, gp.content, gp.created_at, u.first_name, u.last_name, u.avatar_path
+	FROM group_posts gp
+	JOIN users u ON gp.user_id = u.id
+	WHERE gp.group_id = ?
+	ORDER BY gp.id DESC;`, groupId)
+
+	if err != nil {
+		fmt.Println("rows error at GetPostsByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []model.Post
+	for rows.Next() {
+		var p model.Post
+		var firstname, lastname string
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&p.ID, &p.UserID, &p.ImagePath, &p.Content, &p.CreatedAt, &firstname, &lastname, &avatarUrl)
+		if err != nil {
+			fmt.Println("scan error at GetPostsByUserId", err)
+			return nil, err
+		}
+
+		if avatarUrl.Valid {
+			p.AvatarPath = avatarUrl.String
+		} else {
+			p.AvatarPath = ""
+		}
+
+		p.Username = firstname + " " + lastname
+		posts = append(posts, p)
+	}
+
+	return posts, nil
+}
+
+func GetGroupMembersByGroupId(groupId int) ([]model.User, error) {
+	rows, err := database.DB.Query(`
+	SELECT u.id, u.first_name, u.last_name, u.avatar_path
+	FROM users u
+	JOIN group_members gm ON u.id = gm.user_id
+	WHERE gm.group_id = ?;`, groupId)
+
+	if err != nil {
+		fmt.Println("rows error at GetGroupMembersByGroupId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+	for rows.Next() {
+		var u model.User
+		var firstname, lastname string
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&u.ID, &firstname, &lastname, &avatarUrl)
+		if err != nil {
+			fmt.Println("scan error at GetPostsByUserId", err)
+			return nil, err
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
+		}
+
+		u.Username = firstname + " " + lastname
+		users = append(users, u)
+	}
+
+	return users, nil
 }
