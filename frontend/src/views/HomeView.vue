@@ -49,6 +49,7 @@ const showPostForm = ref(false)
 
 let cursor = ref(null); // last post’s created_at
 const limit = 10;
+const lastPostId = ref(0);
 const isLoading = ref(false);
 const hasMore = ref(true); // To avoid loading forever
 const postsListRef = ref(null); // To access the sentinel in PostsList
@@ -66,9 +67,8 @@ async function _getHomeFeed() {
         const params = new URLSearchParams();
         if (cursor.value) params.append('cursor', cursor.value);
         params.append('limit', limit);
+        params.append('last_post_id', lastPostId.value);
 
-        //const res = await fetch(`${apiUrl}/api/posts`, {
-        //const res = await fetch(`${apiUrl}/api/homefeed`, {
         const res = await fetch(`${apiUrl}/api/homefeed?${params.toString()}`, {
             credentials: 'include' // This sends the session cookie with the request
         });
@@ -77,7 +77,7 @@ async function _getHomeFeed() {
             // Session is invalid — logout and redirect
             console.log("homefeed returned 401 status")
             errorStore.setError('Session Expired', 'Your session has expired. Please log in again.');
-            logout(); // your logout function
+            logout();
             router.push('/login')
             return;
         }
@@ -89,12 +89,12 @@ async function _getHomeFeed() {
             throw new Error(errorData.message || `HTTP error ${res.status}`)
         }
 
-        //posts.value = await res.json()
         const newPosts = await res.json()
 
         // Update cursor to the created_at of the last post received
-        if (newPosts.length > 0) {
+        if (newPosts && newPosts.length > 0) {
             cursor.value = newPosts[newPosts.length - 1].created_at
+            lastPostId.value = newPosts[newPosts.length - 1].id
             posts.value.push(...newPosts); // append to existing posts
         } else {
             hasMore.value = false
