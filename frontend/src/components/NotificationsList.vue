@@ -1,9 +1,35 @@
 <template>
     <ul class="notifications-list">
         <li v-for="notification in notifications" :key="notification.id" class="notification-item">
+            <small class="post-date flex items-center ">
+                {{ formatDate(notification.created_at) }}
+            </small>
             <div class="notification-content">
                 <span class="notification-text">
-                    {{ notification.content }}
+                    <template v-if="notification.type === 'follow_request'">
+                        <router-link :to="'/profile/' + notification.sender_id" class="font-bold">{{
+                            notification.sender_name }}</router-link> wants to follow you
+                    </template>
+                    <template v-else-if="notification.type === 'group_invitation'">
+                        <router-link :to="'/profile/' + notification.sender_id" class="font-bold">{{
+                            notification.sender_name }}</router-link> invited you to join
+                        <router-link :to="'/group/' + notification.group_id" class="font-bold">{{
+                            notification.group_title }}</router-link>
+                    </template>
+                    <template v-else-if="notification.type === 'group_join_request'">
+                        <router-link :to="'/profile/' + notification.sender_id" class="font-bold">{{
+                            notification.sender_name }}</router-link> wants to join
+                        <router-link :to="'/group/' + notification.group_id" class="font-bold">{{
+                            notification.group_title }}</router-link>
+                    </template>
+                    <template v-else-if="notification.type === 'event_creation'">
+                        New event: <router-link :to="'/event/' + notification.event_id" class="font-bold">{{
+                            notification.event_title }}</router-link>
+                    </template>
+                    <template v-else>
+                        {{ notification.content }}
+                    </template>
+
                 </span>
 
                 <!-- Close Button -->
@@ -29,12 +55,17 @@
 <script setup>
 import { defineEmits } from 'vue'
 
+function formatDate(dateString) {
+    const date = new Date(dateString)
+    return date.toLocaleString("ru-RU")
+}
+
 // Accept props
 defineProps({
-  notifications: {
-    type: Array,
-    required: true
-  }
+    notifications: {
+        type: Array,
+        required: true
+    }
 })
 
 // Emit events to the parent component
@@ -42,15 +73,15 @@ const emit = defineEmits(['close', 'accept', 'decline'])
 
 // These functions emit events to the parent
 function closeNotification(id) {
-  emit('close', id)
+    emit('close', id)
 }
 
 function acceptAction(id) {
-  emit('accept', id)
+    emit('accept', id)
 }
 
 function declineAction(id) {
-  emit('decline', id)
+    emit('decline', id)
 }
 </script>
 
