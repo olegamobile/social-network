@@ -153,3 +153,16 @@ func CheckEventInvitationStatus(userID, eventID int) (bool, error) {
 	}
 	return status == "pending", nil
 }
+
+func GetNewNotificatonsCount(userID int) (int, error) {
+	count := 0
+	err := database.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM notifications
+		WHERE user_id = ? AND is_read = 0 AND status = 'enable'
+	`, userID).Scan(&count)
+	if err != nil {
+		return count, err
+	}
+	return count, nil
+}
