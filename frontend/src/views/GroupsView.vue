@@ -20,12 +20,12 @@
                 <h2 class="text-3xl font-bold text-nordic-dark mb-6">Explore Groups</h2>
 
                 <div class="max-w-lg w-full lg:max-w-xs mb-6">
-                    <label for="search" class="sr-only">Search</label>
+                    <label for="search-groups" class="sr-only">Search</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-nordic-light"></i>
                         </div>
-                        <input id="search" title="search"
+                        <input id="search-groups" title="search"
                             class="block w-full pl-10 pr-3 py-2 border border-nordic-light rounded-md leading-5 bg-white placeholder-nordic-light focus:outline-none focus:ring-2 focus:ring-nordic-secondary-accent focus:border-nordic-secondary-accent sm:text-sm"
                             placeholder="Search for groups..." type="search" v-model="search">
                     </div>

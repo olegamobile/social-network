@@ -18,7 +18,7 @@
 
         <div v-if="chat" class="message-input-container">
             <form @submit.prevent="sendMessage" class="flex gap-2">
-                <input v-model="newMessage" type="text" placeholder="Type a message..."
+                <input id="message-input" v-model="newMessage" type="text" placeholder="Type a message..."
                     class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent"
                     :disabled="!isConnected" />
                 <button type="submit"
