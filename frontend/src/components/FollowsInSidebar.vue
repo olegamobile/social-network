@@ -2,7 +2,7 @@
     <!-- Users I am following -->
     <div>
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followed</h3>
-        <ul v-if="followedUsers.length > 0" class="space-y-2">
+        <ul v-if="followedUsers && followedUsers.length > 0" class="space-y-2 mb-5">
             <li v-for="user in followedUsers" :key="user.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                 <RouterLink :to="`/profile/${user.id}`">
@@ -14,12 +14,10 @@
         <p v-else class="text-nordic-light italic">Not following anyone</p>
     </div>
 
-    <br />
-
     <!-- Users who follow me -->
     <div>
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followers</h3>
-        <ul v-if="followers.length > 0" class="space-y-2">
+        <ul v-if="followers && followers.length > 0" class="space-y-2 mb-5">
             <li v-for="user in followers" :key="user.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                 <RouterLink :to="`/profile/${user.id}`">

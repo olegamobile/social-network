@@ -24,6 +24,7 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
+		return user, err
 	}
 
 	if nickname.Valid {
@@ -44,7 +45,7 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 		user.AvatarPath = ""
 	}
 
-	return user, err
+	return user, nil
 }
 
 func InsertSession(sessionID string, user model.User, expiresAt time.Time) error {
@@ -721,4 +722,20 @@ func SearchGroups(query string) ([]model.Group, error) {
 	}
 
 	return groups, nil
+}
+
+func GetGroupById(groupId int) (model.Group, error) {
+	var group model.Group
+
+	err := database.DB.QueryRow(`
+	SELECT id, title, description
+	FROM groups
+	WHERE id = ?`, groupId).Scan(&group.ID, &group.Title, &group.Description)
+
+	if err != nil {
+		fmt.Println("error getting user by email:", err)
+		return group, err
+	}
+
+	return group, nil
 }

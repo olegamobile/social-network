@@ -42,6 +42,7 @@
                 <p v-if="!user?.is_public" class="mt-3 mb-7"><strong>Private profile</strong></p>
 
                 <FollowsInSidebar v-if="formattedBirthday" :userId="user.id"/>   <!-- birthday exists = allowed to view -->
+                <GroupsInSidebar v-if="formattedBirthday" :userId="user.id"/>   <!-- birthday exists = allowed to view -->
             </template>
 
             <template #main>
@@ -73,6 +74,7 @@ import { useErrorStore } from '@/stores/error'
 import EditProfile from '@/components/EditProfile.vue'
 import { useUserStore } from '@/stores/user'
 import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
+import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
 
 const route = useRoute()
 const user = ref(null)
@@ -225,6 +227,7 @@ onMounted(() => {
 
 // React to route param changes (reload when going from one profile to another)
 watch(() => route.params.id, (newId) => {
+    posts.value = []
     fetchUserAndPosts(newId)
 })
 

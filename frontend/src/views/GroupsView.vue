@@ -29,7 +29,7 @@
                     <ul class="space-y-2">
                         <li v-for="group in searchResults" :key="group.id"
                             class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                            <RouterLink :to="`/groups/${group.id}`">{{ group.title }}</RouterLink>
+                            <RouterLink :to="`/group/${group.id}`">{{ group.title }}</RouterLink>
                             <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
                         </li>
                     </ul>
@@ -42,7 +42,7 @@
                     <ul v-if="suggestedGroups && suggestedGroups.length > 0" class="space-y-2">
                         <li v-for="group in suggestedGroups" :key="group.id"
                             class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
-                            <RouterLink :to="`/groups/${group.id}`">{{ group.title }}</RouterLink>
+                            <RouterLink :to="`/group/${group.id}`">{{ group.title }}</RouterLink>
                             <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
                         </li>
                     </ul>

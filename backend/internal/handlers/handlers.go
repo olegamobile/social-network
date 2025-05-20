@@ -142,6 +142,7 @@ func SearchGroups(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error searching groups", http.StatusInternalServerError)
 		return
 	}
+
 	json.NewEncoder(w).Encode(groups)
 }
 
@@ -318,4 +319,29 @@ func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(groups)
+}
+
+func HandleGroupById(w http.ResponseWriter, r *http.Request) {
+	_, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/group/")
+	targetId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	group, err := repository.GetGroupById(targetId)
+	if err != nil {
+		http.Error(w, "Failed to fetch group", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(group)
 }

@@ -10,7 +10,7 @@
             </RouterLink>
             <span v-if="post.group_id">
                 in
-                <RouterLink :to="`/groups/${post.group_id}`" class="text-blue-500 hover:underline mr-1">
+                <RouterLink :to="`/group/${post.group_id}`" class="text-blue-500 hover:underline mr-1">
                     {{ post.group_name }}
                 </RouterLink>
             </span>
