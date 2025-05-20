@@ -4,16 +4,7 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Your Groups</h3>
-                    <ul v-if="userGroups.length > 0" class="space-y-2">
-                        <li v-for="group in userGroups" :key="group.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
-                            <RouterLink :to="`/groups/${group.id}`">{{ group.title }}</RouterLink>
-                        </li>
-                    </ul>
-                    <p v-else class="text-nordic-light italic">You're not in any groups yet.</p>
-                </div>
+                <GroupsInSidebar />
             </template>
 
             <template #main>
@@ -54,6 +45,7 @@ import TopBar from '@/components/TopBar.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useErrorStore } from '@/stores/error'
 import { useAuth } from '@/composables/useAuth'
+import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
 
 const apiUrl = import.meta.env.VITE_API_URL
 const search = ref('')

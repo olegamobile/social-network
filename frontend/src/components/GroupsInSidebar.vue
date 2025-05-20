@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Groups</h3>
+        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Your Groups</h3>
         <ul v-if="groups.length > 0" class="space-y-2">
             <li v-for="group in groups" :key="group.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
