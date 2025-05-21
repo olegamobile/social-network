@@ -42,7 +42,7 @@
         <!-- user suggestions -->
         <div>
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Suggested Users</h3>
-          <ul v-if="users.length > 0" class="space-y-2">
+          <ul v-if="users && users.length > 0" class="space-y-2">
             <li v-for="user in users" :key="user.id"
               class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
               <RouterLink :to="`/profile/${user.id}`">

@@ -46,7 +46,7 @@
                             <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
                         </li>
                     </ul>
-                    <p v-else class="text-nordic-light italic">No groups match your search.</p>
+                    <p v-else class="text-nordic-light italic">Not enough data for recommendations</p>
                 </div>
             </template>
         </TwoColumnLayout>
@@ -123,7 +123,8 @@ async function fetchGroups() {
         suggestedGroups.value = shuffle(suggestedGroups.value) // random order
 
     } catch (err) {
-        errorStore.setError('Error', 'Something went wrong while loading users data.')
+        //console.log("error at suggest groups", err)
+        errorStore.setError('Error', 'Something went wrong while loading groups data.')
         router.push('/error')
     }
 }

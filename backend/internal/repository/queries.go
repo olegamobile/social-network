@@ -691,6 +691,7 @@ func GetRecommendedGroups(userID int) ([]model.Group, error) {
 
 	rows, err := database.DB.Query(query, userID, userID, userID, userID, userID)
 	if err != nil {
+		fmt.Println("query error at GetRecommendedGroups", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -699,6 +700,7 @@ func GetRecommendedGroups(userID int) ([]model.Group, error) {
 	for rows.Next() {
 		var g model.Group
 		if err := rows.Scan(&g.ID, &g.Title, &g.Description); err != nil {
+			fmt.Println("scan error at GetRecommendedGroups", err)
 			return groups, err
 		}
 		groups = append(groups, g)

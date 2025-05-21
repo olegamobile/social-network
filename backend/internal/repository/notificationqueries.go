@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/database"
 	"backend/internal/model"
+	"fmt"
 )
 
 func GetAllNotificatons(userID int) ([]model.Notification, error) {
@@ -48,6 +49,7 @@ LEFT JOIN users eu ON e.creator_id = eu.id AND n.type = 'event_creation'
 WHERE n.status = 'enable' AND n.user_id = ?
 	`, userID)
 	if err != nil {
+		fmt.Println("query error at GetAllNotificatons", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -72,6 +74,7 @@ WHERE n.status = 'enable' AND n.user_id = ?
 			&n.CreatedAt,
 		)
 		if err != nil {
+			fmt.Println("scan error at GetAllNotificatons", err)
 			return notifications, err
 		}
 		notifications = append(notifications, n)

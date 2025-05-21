@@ -53,8 +53,6 @@
 
 
 <script setup>
-import { defineEmits } from 'vue'
-
 function formatDate(dateString) {
     const date = new Date(dateString)
     return date.toLocaleString("ru-RU")
