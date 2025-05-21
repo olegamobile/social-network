@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/database"
 	"backend/internal/model"
+	"fmt"
 )
 
 func ReadAllCommentsForPost(postID int, userID int) ([]model.Comment, error) {
@@ -19,7 +20,7 @@ func ReadAllCommentsForPost(postID int, userID int) ([]model.Comment, error) {
 		FROM comments c
 			INNER JOIN users u
 				ON c.user_id = u.id AND c.status != 'delete' AND u.status != 'delete' AND c.post_id = ?
-		ORDER BY c.id asc;
+		ORDER BY comment_created_at asc;
 	`
 	rows, selectError := database.DB.Query(selectQuery, postID) // Query the database
 	if selectError != nil {
@@ -74,4 +75,17 @@ func ReadAllCommentsForPost(postID int, userID int) ([]model.Comment, error) {
 	}
 
 	return comments, nil
+}
+
+func InsertComment(content string, userID int, postID int) error {
+
+	insertQuery := `INSERT INTO comments (post_id, content, user_id) VALUES (?, ?, ?);`
+	_, insertErr := database.DB.Exec(insertQuery, postID, content, userID)
+
+	if insertErr != nil {
+		fmt.Println("Error inserting the comment", insertErr)
+		return insertErr
+	}
+
+	return nil
 }

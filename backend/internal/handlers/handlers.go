@@ -240,3 +240,62 @@ func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(comments)
 
 }
+
+func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	UserIDString := r.URL.Query().Get("user_id")
+	if UserIDString == "" {
+		fmt.Println("empty usetId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+
+	UserID, err := strconv.Atoi(UserIDString)
+	if err != nil {
+		fmt.Println("can not convert userId")
+		return
+	}
+
+	PostIDstring := r.URL.Query().Get("post_id")
+	if PostIDstring == "" {
+		fmt.Println("empty postId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+	PostID, err := strconv.Atoi(PostIDstring)
+	if err != nil {
+		fmt.Println("can not convert postId")
+		return
+	}
+	err = r.ParseForm()
+	if err != nil {
+		http.Error(w, "BadRequestError", http.StatusBadRequest)
+		return
+	}
+
+	var payload struct {
+		Content string `json:"content"`
+	}
+	err = json.NewDecoder(r.Body).Decode(&payload)
+
+	if err != nil || payload.Content == "" {
+		fmt.Println("error in CreatePost:", err)
+		http.Error(w, "BadRequestError", http.StatusBadRequest)
+		return
+	}
+	err = repository.InsertComment(payload.Content, UserID, PostID)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"success": true,
+	})
+
+}
