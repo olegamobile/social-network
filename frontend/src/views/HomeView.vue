@@ -13,7 +13,7 @@
                 <h2 class="text-3xl font-bold text-nordic-dark mb-6">Home Feed</h2>
 
                 <!-- new post button and form -->
-                <button @click="showPostForm = !showPostForm" class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                <button @click="showPostForm = !showPostForm" class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                     {{ showPostForm ? 'Cancel' : 'Create New Post' }}
                 </button>
                 <NewPostForm v-if="showPostForm" @post-submitted="handlePostSubmitted" class="mb-8" />

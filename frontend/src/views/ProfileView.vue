@@ -28,16 +28,14 @@
                 <p v-if="user?.is_public" class="mt-3 mb-7"><strong>Public profile</strong></p>
                 <p v-if="!user?.is_public" class="mt-3 mb-7"><strong>Private profile</strong></p>
 
+                <!-- birthday exists = allowed to view -->
                 <FollowsInSidebar v-if="formattedBirthday" :userId="user.id" />
-                <!-- birthday exists = allowed to view -->
                 <GroupsInSidebar v-if="formattedBirthday" :userId="user.id" />
-                <!-- birthday exists = allowed to view -->
             </template>
 
             <template #main>
 
                 <!-- follow button -->
-
                 <button v-if="showFollowButton" :disabled="followStatus === 'pending'" @click="handleFollowAction"
                     class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition" :class="followButtonClass">
                     {{
@@ -48,7 +46,6 @@
                                         ''
                     }}
                 </button>
-
 
                 <!-- edit profile button and form -->
                 <button v-if="userStore.user && route.params.id == userStore.user.id"

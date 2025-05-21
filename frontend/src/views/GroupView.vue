@@ -5,20 +5,6 @@
         <TwoColumnLayout>
             <template #sidebar>
                 <div v-if="group">
-
-                    <!-- join/leave button -->
-                    <div v-if="showJoinLeaveButton" class="mb-2">
-                        <button @click="joinOrLeave" class="px-4 py-2 rounded text-white" :class="followButtonClass">
-                            {{
-                                membershipStatus === 'pending' ? 'Request Sent' :
-                                    membershipStatus === 'accepted' ? 'Leave Group' :
-                                        membershipStatus === 'declined' ? 'Request to Join' :
-                                            membershipStatus === 'admin' ? 'Remove Group' :
-                                                ''
-                            }}
-                        </button>
-                    </div>
-
                     <!-- name and description -->
                     <h2 class="text-2xl font-bold mb-4">{{ group.title }}</h2>
                     <p>{{ group.description }}</p>
@@ -40,18 +26,31 @@
             </template>
 
             <template #main>
+
+                <!-- button to join / leave / delete -->
+                <button :disabled="membershipStatus === 'pending'" @click="handleGroupAction"
+                    class="mb-4 px-4 py-2 text-white rounded transition"
+                    :class="groupButtonClass">
+                    {{
+                        membershipStatus === '' ? 'Request to Join' :
+                            membershipStatus === 'pending' ? 'Request Sent' :
+                                membershipStatus === 'accepted' ? 'Leave Group' :
+                                    membershipStatus === 'declined' ? 'Request to Join' :
+                                        membershipStatus === 'admin' ? 'Delete Group' :
+                                            ''
+                    }}
+                </button>
+
                 <div v-if="isMember && posts">
                     <!-- new post button and form -->
                     <button @click="showPostForm = !showPostForm"
-                        class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                        class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                         {{ showPostForm ? 'Cancel' : 'Create New Post' }}
                     </button>
-                    <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)" @post-submitted="handlePostSubmitted" class="mb-8" />
+                    <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
+                        @post-submitted="handlePostSubmitted" class="mb-8" />
 
                     <PostsList :posts="posts" />
-                </div>
-                <div v-else>
-                    <button @click="requestMembership">No membership or no posts</button>
                 </div>
             </template>
         </TwoColumnLayout>
@@ -59,7 +58,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import PostsList from '@/components/PostsList.vue'
@@ -77,19 +76,67 @@ const group = ref(null)
 const posts = ref([])
 const members = ref([])
 const events = ref([])
-
 const showPostForm = ref(false)
 
 const isMember = ref(true) // Mock check
-const showJoinLeaveButton = ref[true]
-
-
-function requestMembership() {
-    alert('Membership requested!')
-}
+const membershipStatus = ref('')
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
+}
+
+const groupButtonClass = computed(() => {
+    if (membershipStatus.value === '' || membershipStatus.value === 'declined') {
+        return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
+    }
+    if (membershipStatus.value === 'pending') {
+        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-bg text-nordic-light cursor-not-allowed';
+    }
+    if (membershipStatus.value === 'accepted') {
+        //return 'bg-nordic-text-light hover:bg-nordic-primary-accent text-black';  // doesn't work for some reason
+        return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
+    }
+    if (membershipStatus.value === 'admin') {
+        return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
+    }
+    return '';
+});
+
+async function handleGroupAction() {
+    if (membershipStatus.value === 'pending') return
+
+    let action = ''
+    if (membershipStatus.value === '' || membershipStatus.value === 'declined') action = 'request'
+    else if (membershipStatus.value === 'accepted') action = 'leave'
+    else if (membershipStatus.value === 'admin') action = 'delete'
+
+    try {
+        const res = await fetch(`${apiUrl}/api/group/join`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                target_id: group.value.id,
+                action: action
+            })
+        })
+
+        if (!res.ok) throw new Error('Failed to update group status')
+
+        // Get membership status again
+        const followRes = await fetch(`${apiUrl}/api/group/${group.value.id}`, {     //
+            credentials: 'include'
+        })
+        if (!followRes.ok) {
+            throw new Error(`Failed to fetch follow info: ${followRes.status}`)
+        }
+        const resp = await followRes.json()
+        membershipStatus.value = resp.membership
+    } catch (err) {
+        console.error(err)
+    }
 }
 
 async function getGroup(groupId) {
@@ -122,7 +169,10 @@ async function getGroup(groupId) {
             throw new Error(`Failed to fetch group: ${groupRes.status}`)
         }
 
-        group.value = await groupRes.json()
+        const resp = await groupRes.json()
+        group.value = resp.group
+        membershipStatus.value = resp.membership
+
     } catch (err) {
         console.log("error fetching group:", err)
         errorStore.setError('Error', 'Something went wrong while loading group data.')
@@ -141,7 +191,7 @@ async function getPosts(groupId) {        // Fetch and filter posts
             throw new Error(`Failed to fetch posts: ${postsRes.status}`)
         }
         const groupPosts = await postsRes.json()
-        if (groupPosts) posts.value.push(...groupPosts)
+        if (groupPosts) posts.value = groupPosts
     } catch (error) {
         console.log("error fetching group posts:", error)
         errorStore.setError('Error', 'Something went wrong while loading group posts data.')
@@ -189,6 +239,13 @@ async function getEvents(groupId) {        // Fetch and filter posts
 }
 
 onMounted(() => {
+    getGroup(route.params.id)
+    getPosts(route.params.id)
+    getMembers(route.params.id)
+    getEvents(route.params.id)
+})
+
+watch(() => membershipStatus, () => {
     getGroup(route.params.id)
     getPosts(route.params.id)
     getMembers(route.params.id)

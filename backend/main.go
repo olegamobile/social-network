@@ -29,6 +29,8 @@ func setHandlers() {
 	http.HandleFunc("/api/groups/search", middleware.WithCORS(handlers.SearchGroups))
 	http.HandleFunc("/api/groups/user/", middleware.WithCORS(handlers.HandleGroupsByUserId)) // groups with user id
 	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById))            // group with group id
+	http.HandleFunc("/api/group/join", middleware.WithCORS(handlers.HandleGroupMembership))
+
 	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
 	http.HandleFunc("/api/register", middleware.WithCORS(handlers.HandleRegister))
