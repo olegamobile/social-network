@@ -2,30 +2,21 @@
 
 -- Insert users (14 columns, all specified)
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, avatar_path, nickname, about_me, is_public, created_at, updated_at, updated_by, status) VALUES
-('emma.bauer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Emma', 'Bauer', '1993-03-22', NULL, 'EmB', 'Loves painting and coffee shops.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('liam.muller@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Liam', 'Müller', '1987-09-14', NULL, 'LiamM', 'Avid cyclist and tech enthusiast.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('sofia.vogel@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Sofia', 'Vogel', '1995-06-30', NULL, 'Sofi', 'Enjoys yoga and travel.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('noah.fischer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Noah', 'Fischer', '1990-12-05', NULL, 'NoahF', 'Music lover and amateur chef.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('olivia.schreiber@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Olivia', 'Schreiber', '1992-08-17', NULL, 'Liv', 'Bookworm and nature enthusiast.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('luca.klein@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Luca', 'Klein', '1989-04-11', NULL, 'LucaK', 'Gamer and coffee addict.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('mia.wagner@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Mia', 'Wagner', '1997-01-25', NULL, 'MiaW', 'Aspiring photographer.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('elias.schmidt@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Elias', 'Schmidt', '1986-10-03', NULL, 'Eli', 'Hiker and history buff.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('lena.herrmann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Lena', 'Herrmann', '1994-07-19', NULL, 'LenaH', 'Loves baking and gardening.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('finn.zimmermann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Finn', 'Zimmermann', '1991-11-08', NULL, 'FinnZ', 'Tech geek and sci-fi fan.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('amina.ali@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Amina', 'Ali', '1990-05-15', NULL, NULL, NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-('yusuf.kamau@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Yusuf', 'Kamau', '1988-11-20', NULL, 'Yus', 'Loves hiking and photography.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('emma.bauer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Emma', 'Bauer', '1993-03-22', 'avatars/1747642156208195000.jpeg', 'EmB', 'Loves painting and coffee shops.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('liam.muller@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Liam', 'Müller', '1987-09-14', 'avatars/1747642184916489000.webp', 'LiamM', 'Avid cyclist and tech enthusiast.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('sofia.vogel@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Sofia', 'Vogel', '1995-06-30', 'avatars/1747642206647198000.jpeg', 'Sofi', 'Enjoys yoga and travel.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('noah.fischer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Noah', 'Fischer', '1990-12-05', 'avatars/1747642227982390000.jpeg', 'NoahF', 'Music lover and amateur chef.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('olivia.schreiber@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Olivia', 'Schreiber', '1992-08-17', 'avatars/1747642249397877000.webp', 'Liv', 'Bookworm and nature enthusiast.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('luca.klein@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Luca', 'Klein', '1989-04-11', 'avatars/1747642275289046000.webp', 'LucaK', 'Gamer and coffee addict.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('mia.wagner@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Mia', 'Wagner', '1997-01-25', 'avatars/1747642297774998000.jpeg', 'MiaW', 'Aspiring photographer.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('elias.schmidt@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Elias', 'Schmidt', '1986-10-03', 'avatars/1747642317912843000.jpeg', 'Eli', 'Hiker and history buff.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('lena.herrmann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Lena', 'Herrmann', '1994-07-19', 'avatars/1747642338716395000.jpeg', 'LenaH', 'Loves baking and gardening.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('finn.zimmermann@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Finn', 'Zimmermann', '1991-11-08', 'avatars/1747642362945352000.jpeg', 'FinnZ', 'Tech geek and sci-fi fan.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('amina.ali@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Amina', 'Ali', '1990-05-15', 'avatars/1747642384091203000.jpeg', NULL, NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('yusuf.kamau@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Yusuf', 'Kamau', '1988-11-20', 'avatars/1747642408504644000.jpeg', 'Yus', 'Loves hiking and photography.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('aziz.bek@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Aziz', 'Bek', '1985-07-10', NULL, 'AzizB', NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('zara.khan@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Zara', 'Khan', '1996-12-25', NULL, NULL, 'Enjoys reading and learning new languages.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable');
 
--- Insert sessions (5 columns)
-INSERT INTO sessions (user_id, session_token, expires_at, created_at) VALUES
-(1, 'token_amina_123', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(2, 'token_yusuf_456', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(5, 'token_emma_789', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(7, 'token_sofia_012', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(9, 'token_olivia_345', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(11, 'token_lena_678', '2025-06-14 20:15:00', CURRENT_TIMESTAMP),
-(13, 'token_aziz_901', '2025-06-14 20:15:00', CURRENT_TIMESTAMP);
 
 -- Insert posts (8 columns, image_path always included)
 INSERT INTO posts (user_id, content, image_path, privacy_level, created_at, updated_at, updated_by, status) VALUES
@@ -58,13 +49,19 @@ INSERT INTO comments (post_id, user_id, content, image_path, created_at, updated
 
 -- Insert follow requests (5 columns)
 INSERT INTO follow_requests (follower_id, followed_id, approval_status, created_at) VALUES
-(2, 1, 'accepted', CURRENT_TIMESTAMP),
-(5, 3, 'pending', CURRENT_TIMESTAMP),
+(2, 1, 'pending', CURRENT_TIMESTAMP),
+(3, 1, 'pending', CURRENT_TIMESTAMP),
+(4, 1, 'pending', CURRENT_TIMESTAMP),
+(5, 1, 'pending', CURRENT_TIMESTAMP),
+(6, 1, 'pending', CURRENT_TIMESTAMP),
+(7, 1, 'pending', CURRENT_TIMESTAMP),
+(8, 1, 'pending', CURRENT_TIMESTAMP),
 (7, 4, 'accepted', CURRENT_TIMESTAMP),
 (9, 6, 'declined', CURRENT_TIMESTAMP),
 (11, 8, 'pending', CURRENT_TIMESTAMP),
 (13, 5, 'accepted', CURRENT_TIMESTAMP),
 (1, 9, 'pending', CURRENT_TIMESTAMP),
+(11, 13, 'accepted', CURRENT_TIMESTAMP),
 (3, 11, 'accepted', CURRENT_TIMESTAMP);
 
 -- Insert 15 groups (7 columns)
@@ -485,27 +482,27 @@ INSERT INTO events (group_id, creator_id, title, description, event_datetime, cr
 
 -- Insert event responses (5 columns)
 INSERT INTO event_responses (event_id, user_id, response, created_at) VALUES
-(1, 2, 'going', CURRENT_TIMESTAMP),
-(1, 7, 'going', CURRENT_TIMESTAMP),
-(1, 13, 'not_going', CURRENT_TIMESTAMP),
-(2, 5, 'going', CURRENT_TIMESTAMP),
-(2, 8, 'going', CURRENT_TIMESTAMP),
-(2, 1, 'going', CURRENT_TIMESTAMP),
-(3, 9, 'going', CURRENT_TIMESTAMP),
-(3, 4, 'going', CURRENT_TIMESTAMP),
-(3, 11, 'not_going', CURRENT_TIMESTAMP),
-(4, 2, 'going', CURRENT_TIMESTAMP),
-(4, 6, 'going', CURRENT_TIMESTAMP),
-(4, 12, 'going', CURRENT_TIMESTAMP),
-(5, 7, 'going', CURRENT_TIMESTAMP),
-(5, 10, 'going', CURRENT_TIMESTAMP),
-(5, 3, 'not_going', CURRENT_TIMESTAMP),
-(6, 11, 'going', CURRENT_TIMESTAMP),
-(6, 14, 'going', CURRENT_TIMESTAMP),
-(6, 5, 'going', CURRENT_TIMESTAMP),
-(7, 4, 'going', CURRENT_TIMESTAMP),
-(7, 9, 'going', CURRENT_TIMESTAMP),
-(7, 2, 'not_going', CURRENT_TIMESTAMP),
+(1, 2, 'pending', CURRENT_TIMESTAMP),
+(1, 7, 'pending', CURRENT_TIMESTAMP),
+(1, 13, 'pending', CURRENT_TIMESTAMP),
+(2, 5, 'pending', CURRENT_TIMESTAMP),
+(2, 8, 'pending', CURRENT_TIMESTAMP),
+(2, 1, 'pending', CURRENT_TIMESTAMP),
+(3, 9, 'pending', CURRENT_TIMESTAMP),
+(3, 4, 'pending', CURRENT_TIMESTAMP),
+(3, 11, 'pending', CURRENT_TIMESTAMP),
+(4, 2, 'pending', CURRENT_TIMESTAMP),
+(4, 6, 'pending', CURRENT_TIMESTAMP),
+(4, 12, 'pending', CURRENT_TIMESTAMP),
+(5, 7, 'pending', CURRENT_TIMESTAMP),
+(5, 10, 'pending', CURRENT_TIMESTAMP),
+(5, 3, 'pending', CURRENT_TIMESTAMP),
+(6, 11, 'pending', CURRENT_TIMESTAMP),
+(6, 14, 'pending', CURRENT_TIMESTAMP),
+(6, 5, 'pending', CURRENT_TIMESTAMP),
+(7, 4, 'pending', CURRENT_TIMESTAMP),
+(7, 9, 'pending', CURRENT_TIMESTAMP),
+(7, 2, 'pending', CURRENT_TIMESTAMP),
 (8, 8, 'going', CURRENT_TIMESTAMP),
 (8, 13, 'going', CURRENT_TIMESTAMP),
 (8, 6, 'going', CURRENT_TIMESTAMP),
@@ -589,28 +586,32 @@ INSERT INTO group_messages (group_id, sender_id, content, created_at, updated_at
 (14, 12, 'Hackathon next month, form your teams!', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (15, 1, 'Coffee tasting event, who’s coming?', CURRENT_TIMESTAMP, NULL, NULL, 'enable');
 
--- Insert notifications (12 columns)
-INSERT INTO notifications (user_id, type, related_id, group_id, event_id, content, is_read, created_at, updated_at, updated_by, status) VALUES
-(3, 'follow_request', 5, 0, 0, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 'group_invitation', 2, 2, 0, 'You’ve been invited to Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 'event_creation', 3, 3, 3, 'New event: Book Discussion in Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(8, 'group_join_request', 2, 2, 0, 'Mia wants to join Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(13, 'group_invitation', 4, 4, 0, 'You’ve been invited to Photography Hub.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(1, 'event_creation', 5, 5, 5, 'New event: Group Run in Fitness Fanatics.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(9, 'group_join_request', 7, 7, 0, 'Zara wants to join Travel Explorers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'follow_request', 3, 0, 0, 'Aziz wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(11, 'event_creation', 8, 8, 8, 'New event: Jam Session in Music Makers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(2, 'group_invitation', 9, 9, 0, 'You’ve been invited to Tech Talk.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(14, 'group_join_request', 10, 10, 0, 'Luca wants to join Yoga & Meditation.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(7, 'event_creation', 11, 11, 11, 'New event: Game Night in Gamers Guild.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(12, 'follow_request', 1, 0, 0, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 'group_invitation', 12, 12, 0, 'You’ve been invited to Plant Parents.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(8, 'event_creation', 13, 13, 13, 'New event: History Trivia in History Buffs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(10, 'group_join_request', 14, 14, 0, 'Finn wants to join Code Crafters.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 'follow_request', 9, 0, 0, 'Olivia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(1, 'event_creation', 15, 15, 15, 'New event: Coffee Tasting in Coffee Connoisseurs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(3, 'group_invitation', 6, 6, 0, 'You’ve been invited to Baking Buddies.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'group_join_request', 1, 1, 0, 'Amina wants to join Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable');
+-- Insert notifications (12 columns: user_id, type, follow_req_id, group_invite_id, group_id, event_id, content, is_read, created_at, updated_at, updated_by, status)
+INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_id, event_id, content, is_read, created_at, updated_at, updated_by, status) VALUES
+(1, 'follow_request', 1, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'follow_request', 2, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'follow_request', 3, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'follow_request', 4, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'follow_request', 5, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'follow_request', 6, NULL, NULL, NULL, 'Aziz wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(12, 'follow_request', 1, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(6, 'follow_request', 9, NULL, NULL, NULL, 'Olivia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(6, 'group_invitation', NULL, 2, 1, NULL, 'You’ve been invited to Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(4, 'event_creation', NULL, NULL, 2, 3, 'New event: Book Discussion in Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(8, 'group_join_request', NULL, NULL, 1, NULL, 'Mia wants to join Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(13, 'group_invitation', NULL, 4, 3, NULL, 'You’ve been invited to Photography Hub.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'event_creation', NULL, NULL, 4, 2, 'New event: Group Run in Fitness Fanatics.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(9, 'group_join_request', NULL, NULL, 5, NULL, 'Zara wants to join Travel Explorers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(11, 'event_creation', NULL, NULL, 6, 8, 'New event: Jam Session in Music Makers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(2, 'group_invitation', NULL, 9, 7, NULL, 'You’ve been invited to Tech Talk.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(14, 'group_join_request', NULL, NULL, 8, NULL, 'Luca wants to join Yoga & Meditation.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(7, 'event_creation', NULL, NULL, 9, 11, 'New event: Game Night in Gamers Guild.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(4, 'group_invitation', NULL, 12, 10, NULL, 'You’ve been invited to Plant Parents.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(8, 'event_creation', NULL, NULL, 11, 13, 'New event: History Trivia in History Buffs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(10, 'group_join_request', NULL, NULL, 12, NULL, 'Finn wants to join Code Crafters.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'event_creation', NULL, NULL, 13, 15, 'New event: Coffee Tasting in Coffee Connoisseurs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(3, 'group_invitation', NULL, 6, 14, NULL, 'You’ve been invited to Baking Buddies.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(5, 'group_join_request', NULL, NULL, 15, NULL, 'Amina wants to join Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable');
 
 -- Insert post privacy (7 columns)
 INSERT INTO post_privacy (post_id, user_id, created_at, updated_at, updated_by, status) VALUES
@@ -619,3 +620,13 @@ INSERT INTO post_privacy (post_id, user_id, created_at, updated_at, updated_by, 
 (7, 2, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (8, 4, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (10, 11, CURRENT_TIMESTAMP, NULL, NULL, 'enable');
+
+
+-- Update tables with random times for created_at
+UPDATE posts SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE comments SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE group_posts SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE group_comments SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE messages SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE group_messages SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');
+UPDATE notifications SET created_at = datetime('2025-04-21 13:39:00', '+' || CAST(ABS(RANDOM() % (60 * 60 * 24 * 28)) AS TEXT) || ' seconds');

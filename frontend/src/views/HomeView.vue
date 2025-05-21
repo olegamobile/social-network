@@ -4,46 +4,20 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Following</h3>
-                    <ul v-if="mockFollowing.length > 0" class="space-y-2">
-                        <li v-for="user in mockFollowing" :key="user.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                            {{ user.name }}
-                        </li>
-                    </ul>
-                    <p v-else class="text-nordic-light italic">Not following anyone yet.</p>
-                </div>
-
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followers</h3>
-                    <ul v-if="mockFollowers.length > 0" class="space-y-2">
-                        <li v-for="user in mockFollowers" :key="user.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                            {{ user.name }}
-                        </li>
-                    </ul>
-                    <p v-else class="text-nordic-light italic">No followers yet.</p>
-                </div>
-
-                <div>
-                    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Groups</h3>
-                    <ul v-if="mockGroups.length > 0" class="space-y-2">
-                        <li v-for="group in mockGroups" :key="group.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                            {{ group.name }}
-                        </li>
-                    </ul>
-                    <p v-else class="text-nordic-light italic">Not a member of any groups yet.</p>
-                </div>
+                <FollowsInSidebar :userId="user.id" v-if="user" /> <!-- not user.value.id ! -->
+                <br />
+                <GroupsInSidebar />
             </template>
 
             <template #main>
                 <h2 class="text-3xl font-bold text-nordic-dark mb-6">Home Feed</h2>
 
-                <NewPostForm @post-submitted="handlePostSubmitted" class="mb-8" />
+                <button @click="showPostForm = !showPostForm" class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                    {{ showPostForm ? 'Cancel' : 'Create New Post' }}
+                </button>
+                <NewPostForm v-if="showPostForm" @post-submitted="handlePostSubmitted" class="mb-8" />
 
-                <PostsList :posts="posts" />
+                <PostsList ref="postsListRef" :posts="posts" />
             </template>
         </TwoColumnLayout>
     </div>
@@ -52,73 +26,120 @@
 <script setup>
 import TopBar from '../components/TopBar.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import PostsList from '@/components/PostsList.vue'
 import { useAuth } from '@/composables/useAuth'
 import NewPostForm from '@/components/NewPostForm.vue'
 import { useErrorStore } from '@/stores/error'
+import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia';
+import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
+import throttle from 'lodash.throttle';
 
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const { logout } = useAuth()
 const router = useRouter()
 const errorStore = useErrorStore()
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
+const showPostForm = ref(false)
 
-// Mock data for sidebar (replace with actual data fetching if needed)
-const mockFollowing = ref([
-    { id: 'f1', name: '@bob_s CoolUser' },
-    { id: 'f2', name: '@john_doe_artist' },
-    { id: 'f3', name: '@alice_in_wonderdev' },
-]);
-const mockFollowers = ref([
-    { id: 'fl1', name: '@charlie_codes' },
-]);
-const mockGroups = ref([
-    { id: 'g1', name: 'Vue Virtuosos' },
-    { id: 'g2', name: 'Nordic Design Fans' },
-    { id: 'g3', name: 'Tailwind CSS Masters' },
-]);
+let cursor = ref(null); // last post’s created_at
+const limit = 10;
+const lastPostId = ref(0);
+const isLoading = ref(false);
+const hasMore = ref(true); // To avoid loading forever
+const postsListRef = ref(null); // To access the sentinel in PostsList
+
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
 }
 
-onMounted(async () => {
+async function _getHomeFeed() {
+    if (isLoading.value || !hasMore.value) return;
+    isLoading.value = true;
+
     try {
-        const res = await fetch(`${apiUrl}/api/posts`, {
+        const params = new URLSearchParams();
+        if (cursor.value) params.append('cursor', cursor.value);
+        params.append('limit', limit);
+        params.append('last_post_id', lastPostId.value);
+
+        const res = await fetch(`${apiUrl}/api/homefeed?${params.toString()}`, {
             credentials: 'include' // This sends the session cookie with the request
         });
 
         if (res.status === 401) {
             // Session is invalid — logout and redirect
+            console.log("homefeed returned 401 status")
             errorStore.setError('Session Expired', 'Your session has expired. Please log in again.');
-            logout(); // your logout function
-            router.push('/login');
+            logout();
+            router.push('/login')
             return;
         }
 
         if (!res.ok) {
             // Handle other non-successful HTTP statuses (e.g., 400, 404, 500)
             const errorData = await res.json().catch(() => ({ message: 'Failed to fetch posts and parse error.' }));
-            throw new Error(errorData.message || `HTTP error ${res.status}`);
+            isLoading.value = false
+            throw new Error(errorData.message || `HTTP error ${res.status}`)
         }
 
-        posts.value = await res.json()
+        const newPosts = await res.json()
+
+        // Update cursor to the created_at of the last post received
+        if (newPosts && newPosts.length > 0) {
+            cursor.value = newPosts[newPosts.length - 1].created_at
+            lastPostId.value = newPosts[newPosts.length - 1].id
+            posts.value.push(...newPosts); // append to existing posts
+        } else {
+            hasMore.value = false
+        }
+
+        isLoading.value = false
     } catch (error) {
+        isLoading.value = false
         errorStore.setError('Error Loading Posts', error.message || 'An unexpected error occurred while trying to load posts. Please try again later.');
         router.push('/error')
         return
     }
+}
 
+
+// 🔁 Create a throttled version
+const getHomeFeed = throttle(_getHomeFeed, 1000);
+
+onMounted(async () => {
+    await getHomeFeed()
+
+    // Wait for posts to render so sentinel is in DOM
+    await nextTick();
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            const entry = entries[0];
+            if (entry.isIntersecting) {
+                getHomeFeed();
+            }
+        },
+        {
+            root: null, // viewport
+            threshold: 0.5
+        }
+    );
+
+    if (postsListRef.value?.scrollObserver) {
+        observer.observe(postsListRef.value.scrollObserver);
+    }
 })
 </script>
 
 <style scoped>
-
-
 .home-page-wrapper {
-  min-height: 100vh;
+    min-height: 100vh;
 }
-
 </style>

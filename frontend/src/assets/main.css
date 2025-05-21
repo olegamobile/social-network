@@ -1,27 +1,64 @@
 :root {
-  --nordic-primary-bg: #F7F9FB; /* Very Light Cool Grey */
-    --nordic-secondary-bg: #E8EDF2; /* Soft Blue-Grey for panels or accents */
-    --nordic-text-dark: #263238;    /* Dark Slate Grey for primary text */
-    --nordic-text-light: #546E7A;   /* Lighter Slate Grey for secondary text */
-    --nordic-primary-accent: #607D8B;/* Muted Blue-Grey for active elements */
-    --nordic-border-light: #CFD8DC;  /* Light Grey for borders */
+  --nordic-primary-bg: #F7F9FB;
+  /* Very Light Cool Grey */
+  --nordic-secondary-bg: #E8EDF2;
+  /* Soft Blue-Grey for panels or accents */
+  --nordic-text-dark: #263238;
+  /* Dark Slate Grey for primary text */
+  --nordic-text-light: #546E7A;
+  /* Lighter Slate Grey for secondary text */
+  --nordic-primary-accent: #607D8B;
+  /* Muted Blue-Grey for active elements */
+  --nordic-secondary-accent: #769FCD;
+  --nordic-border-light: #CFD8DC;
+  /* Light Grey for borders */
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--nordic-primary-bg);
+  min-height: 100vh;
+  background: url("./nordic_background_no_people.svg") center center / cover no-repeat fixed;
 }
 
 /* Utility classes using CSS variables */
-.bg-nordic-primary-bg { background-color: var(--nordic-primary-bg); }
-.bg-nordic-secondary-bg { background-color: var(--nordic-secondary-bg); }
-.text-nordic-primary-accent { color: var(--nordic-primary-accent); }
-.text-nordic-dark { color: var(--nordic-text-dark); }
-.text-nordic-light { color: var(--nordic-text-light); }
-.bg-nordic-primary-accent { background-color: var(--nordic-primary-accent); }
-.border-nordic-light { border-color: var(--nordic-border-light); }
+.bg-nordic-primary-bg {
+  background-color: var(--nordic-primary-bg);
+  background: url("./nordic_background_no_people.svg") center center / cover no-repeat fixed;
+}
+
+.bg-nordic-secondary-bg {
+  background-color: var(--nordic-secondary-bg);
+}
+
+.text-nordic-primary-accent {
+  color: var(--nordic-primary-accent);
+}
+
+.text-nordic-dark {
+  color: var(--nordic-text-dark);
+}
+
+.text-nordic-light {
+  color: var(--nordic-text-light);
+}
+
+.bg-nordic-primary-accent {
+  background-color: var(--nordic-primary-accent);
+}
+
+.border-nordic-light {
+  border-color: var(--nordic-border-light);
+}
 
 /* Hover states */
-.hover\:text-nordic-secondary-accent:hover { color: var(--nordic-secondary-accent); }
-.hover\:bg-nordic-secondary-accent:hover { background-color: var(--nordic-secondary-accent); }
-.hover\:text-nordic-primary-accent:hover { color: var(--nordic-primary-accent); }
+.hover\:text-nordic-secondary-accent:hover {
+  color: var(--nordic-secondary-accent);
+}
+
+.hover\:bg-nordic-secondary-accent:hover {
+  background-color: var(--nordic-secondary-accent);
+}
+
+.hover\:text-nordic-primary-accent:hover {
+  color: var(--nordic-primary-accent);
+}

@@ -1,11 +1,19 @@
 <template>
     <div class="post-card">
         <p class="post-content">{{ post.content }}</p>
-        <small class="post-date">
-            Posted by
-            <RouterLink :to="`/profile/${post.user_id}`" class="post-user">
+        <small class="post-date flex items-center">
+            <RouterLink :to="`/profile/${post.user_id}`" class="post-user flex items-center mr-1">
+                <div v-if="post.avatar_url" class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1">
+                    <img :src="`${apiUrl}/${post.avatar_url}`" alt="User Avatar" class="w-full h-full object-cover" />
+                </div>
                 {{ post.username }}
             </RouterLink>
+            <span v-if="post.group_id">
+                in
+                <RouterLink :to="`/groups/${post.group_id}`" class="text-blue-500 hover:underline mr-1">
+                    {{ post.group_name }}
+                </RouterLink>
+            </span>
             on {{ formattedDate }}
         </small>
         <button @click="toggleComments" class="mt-2 text-blue-500 hover:underline">

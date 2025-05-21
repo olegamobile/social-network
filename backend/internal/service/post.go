@@ -27,7 +27,7 @@ func CreatePost(r *http.Request, userID int) (model.Post, int) {
 		return post, http.StatusInternalServerError
 	}
 
-	usr, err := repository.GetUserById(userID)
+	usr, err := repository.GetUserById(userID, true)
 	if err != nil {
 		return post, http.StatusNotFound
 	}
