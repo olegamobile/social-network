@@ -16,11 +16,11 @@
             </span>
             on {{ formattedDate }}
         </small>
-        <button @click="toggleComments" class="mt-2 text-blue-500 hover:underline">
-      {{ showComments ? 'Hide Comments' : 'Show Comments' }}
+        <button @click="toggleComments" class="mt-2 mr-2 text-blue-500 hover:underline">
+      {{ showComments ? 'Hide Comments' : 'Show comments' }}
     </button>
     <button @click="showNewCommentForm" class="mt-2 text-blue-500 hover:underline">
-      {{ newComment ? 'Hide form' : 'add comment' }}
+      {{ newComment ? 'Hide form' : 'Add comment' }}
     </button>
     <div v-if="showComments" class="mt-2">
       <div v-if="loadingComments">Loading comments...</div>
