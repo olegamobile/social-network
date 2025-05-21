@@ -24,7 +24,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import NotificationsList from '@/components/NotificationsList.vue'

@@ -49,6 +49,7 @@ func setHandlers() {
 	http.HandleFunc("/api/notifications", middleware.WithCORS(handlers.GetNotifications))
 	http.HandleFunc("/api/notifications/{id}", middleware.WithCORS(handlers.GetNotificationByID))
 	http.HandleFunc("/api/notifications/{id}/read", middleware.WithCORS(handlers.ReadNotification))
+	http.HandleFunc("/api/notifications/new", middleware.WithCORS(handlers.GetNewNotifications))
 
 	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections))
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)

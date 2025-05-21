@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/database"
 	"backend/internal/model"
+	"database/sql"
 	"fmt"
 )
 
@@ -113,6 +114,9 @@ func CheckFollowRequestStatus(followRequestID int) (bool, error) {
         WHERE id = ?
     `, followRequestID).Scan(&status)
 	if err != nil {
+		if err == sql.ErrNoRows { // no row found means not pending
+			return false, nil
+		}
 		return false, err
 	}
 	return status == "pending", nil
@@ -126,6 +130,9 @@ func CheckInvitationStatus(groupInvitationID int) (bool, error) {
         WHERE id = ?
     `, groupInvitationID).Scan(&status)
 	if err != nil {
+		if err == sql.ErrNoRows { // no row found means not pending
+			return false, nil
+		}
 		return false, err
 	}
 	return status == "pending", nil
@@ -139,6 +146,9 @@ func CheckJoinRequestStatus(userID, groupID int) (bool, error) {
         WHERE user_id = ? AND group_id = ?
     `, userID, groupID).Scan(&status)
 	if err != nil {
+		if err == sql.ErrNoRows { // no row found means not pending
+			return false, nil
+		}
 		return false, err
 	}
 	return status == "pending", nil
@@ -152,7 +162,23 @@ func CheckEventInvitationStatus(userID, eventID int) (bool, error) {
         WHERE user_id = ? AND event_id = ? 
     `, userID, eventID).Scan(&status)
 	if err != nil {
+		if err == sql.ErrNoRows { // no row found means not pending
+			return false, nil
+		}
 		return false, err
 	}
 	return status == "pending", nil
+}
+
+func GetNewNotificatonsCount(userID int) (int, error) {
+	count := 0
+	err := database.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM notifications
+		WHERE user_id = ? AND is_read = 0 AND status = 'enable'
+	`, userID).Scan(&count)
+	if err != nil {
+		return count, err
+	}
+	return count, nil
 }
