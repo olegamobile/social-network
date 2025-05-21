@@ -37,7 +37,7 @@
 
                 <!-- follow button -->
                 <button v-if="showFollowButton" :disabled="followStatus === 'pending'" @click="handleFollowAction"
-                    class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition" :class="followButtonClass">
+                    class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition" :class="followButtonClass">
                     {{
                         followStatus === 'not following public' ? 'Follow' :
                             followStatus === 'not following private' ? 'Request to Follow' :
@@ -50,7 +50,7 @@
                 <!-- edit profile button and form -->
                 <button v-if="userStore.user && route.params.id == userStore.user.id"
                     @click="showEditForm = !showEditForm"
-                    class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                    class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                     {{ showEditForm ? 'Close Editor' : 'Edit Profile' }}
                 </button>
                 <EditProfile v-if="showEditForm" />

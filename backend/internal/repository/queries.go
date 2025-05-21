@@ -141,7 +141,6 @@ func GetUserById(id int, viewFull bool) (model.User, error) {
 }
 
 func GetGroupsByUserId(userId int) ([]model.Group, error) {
-	// group info from groups where that id can be found on same row as userId on group_members
 	query := `
 	SELECT g.id, g.title, g.description
 	FROM groups g
@@ -168,6 +167,64 @@ func GetGroupsByUserId(userId int) ([]model.Group, error) {
 	}
 
 	//fmt.Println("user groups:", groups)
+
+	return groups, nil
+}
+
+func GetGroupRequestsByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	JOIN group_members gm ON g.id = gm.group_id
+	WHERE gm.user_id = ? AND g.status = 'enable' AND gm.status = 'enable' AND gm.approval_status = 'pending' ;
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupRequestsByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupRequestsByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
+
+func GetGroupInvitationsByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	JOIN group_invitations gi ON g.id = gi.group_id
+	WHERE gi.user_id = ? AND g.status = 'enable' AND gi.status = 'enable' AND gi.approval_status = 'pending' ;
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupInvitationsByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupInvitationsByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
 
 	return groups, nil
 }

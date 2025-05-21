@@ -5,6 +5,8 @@
         <TwoColumnLayout>
             <template #sidebar>
                 <GroupsInSidebar />
+                <RequestedGroupsInSidebar />
+                <InvitedGroupsInSidebar />
             </template>
 
             <template #main>
@@ -61,6 +63,8 @@ import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useErrorStore } from '@/stores/error'
 import { useAuth } from '@/composables/useAuth'
 import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
+import RequestedGroupsInSidebar from '@/components/RequestedGroupsInSidebar.vue'
+import InvitedGroupsInSidebar from '@/components/InvitedGroupsInSidebar.vue'
 import { useArrayUtils } from '@/composables/useArrayUtils';
 import throttle from 'lodash.throttle';
 

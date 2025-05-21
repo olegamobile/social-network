@@ -180,6 +180,17 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	membership, err := service.Membership(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to determine group membership status", http.StatusInternalServerError)
+		return
+	}
+
+	if membership != "accepted" && membership != "admin" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var imagePath *string
 	file, header, err := r.FormFile("image")
 	if err == nil {
@@ -284,6 +295,38 @@ func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
 	groups, err := repository.GetGroupsByUserId(userId)
 	if err != nil {
 		http.Error(w, "Failed to fetch groups", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(groups)
+}
+
+func HandleGroupRequestsByUserId(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupRequestsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := repository.GetGroupRequestsByUserId(userId)
+	if err != nil {
+		http.Error(w, "Failed to fetch group requests", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(groups)
+}
+
+func HandleGroupInvitationsByUserId(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupInvitationsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := repository.GetGroupInvitationsByUserId(userId)
+	if err != nil {
+		http.Error(w, "Failed to fetch group invitations", http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(groups)

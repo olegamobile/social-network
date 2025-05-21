@@ -10,7 +10,7 @@
                     <p>{{ group.description }}</p>
 
                     <!-- members only information -->
-                    <div v-if="isMember">
+                    <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
                         <!-- chat button -->
                         <br>
                         <RouterLink :to="`/chats/${group.id}`" class="my-4">Go to Chat</RouterLink>
@@ -29,8 +29,7 @@
 
                 <!-- button to join / leave / delete -->
                 <button :disabled="membershipStatus === 'pending'" @click="handleGroupAction"
-                    class="mb-4 px-4 py-2 text-white rounded transition"
-                    :class="groupButtonClass">
+                    class="mb-4 px-4 py-2 text-white rounded transition" :class="groupButtonClass">
                     {{
                         membershipStatus === '' ? 'Request to Join' :
                             membershipStatus === 'pending' ? 'Request Sent' :
@@ -41,7 +40,17 @@
                     }}
                 </button>
 
-                <div v-if="isMember && posts">
+                <div class="relative">
+                    <img :src="`${apiUrl}/uploads/posts/default.jpg`" alt="Page Image"
+                        class="w-full mb-4 h-40 object-cover rounded" />
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <h1 v-if="group && group.title" class="text-white text-5xl font-extrabold text-center">
+                            {{ group.title }}
+                        </h1>
+                    </div>
+                </div>
+
+                <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
                     <!-- new post button and form -->
                     <button @click="showPostForm = !showPostForm"
                         class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
@@ -78,7 +87,6 @@ const members = ref([])
 const events = ref([])
 const showPostForm = ref(false)
 
-const isMember = ref(true) // Mock check
 const membershipStatus = ref('')
 
 const handlePostSubmitted = (newPost) => {
