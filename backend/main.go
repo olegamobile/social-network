@@ -19,6 +19,7 @@ func setHandlers() {
 	http.HandleFunc("/api/users/search", middleware.WithCORS(handlers.SearchUsers))
 	//http.HandleFunc("/api/posts", middleware.WithCORS(handlers.GetPosts))
 	http.HandleFunc("/api/posts/", middleware.WithCORS(handlers.HandlePostsByUserId))
+	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))
 	http.HandleFunc("/api/group/posts/", middleware.WithCORS(handlers.HandlePostsByGroupId))
 	http.HandleFunc("/api/group/members/", middleware.WithCORS(handlers.HandleMembersByGroupId))
 	http.HandleFunc("/api/group/events/", middleware.WithCORS(handlers.HandleEventsByGroupId))
@@ -28,12 +29,12 @@ func setHandlers() {
 	http.HandleFunc("/api/groups/search", middleware.WithCORS(handlers.SearchGroups))
 	http.HandleFunc("/api/groups/user/", middleware.WithCORS(handlers.HandleGroupsByUserId)) // groups with user id
 	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById))            // group with group id
+	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
 	http.HandleFunc("/api/register", middleware.WithCORS(handlers.HandleRegister))
 	http.HandleFunc("/api/logout", middleware.WithCORS(handlers.HandleLogout))
 	http.HandleFunc("/api/me", middleware.WithCORS(handlers.HandleMe))
 	http.HandleFunc("/api/me/update", middleware.WithCORS(handlers.HandleUpdateMe))
-	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))
 	http.HandleFunc("/api/following/", middleware.WithCORS(handlers.HandleFollowing))
 	http.HandleFunc("/api/follow", middleware.WithCORS(handlers.HandleFollowAction))
 	http.HandleFunc("/api/followers/", middleware.WithCORS(handlers.GetFollowers))
@@ -51,11 +52,18 @@ func setHandlers() {
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 
 	// Serve the avatars directory as static content with CORS
-	fs := http.FileServer(http.Dir("./avatars"))
+	avatarsFS := http.FileServer(http.Dir("./avatars"))
 	avatarHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		middleware.WithCORS(fs.ServeHTTP)(w, r)
+		middleware.WithCORS(avatarsFS.ServeHTTP)(w, r)
 	})
 	http.Handle("/avatars/", http.StripPrefix("/avatars/", avatarHandler))
+
+	postsFS := http.FileServer(http.Dir("./uploads/posts"))
+	postImageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		middleware.WithCORS(postsFS.ServeHTTP)(w, r)
+	})
+	http.Handle("/uploads/posts/", http.StripPrefix("/uploads/posts/", postImageHandler))
+
 }
 
 func main() {

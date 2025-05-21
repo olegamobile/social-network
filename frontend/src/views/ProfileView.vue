@@ -5,20 +5,6 @@
         <TwoColumnLayout>
             <template #sidebar>
 
-                <!-- follow button -->
-                <div v-if="showFollowButton" class="mb-2">
-                    <button :disabled="followStatus === 'pending'" @click="handleFollowAction"
-                        class="px-4 py-2 rounded text-white" :class="followButtonClass">
-                        {{
-                            followStatus === 'not following public' ? 'Follow' :
-                                followStatus === 'not following private' ? 'Request to Follow' :
-                                    followStatus === 'accepted' ? 'Stop Following' :
-                                        followStatus === 'pending' ? 'Follow Requested' :
-                                            ''
-                        }}
-                    </button>
-                </div>
-
                 <!-- avatar image -->
                 <div class="flex flex-col items-center mb-4">
                     <div v-if="user?.avatar_url"
@@ -29,7 +15,8 @@
                 </div>
 
                 <!-- first and last name -->
-                <h3 class="text-xl font-semibold text-nordic-dark mb-3">{{ user?.first_name }} {{ user?.last_name }}</h3>
+                <h3 class="text-xl font-semibold text-nordic-dark mb-3">{{ user?.first_name }} {{ user?.last_name }}
+                </h3>
 
                 <!-- info: show if following or public -->
                 <p v-if="user?.email" class="mb-3"><strong>Email:</strong><br>{{ user?.email }}</p>
@@ -41,11 +28,28 @@
                 <p v-if="user?.is_public" class="mt-3 mb-7"><strong>Public profile</strong></p>
                 <p v-if="!user?.is_public" class="mt-3 mb-7"><strong>Private profile</strong></p>
 
-                <FollowsInSidebar v-if="formattedBirthday" :userId="user.id"/>   <!-- birthday exists = allowed to view -->
-                <GroupsInSidebar v-if="formattedBirthday" :userId="user.id"/>   <!-- birthday exists = allowed to view -->
+                <FollowsInSidebar v-if="formattedBirthday" :userId="user.id" />
+                <!-- birthday exists = allowed to view -->
+                <GroupsInSidebar v-if="formattedBirthday" :userId="user.id" />
+                <!-- birthday exists = allowed to view -->
             </template>
 
             <template #main>
+
+                <!-- follow button -->
+
+                <button v-if="showFollowButton" :disabled="followStatus === 'pending'" @click="handleFollowAction"
+                    class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition" :class="followButtonClass">
+                    {{
+                        followStatus === 'not following public' ? 'Follow' :
+                            followStatus === 'not following private' ? 'Request to Follow' :
+                                followStatus === 'accepted' ? 'Stop Following' :
+                                    followStatus === 'pending' ? 'Follow Requested' :
+                                        ''
+                    }}
+                </button>
+
+
                 <!-- edit profile button and form -->
                 <button v-if="userStore.user && route.params.id == userStore.user.id"
                     @click="showEditForm = !showEditForm"

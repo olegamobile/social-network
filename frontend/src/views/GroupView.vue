@@ -4,41 +4,50 @@
 
         <TwoColumnLayout>
             <template #sidebar>
-
-                <!-- join/leave button -->
-                <div v-if="showJoinLeaveButton" class="mb-2">
-                    <button @click="joinOrLeave" class="px-4 py-2 rounded text-white" :class="followButtonClass">
-                        {{
-                            membershipStatus === 'pending' ? 'Request Sent' :
-                                membershipStatus === 'accepted' ? 'Leave Group' :
-                                    membershipStatus === 'declined' ? 'Request to Join' :
-                                        membershipStatus === 'admin' ? 'Remove Group' :
-                                            ''
-                        }}
-                    </button>
-                </div>
-
                 <div v-if="group">
+
+                    <!-- join/leave button -->
+                    <div v-if="showJoinLeaveButton" class="mb-2">
+                        <button @click="joinOrLeave" class="px-4 py-2 rounded text-white" :class="followButtonClass">
+                            {{
+                                membershipStatus === 'pending' ? 'Request Sent' :
+                                    membershipStatus === 'accepted' ? 'Leave Group' :
+                                        membershipStatus === 'declined' ? 'Request to Join' :
+                                            membershipStatus === 'admin' ? 'Remove Group' :
+                                                ''
+                            }}
+                        </button>
+                    </div>
+
+                    <!-- name and description -->
                     <h2 class="text-2xl font-bold mb-4">{{ group.title }}</h2>
                     <p>{{ group.description }}</p>
 
+                    <!-- members only information -->
                     <div v-if="isMember">
-
-                        <EventList :events="events" small class="my-4" />
+                        <!-- chat button -->
+                        <br>
                         <RouterLink :to="`/chats/${group.id}`" class="my-4">Go to Chat</RouterLink>
 
-                        <h4 class="mt-4">Members</h4>
-                        <ul>
-                            <li v-for="member in members" :key="member.id">
-                                {{ member.username }}
-                            </li>
-                        </ul>
+                        <!-- events -->
+                        <EventList :events="events" small class="my-4" />
+
+                        <!-- members -->
+                        <MembersList :members="members" small class="my-4" />
                     </div>
+
                 </div>
             </template>
 
             <template #main>
                 <div v-if="isMember && posts">
+                    <!-- new post button and form -->
+                    <button @click="showPostForm = !showPostForm"
+                        class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                        {{ showPostForm ? 'Cancel' : 'Create New Post' }}
+                    </button>
+                    <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)" @post-submitted="handlePostSubmitted" class="mb-8" />
+
                     <PostsList :posts="posts" />
                 </div>
                 <div v-else>
@@ -55,8 +64,10 @@ import { useRoute, useRouter } from 'vue-router'
 import TopBar from '@/components/TopBar.vue'
 import PostsList from '@/components/PostsList.vue'
 import EventList from '@/components/EventList.vue'
+import MembersList from '@/components/MembersList.vue'
 import { useErrorStore } from '@/stores/error'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
+import NewGroupPostForm from '@/components/NewGroupPostForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -67,12 +78,18 @@ const posts = ref([])
 const members = ref([])
 const events = ref([])
 
+const showPostForm = ref(false)
+
 const isMember = ref(true) // Mock check
 const showJoinLeaveButton = ref[true]
 
 
 function requestMembership() {
     alert('Membership requested!')
+}
+
+const handlePostSubmitted = (newPost) => {
+    posts.value.unshift(newPost)
 }
 
 async function getGroup(groupId) {
@@ -163,8 +180,6 @@ async function getEvents(groupId) {        // Fetch and filter posts
         }
         const groupEvs = await eventsRes.json()
         if (groupEvs) events.value = groupEvs
-
-        console.log("events gotten:", events.value)
     } catch (error) {
         console.log("error fetching group events:", error)
         errorStore.setError('Error', 'Something went wrong while loading group events data.')

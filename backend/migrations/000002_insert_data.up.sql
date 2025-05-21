@@ -20,20 +20,20 @@ INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, a
 
 -- Insert posts (8 columns, image_path always included)
 INSERT INTO posts (user_id, content, image_path, privacy_level, created_at, updated_at, updated_by, status) VALUES
-(1, 'Just enjoyed a beautiful sunset! #nature #peaceful', NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(2, 'Trying out a new recipe today. Fingers crossed! 🤞', 'mock.jpg', 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(3, 'Thinking about life and everything in between.', NULL, 'private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(4, 'Found a hidden gem of a cafe! The coffee is amazing. ☕', NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(5, 'First attempt at watercolor painting! 🎨', NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(6, 'Captured a stunning view on my morning run.', 'mock.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(7, 'Exploring a new hiking trail this weekend!', NULL, 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(8, 'Interesse im Fotoprojekt! Wie kann ich teilnehmen?', 'mock.jpg', 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(9, 'Gerade ein tolles Sci-Fi-Buch beendet. Empfehlungen?', NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(10, 'Abendstimmung mit Jazzmusik.', 'mock.jpg', 'private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(11, 'Heute Sauerteigbrot gebacken. Riecht toll! 🍞', NULL, 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(12, 'Neues Coding-Projekt läuft!', 'mock.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(13, 'Plane ein Wochenendabenteuer. Vorschläge?', NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
-(14, 'Neue Pflanze für meine Sammlung adoptiert! 🌿', NULL, 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable');
+(1, 'Just enjoyed a beautiful sunset! #nature #peaceful', '/uploads/posts/b15c5404-20a3-4e84-a7f1-995687925af0.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(2, 'Trying out a new recipe today. Fingers crossed! 🤞', '/uploads/posts/7650b44d-172c-4f19-9597-0b034254ec02.jpg', 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(3, 'Thinking about life and everything in between.', '/uploads/posts/0c52f09a-525d-4f94-9700-2f0abbe14043.jpg', 'private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(4, 'Found a hidden gem of a cafe! The coffee is amazing. ☕', '/uploads/posts/ca166a1c-2ec1-4074-9dde-1aa7894d7745.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(5, 'First attempt at watercolor painting! 🎨', '/uploads/posts/b94147a9-bd09-49c8-9e15-9125a370deef.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(6, 'Captured a stunning view on my morning run.', '/uploads/posts/32e3577c-ad83-42b8-91fa-687ab0a93fa9.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(7, 'Exploring a new hiking trail this weekend!', '/uploads/posts/f5dbeebd-33f0-4564-ac24-e917bdbfcfa0.jpg', 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(8, 'Interesse im Fotoprojekt! Wie kann ich teilnehmen?', '/uploads/posts/12973660-24d1-4fbc-ac24-c1796ae07bf1.jpg', 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(9, 'Gerade ein tolles Sci-Fi-Buch beendet. Empfehlungen?', '/uploads/posts/83b260eb-6399-4735-a4f8-73094a794544.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(10, 'Abendstimmung mit Jazzmusik.', '/uploads/posts/627013d0-d8d9-4493-9bbc-8996160554b8.jpg', 'private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(11, 'Heute Sauerteigbrot gebacken. Riecht toll! 🍞', '/uploads/posts/54ab6009-3b23-4e9d-88db-337d0ba96c05.jpg', 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(12, 'Neues Coding-Projekt läuft!', '/uploads/posts/ec5051be-8f3c-4ef0-9313-854ecbd90e83.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(13, 'Plane ein Wochenendabenteuer. Vorschläge?', '/uploads/posts/4c5baa2a-d900-47eb-9b96-be97f680ddc4.jpg', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+(14, 'Neue Pflanze für meine Sammlung adoptiert! 🌿', '/uploads/posts/c6187ce7-e35d-4ee5-89ec-cc983fd3ab7e.jpg', 'almost_private', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable');
 
 -- Insert comments (8 columns, image_path always included)
 INSERT INTO comments (post_id, user_id, content, image_path, created_at, updated_by, status) VALUES

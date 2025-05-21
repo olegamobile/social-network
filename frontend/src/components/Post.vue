@@ -1,5 +1,6 @@
 <template>
     <div class="post-card">
+        <img v-if="post.image_path" :src="`${apiUrl}/${post.image_path}`" alt="">
         <p class="post-content">{{ post.content }}</p>
         <small class="post-date flex items-center">
             <RouterLink :to="`/profile/${post.user_id}`" class="post-user flex items-center mr-1">

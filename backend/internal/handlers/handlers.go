@@ -458,18 +458,37 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload struct {
-		Content string `json:"content"`
-		Privacy string `json:"privacy_level"`
-	}
-	err = json.NewDecoder(r.Body).Decode(&payload)
-
-	if err != nil || payload.Content == "" {
-		fmt.Println("error in CreatePost:", err)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		fmt.Println("error reading data at HandleCreatePost", err)
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
 	}
 
-	post, statusCode := service.CreatePost(payload, userID)
+	content := r.FormValue("content")
+	privacyLvl := r.FormValue("privacy_level")
+	if content == "" || privacyLvl == "" {
+		fmt.Println("Missing fields at HandleCreatePost", err)
+		http.Error(w, "Missing fields", http.StatusBadRequest)
+		return
+	}
+
+	var imagePath *string
+	file, header, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		savedPath, saveErr := service.SaveUploadedFile(file, header)
+		if saveErr != nil {
+			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			return
+		}
+		imagePath = &savedPath
+	} else if err != http.ErrMissingFile {
+		fmt.Println("Error reading file at CreateGroupPostHandler", err)
+		http.Error(w, "Error reading file", http.StatusBadRequest)
+		return
+	}
+
+	post, statusCode := service.CreatePost(content, privacyLvl, imagePath, userID)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
@@ -546,7 +565,6 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 
 	notifications, err := repository.GetAllNotificatons(userID)
 	if err != nil {
-		fmt.Println(" error getting user GetNotifications", err)
 		http.Error(w, "Failed to fetch notifications", http.StatusInternalServerError)
 		return
 	}
@@ -567,7 +585,6 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err != nil {
-			fmt.Println(" error checking user GetNotifications", err)
 			http.Error(w, "Failed to check notification status", http.StatusInternalServerError)
 			return
 		}
@@ -631,4 +648,82 @@ func ReadNotification(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
+	userID, err := service.ValidateSession(r) // replace with your actual session logic
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		fmt.Println("error reading data at CreateGroupPostHandler", err)
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	content := r.FormValue("content")
+	groupIDStr := r.FormValue("group_id")
+	if content == "" || groupIDStr == "" {
+		fmt.Println("Missing fields at CreateGroupPostHandler", err)
+		http.Error(w, "Missing fields", http.StatusBadRequest)
+		return
+	}
+
+	groupID, err := strconv.Atoi(groupIDStr)
+	if err != nil {
+		fmt.Println("Invalid group_id at CreateGroupPostHandler", err)
+		http.Error(w, "Invalid group_id", http.StatusBadRequest)
+		return
+	}
+
+	var imagePath *string
+	file, header, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		savedPath, saveErr := service.SaveUploadedFile(file, header)
+		if saveErr != nil {
+			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			return
+		}
+		imagePath = &savedPath
+	} else if err != http.ErrMissingFile {
+		fmt.Println("Error reading file at CreateGroupPostHandler", err)
+		http.Error(w, "Error reading file", http.StatusBadRequest)
+		return
+	}
+
+	id, createdAt, err := repository.InsertGroupPost(userID, groupID, content, imagePath)
+	if err != nil {
+		http.Error(w, "Failed to store post", http.StatusInternalServerError)
+		return
+	}
+
+	user, err := repository.GetUserById(userID, true)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	group, err := repository.GetGroupById(groupID)
+	if err != nil {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+
+	post := model.Post{
+		ID:         int(id),
+		UserID:     userID,
+		Username:   user.FirstName + " " + user.LastName,
+		AvatarPath: user.AvatarPath,
+		Content:    content,
+		ImagePath:  imagePath,
+		GroupID:    &groupID,
+		GroupName:  &group.Title,
+		CreatedAt:  createdAt,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(post)
 }
