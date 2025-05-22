@@ -47,7 +47,7 @@
                 <!-- title image -->
                 <div class="relative">
                     <img :src="`${apiUrl}/uploads/posts/groupdefault.jpg`" alt="Page Image"
-                        class="w-full mb-4 h-40 object-cover rounded" />
+                        class="w-full max-w-screen-lg mb-4 h-40 object-cover rounded" />
                     <div class="absolute inset-0 flex items-center justify-center">
                         <h1 v-if="group && group.title" class="text-white text-5xl font-extrabold text-center">
                             {{ group.title }}
