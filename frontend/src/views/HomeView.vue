@@ -14,7 +14,7 @@
 
                 <!-- new post button and form -->
                 <button @click="showPostForm = !showPostForm" class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
-                    {{ showPostForm ? 'Cancel' : 'Create New Post' }}
+                    {{ showPostForm ? 'Close Form' : 'Create New Post' }}
                 </button>
                 <NewPostForm v-if="showPostForm" @post-submitted="handlePostSubmitted" class="mb-8" />
 

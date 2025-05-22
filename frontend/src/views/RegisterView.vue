@@ -95,8 +95,7 @@ const register = async () => {
             lastName: form.value.lastName,
             dob: form.value.dob,
             nickname: form.value.nickname || null,
-            about: form.value.about || null,
-            // Avatar will likely need to be sent as FormData
+            about: form.value.about || null
         };
 
         const formData = new FormData();
@@ -104,7 +103,6 @@ const register = async () => {
             formData.append(key, value);
         }
         if (form.value.avatar) {
-            //formData.append('avatar', form.value.avatar);
             const processedAvatar = await processAvatarImage(form.value.avatar);
             formData.append('avatar', processedAvatar);
         }

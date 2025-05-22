@@ -76,13 +76,6 @@ const submitPost = async () => {
       credentials: 'include',
     })
 
-/*     const res = await fetch(`${apiUrl}/api/posts/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // to send the session cookie
-      body: JSON.stringify({ content: content.value, privacy_level: privacy_level.value })
-    }) */
-
     if (res.ok) {
       const newPost = await res.json()
       emit('post-submitted', newPost)

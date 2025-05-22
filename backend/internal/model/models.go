@@ -55,7 +55,7 @@ type FollowRequest struct {
 }
 
 type Event struct {
-	ID          *int    `json:"id,omitempty"`
+	ID          *int   `json:"id,omitempty"`
 	Group       string `json:"group"`
 	GroupID     int    `json:"group_id"`
 	CreatorID   int    `json:"creator_id"`
@@ -63,7 +63,6 @@ type Event struct {
 	Description string `json:"description"`
 	EventDate   string `json:"event_datetime"`
 }
-
 
 type EventResponse struct {
 	EventID  int    `json:"event_id"`
@@ -75,7 +74,6 @@ type GroupRequest struct {
 	TargetID int    `json:"target_id"`
 	Action   string `json:"action"` // "request", "leave", "delete"
 }
-
 
 type Notification struct {
 	ID            int     `json:"id"`
