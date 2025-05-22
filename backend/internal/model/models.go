@@ -75,6 +75,11 @@ type GroupRequest struct {
 	Action   string `json:"action"` // "request", "leave", "delete"
 }
 
+type GroupRequestApproval struct {
+	GroupID     int `json:"group_id"`
+	RequesterID int `json:"requester_id"`
+}
+
 type Notification struct {
 	ID            int     `json:"id"`
 	Type          string  `json:"type"` // 'follow_request', 'group_invitation', 'group_join_request', 'event_creation'

@@ -183,7 +183,7 @@ func GetGroupMembersByGroupId(groupId int) ([]model.User, error) {
 	SELECT u.id, u.first_name, u.last_name, u.avatar_path
 	FROM users u
 	JOIN group_members gm ON u.id = gm.user_id
-	WHERE gm.group_id = ?;`, groupId)
+	WHERE gm.group_id = ? AND gm.status = 'enable' AND u.status = 'enable' AND approval_status = 'accepted';`, groupId)
 
 	if err != nil {
 		fmt.Println("rows error at GetGroupMembersByGroupId", err)
@@ -279,18 +279,19 @@ func GroupRequest(userID, groupID int) (int, int) {
 		status = 'enable',
 		updated_by = ?
 	`
-	result, err := database.DB.Exec(query, groupID, userID, userID)
+	_, err := database.DB.Exec(query, groupID, userID, userID)
 	if err != nil {
 		return 0, http.StatusInternalServerError
 	}
 
-	// Get the last inserted row ID
-	id, err := result.LastInsertId()
+	var id int
+	row := database.DB.QueryRow("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?", groupID, userID)
+	err = row.Scan(&id)
 	if err != nil {
 		return 0, http.StatusInternalServerError
 	}
 
-	return int(id), http.StatusOK
+	return id, http.StatusOK
 }
 
 func LeaveGroup(userID, groupID int) int {
@@ -372,4 +373,23 @@ func AddGroupMember(userId, groupId int) error {
 		fmt.Println("exec error adding group member:", err)
 	}
 	return err
+}
+
+func ApproveGroupRequest(userID, groupID, adminID int, action string) int {
+	query := `
+		UPDATE group_members SET
+			approval_status = ?,
+			updated_by = ?
+		WHERE 
+			status = 'enable' AND 
+			approval_status = 'pending' AND 
+			user_id = ? AND 
+			group_id = ?
+	`
+	_, err := database.DB.Exec(query, action, adminID, userID, groupID)
+	if err != nil {
+		return http.StatusInternalServerError
+	}
+
+	return http.StatusOK
 }
