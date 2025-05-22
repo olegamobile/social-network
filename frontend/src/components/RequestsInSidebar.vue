@@ -13,8 +13,6 @@
         <p v-else class="text-nordic-light italic mb-5">You haven't sent any requests yet.</p>
     </div>
 
-    <br />
-
     <!-- Received Requests -->
     <div>
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Received Requests</h3>
