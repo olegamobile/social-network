@@ -1,5 +1,6 @@
 <template>
     <div class="post-card">
+        <img v-if="post.image_path" :src="`${apiUrl}/${post.image_path}`" alt="">
         <p class="post-content">{{ post.content }}</p>
         <small class="post-date flex items-center">
             <RouterLink :to="`/profile/${post.user_id}`" class="post-user flex items-center mr-1">
@@ -10,7 +11,7 @@
             </RouterLink>
             <span v-if="post.group_id">
                 in
-                <RouterLink :to="`/groups/${post.group_id}`" class="text-blue-500 hover:underline mr-1">
+                <RouterLink :to="`/group/${post.group_id}`" class="text-blue-500 hover:underline mr-1">
                     {{ post.group_name }}
                 </RouterLink>
             </span>

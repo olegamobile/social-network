@@ -46,9 +46,6 @@
                 </div>
             </div>
 
-
-
-
             <button type="submit"
                 class="w-full bg-nordic-primary-accent text-white py-2 px-4 rounded-md hover:bg-nordic-secondary-accent transition">Save
                 Changes</button>
@@ -95,6 +92,7 @@ const deleteAvatar = () => {
 
 const fetchProfile = async () => {
     try {
+        console.log(`${apiUrl}/api/me`)
         const response = await fetch(`${apiUrl}/api/me`, {
             credentials: 'include',
         });

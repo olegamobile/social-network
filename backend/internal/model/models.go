@@ -15,15 +15,6 @@ type User struct {
 	IsPublic   bool   `json:"is_public"`
 }
 
-/* type Post struct {
-	ID         int    `json:"id"`
-	UserID     int    `json:"user_id"`
-	Username   string `json:"username"`
-	AvatarPath string `json:"avatar_url"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"created_at"`
-} */
-
 type Post struct {
 	ID         int     `json:"id"`
 	UserID     int     `json:"user_id"`
@@ -65,6 +56,7 @@ type FollowRequest struct {
 
 type Event struct {
 	ID          int    `json:"id"`
+	Group       string `json:"group"`
 	GroupID     int    `json:"group_id"`
 	CreatorID   int    `json:"creator_id"`
 	Title       string `json:"title"`
@@ -73,11 +65,18 @@ type Event struct {
 	Status      string `json:"status"`
 }
 
+
 type EventResponse struct {
 	EventID  int    `json:"event_id"`
 	UserID   int    `json:"user_id"`
 	Response string `json:"response"` // going / not_going / pending
 }
+
+type GroupRequest struct {
+	TargetID int    `json:"target_id"`
+	Action   string `json:"action"` // "request", "leave", "delete"
+}
+
 
 type Notification struct {
 	ID            int     `json:"id"`

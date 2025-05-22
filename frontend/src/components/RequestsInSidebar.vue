@@ -10,7 +10,7 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">You haven't sent any requests yet.</p>
+        <p v-else class="text-nordic-light italic mb-5">You haven't sent any requests yet.</p>
     </div>
 
     <br />
