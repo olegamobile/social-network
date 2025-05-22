@@ -6,7 +6,7 @@ import router from './router'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 
-const app = createApp(App)
+const app = createApp(App)    
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)

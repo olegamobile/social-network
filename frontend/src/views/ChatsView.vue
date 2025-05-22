@@ -113,11 +113,17 @@ const followers = ref([{ id: 3, name: 'Alex', userId: '103' }])
 
 // Set the initial selected chat
 onMounted(() => {
+  
+    // when components is loaded/connected/mounted:
+    // fetch chats list from API
+    // display chat list
+    // open the first chat
+
     if (chats.value.length > 0) {
         selectedChat.value = chats.value[0]
     }
 
-    // Connect to WebSocket when component mounts
+    // Connect to WebSocket when component connects
     connectWebSocket()
 
     // Listen for incoming messages
