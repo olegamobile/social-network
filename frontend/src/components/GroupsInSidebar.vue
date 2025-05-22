@@ -1,15 +1,15 @@
 <template>
     <div>
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Groups</h3>
-        <ul v-if="groups.length > 0" class="space-y-2">
+        <ul v-if="groups && groups.length > 0" class="space-y-2 mb-5">
             <li v-for="group in groups" :key="group.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                <RouterLink :to="`/groups/${group.id}`">
+                <RouterLink :to="`/group/${group.id}`">
                     {{ group.title }}
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">Not a member of any groups yet.</p>
+        <p v-else class="text-nordic-light italic mb-5">Not a member of any groups yet.</p>
     </div>
 
 </template>
@@ -34,7 +34,7 @@ const groups = ref([]);
 
 async function getGroups() {
     try {
-        const res = await fetch(`${apiUrl}/api/groups/${user.value.id}`, {
+        const res = await fetch(`${apiUrl}/api/groups/user/${user.value.id}`, {
             credentials: 'include' // This sends the session cookie with the request
         });
 

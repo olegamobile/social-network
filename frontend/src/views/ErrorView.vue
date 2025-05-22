@@ -1,12 +1,8 @@
 <template>
   <div class="error-view">
     <TopBar />
-    <TwoColumnLayout>
-      <template #main>
-        <h1>{{ title }}</h1>
-        <p>{{ message }}</p>
-      </template>
-    </TwoColumnLayout>
+    <h1 class="mt-20">{{ title }}</h1>
+    <p>{{ message }}</p>
   </div>
 </template>
 

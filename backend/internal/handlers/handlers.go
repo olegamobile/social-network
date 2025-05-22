@@ -4,6 +4,7 @@ import (
 	"backend/internal/model"
 	"backend/internal/repository"
 	"backend/internal/service"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -60,7 +61,65 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errMsg, statusCode := service.RegisterUser(r)
+	err := r.ParseMultipartForm(10 << 20) // 10MB limit
+	if err != nil {
+		fmt.Println("01", err)
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	// Required fields
+	email := strings.TrimSpace(r.FormValue("email"))
+	password := r.FormValue("password")
+	firstName := strings.TrimSpace(r.FormValue("firstName"))
+	lastName := strings.TrimSpace(r.FormValue("lastName"))
+	dob := r.FormValue("dob")
+
+	// Optional fields
+	nickname := strings.TrimSpace(r.FormValue("nickname"))
+	about := strings.TrimSpace(r.FormValue("about"))
+
+	if email == "" || password == "" || firstName == "" || lastName == "" || dob == "" {
+		fmt.Println("02 missing fields")
+		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	// Handle optional avatar upload
+	var avatarPath sql.NullString
+	file, header, err := r.FormFile("avatar")
+	if err == nil {
+		defer file.Close()
+		avatarPath, err = service.UploadAvatar(file, header)
+		if err != nil {
+			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		fmt.Println("Image reading error at registering:", err)
+	}
+
+	userInfo := struct {
+		Email      string
+		Password   string
+		FirstName  string
+		LastName   string
+		DOB        string
+		Nickname   string
+		About      string
+		AvatarPath sql.NullString
+	}{
+		Email:      email,
+		Password:   password,
+		FirstName:  firstName,
+		LastName:   lastName,
+		DOB:        dob,
+		Nickname:   nickname,
+		About:      about,
+		AvatarPath: avatarPath,
+	}
+
+	errMsg, statusCode := service.RegisterUser(userInfo)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		http.Error(w, errMsg, statusCode)
 		return
@@ -71,7 +130,6 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println("updating profile")
 
 	userId, err := service.ValidateSession(r)
 	if err != nil {
@@ -79,7 +137,43 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, errMsg, errStatus := service.UpdateUserProfile(userId, r)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "Error parsing form", http.StatusBadRequest)
+		return
+	}
+
+	updateData := model.UpdateProfileData{
+		FirstName: r.FormValue("firstName"),
+		LastName:  r.FormValue("lastName"),
+		DOB:       r.FormValue("dob"),
+		Nickname:  r.FormValue("nickname"),
+		About:     r.FormValue("about"),
+	}
+
+	if r.FormValue("is_public") == "true" {
+		updateData.IsPublic = true
+	}
+
+	// Handle optional avatar
+	file, header, err := r.FormFile("avatar")
+	if err == nil {
+		defer file.Close()
+		updateData.AvatarPath, err = service.UploadAvatar(file, header)
+		if err != nil {
+			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			return
+		}
+		//fmt.Println("Form avatar found at:", updateData.AvatarPath.String)
+	} else {
+		fmt.Println("No avatar file found at updating profile:", err)
+	}
+
+	// Handle delete_avatar flag
+	if r.FormValue("delete_avatar") == "true" {
+		updateData.DeleteAvatar = true
+	}
+
+	usr, errMsg, errStatus := service.UpdateUserProfile(userId, updateData)
 	if errMsg != "" {
 		http.Error(w, errMsg, errStatus)
 		fmt.Println("Error 3", errMsg)
@@ -88,37 +182,6 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(usr)
-}
-
-/* func GetUsers(w http.ResponseWriter, r *http.Request) {
-	_, err := service.ValidateSession(r)
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	users, err := repository.GetAllUsers()
-	if err != nil {
-		http.Error(w, "Users not found", http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(users)
-} */
-
-func GetGroups(w http.ResponseWriter, r *http.Request) {
-	_, err := service.ValidateSession(r)
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	groups, err := repository.GetAllGroups()
-	if err != nil {
-		http.Error(w, "Users not found", http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(groups)
 }
 
 func HandleUserByID(w http.ResponseWriter, r *http.Request) {
@@ -166,23 +229,6 @@ func SearchUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(users)
 }
-
-/* func GetPosts(w http.ResponseWriter, r *http.Request) {
-	_, err := service.ValidateSession(r)
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	posts, err := repository.GetAllPosts()
-	if err != nil {
-		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
-} */
 
 func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)
@@ -238,7 +284,7 @@ func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	viewPosts, err := repository.ViewFullProfileOrNot(userId, targetId)
+	viewProfile, err := repository.ViewFullProfileOrNot(userId, targetId)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -246,7 +292,7 @@ func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 
 	var posts []model.Post
 
-	if viewPosts {
+	if viewProfile {
 		posts, err = repository.GetPostsByUserId(targetId)
 		if err != nil {
 			http.Error(w, "Failed to get posts", http.StatusInternalServerError)
@@ -271,7 +317,37 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, statusCode := service.CreatePost(r, userID)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		fmt.Println("error reading data at HandleCreatePost", err)
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	content := r.FormValue("content")
+	privacyLvl := r.FormValue("privacy_level")
+	if content == "" || privacyLvl == "" {
+		fmt.Println("Missing fields at HandleCreatePost", err)
+		http.Error(w, "Missing fields", http.StatusBadRequest)
+		return
+	}
+
+	var imagePath *string
+	file, header, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		savedPath, saveErr := service.SaveUploadedFile(file, header)
+		if saveErr != nil {
+			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			return
+		}
+		imagePath = &savedPath
+	} else if err != http.ErrMissingFile {
+		fmt.Println("Error reading file at CreateGroupPostHandler", err)
+		http.Error(w, "Error reading file", http.StatusBadRequest)
+		return
+	}
+
+	post, statusCode := service.CreatePost(content, privacyLvl, imagePath, userID)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
@@ -295,20 +371,4 @@ func GetSuggestedUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(suggestions)
-}
-
-func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
-	userId, err := service.ValidateSession(r)
-	if err != nil {
-		fmt.Println("validate error in HandleGroupsByUserId:", err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	groups, err := repository.GetGroupsByUserId(userId)
-	if err != nil {
-		http.Error(w, "Failed to fetch groups", http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(groups)
 }
