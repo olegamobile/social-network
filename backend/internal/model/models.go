@@ -54,19 +54,28 @@ type FollowRequest struct {
 	Action   string `json:"action"` // "request", "follow", "unfollow"
 }
 
+type Event struct {
+	ID          *int    `json:"id,omitempty"`
+	Group       string `json:"group"`
+	GroupID     int    `json:"group_id"`
+	CreatorID   int    `json:"creator_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	EventDate   string `json:"event_datetime"`
+}
+
+
+type EventResponse struct {
+	EventID  int    `json:"event_id"`
+	UserID   int    `json:"user_id"`
+	Response string `json:"response"` // going / not_going / pending
+}
+
 type GroupRequest struct {
 	TargetID int    `json:"target_id"`
 	Action   string `json:"action"` // "request", "leave", "delete"
 }
 
-type Event struct {
-	ID          int    `json:"id"`
-	Group       string `json:"group"`
-	GroupID     int    `json:"group_id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	DateTime    string `json:"datetime"`
-}
 
 type Notification struct {
 	ID            int     `json:"id"`
