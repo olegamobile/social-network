@@ -24,6 +24,7 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
+		return user, err
 	}
 
 	if nickname.Valid {
@@ -44,7 +45,7 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 		user.AvatarPath = ""
 	}
 
-	return user, err
+	return user, nil
 }
 
 func InsertSession(sessionID string, user model.User, expiresAt time.Time) error {
@@ -139,71 +140,7 @@ func GetUserById(id int, viewFull bool) (model.User, error) {
 	return user, err
 }
 
-/* func GetAllUsers() ([]model.User, error) {
-	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public FROM users")
-	defer rows.Close()
-
-	var users []model.User
-	for rows.Next() {
-		var u model.User
-		var nickname sql.NullString
-		var about sql.NullString
-		var avatarUrl sql.NullString
-
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl, &u.IsPublic)
-		if err != nil {
-			return users, err
-		}
-		if nickname.Valid {
-			u.Username = nickname.String
-		} else {
-			u.Username = ""
-		}
-
-		if about.Valid {
-			u.About = about.String
-		} else {
-			u.About = ""
-		}
-
-		if avatarUrl.Valid {
-			u.AvatarPath = avatarUrl.String
-		} else {
-			u.AvatarPath = ""
-		}
-
-		users = append(users, u)
-	}
-
-	return users, nil
-} */
-
-func GetAllGroups() ([]model.Group, error) {
-	rows, err := database.DB.Query(`
-		SELECT id, title, description 
-		FROM groups 
-		WHERE status = 'enable'
-	`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var groups []model.Group
-	for rows.Next() {
-		var g model.Group
-		err := rows.Scan(&g.ID, &g.Title, &g.Description)
-		if err != nil {
-			return groups, err
-		}
-		groups = append(groups, g)
-	}
-
-	return groups, nil
-}
-
 func GetGroupsByUserId(userId int) ([]model.Group, error) {
-	// group info from groups where that id can be found on same row as userId on group_members
 	query := `
 	SELECT g.id, g.title, g.description
 	FROM groups g
@@ -234,41 +171,91 @@ func GetGroupsByUserId(userId int) ([]model.Group, error) {
 	return groups, nil
 }
 
-/* func GetAllPosts() ([]model.Post, error) {
-	rows, err := database.DB.Query(`
-	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
-	FROM posts
-	JOIN users ON posts.user_id = users.id
-	ORDER BY posts.id DESC;
-`)
+func GetGroupRequestsByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	JOIN group_members gm ON g.id = gm.group_id
+	WHERE gm.user_id = ? AND g.status = 'enable' AND gm.status = 'enable' AND gm.approval_status = 'pending' ;
+	`
+
+	rows, err := database.DB.Query(query, userId)
 	if err != nil {
+		fmt.Println("query error in GetGroupRequestsByUserId", err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	var posts []model.Post
+	var groups []model.Group
 	for rows.Next() {
-		var p model.Post
-		var firstname, lastname string
-		var avatarUrl sql.NullString
-
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt)
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
 		if err != nil {
-			return nil, err
+			fmt.Println("scan error in GetGroupRequestsByUserId", err)
+			return groups, err
 		}
-
-		if avatarUrl.Valid {
-			p.AvatarPath = avatarUrl.String
-		} else {
-			p.AvatarPath = ""
-		}
-
-		p.Username = firstname + " " + lastname
-		posts = append(posts, p)
+		groups = append(groups, g)
 	}
 
-	return posts, nil
-} */
+	return groups, nil
+}
+
+func GetGroupInvitationsByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	JOIN group_invitations gi ON g.id = gi.group_id
+	WHERE gi.user_id = ? AND g.status = 'enable' AND gi.status = 'enable' AND gi.approval_status = 'pending' ;
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupInvitationsByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupInvitationsByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
+
+func GetGroupsAdministeredByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	WHERE g.creator_id = ? AND g.status = 'enable';
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupsAdministeredByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupsAdministeredByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
 
 // GetFeedPostsBefore gets posts from userID user's follows and groups
 // using cursor-based pagination: anything before the previous post (cursorTime)
@@ -406,12 +393,19 @@ func GetPostsByUserId(targetId int) ([]model.Post, error) {
 	return posts, nil
 }
 
-func InsertPost(userID int, content string, privacy string) (int, string, error) {
-	result, err := database.DB.Exec(
-		"INSERT INTO posts (user_id, content, privacy_level) VALUES (?, ?, ?)",
-		userID, content, privacy,
-	)
+func InsertPost(userID int, content string, privacy string, imagePath *string) (int, string, error) {
+	var query string
+	var args []any
 
+	if imagePath != nil {
+		query = "INSERT INTO posts (user_id, content, privacy_level, image_path) VALUES (?, ?, ?, ?)"
+		args = []any{userID, content, privacy, *imagePath}
+	} else {
+		query = "INSERT INTO posts (user_id, content, privacy_level) VALUES (?, ?, ?)"
+		args = []any{userID, content, privacy}
+	}
+
+	result, err := database.DB.Exec(query, args...)
 	if err != nil {
 		fmt.Println("error 1 at insert post", err)
 		return 0, "", err
@@ -424,7 +418,11 @@ func InsertPost(userID int, content string, privacy string) (int, string, error)
 	}
 
 	var createdAt string
-	_ = database.DB.QueryRow("SELECT created_at FROM posts WHERE id = ?", id).Scan(&createdAt)
+	err = database.DB.QueryRow("SELECT created_at FROM posts WHERE id = ?", id).Scan(&createdAt)
+	if err != nil {
+		fmt.Println("error 3 at insert post (fetching created_at)", err)
+		return 0, "", err
+	}
 
 	return int(id), createdAt, nil
 }

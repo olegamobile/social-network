@@ -5,6 +5,7 @@ import (
 	"backend/internal/model"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -157,4 +158,43 @@ func GetFollowRequestsReceivedByUser(userID int) ([]model.User, error) {
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func Unfollow(followerID, followedID int) int {
+	_, err := database.DB.Exec(`
+        DELETE FROM follow_requests
+        WHERE follower_id = ? AND followed_id = ?
+    `, followerID, followedID)
+
+	if err != nil {
+		log.Println("Error deleting follow request:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
+}
+
+func AcceptFollowRequest(userId, followRequestId int) int {
+	_, err := database.DB.Exec(`
+		UPDATE follow_requests 
+		SET approval_status = 'accepted'
+		WHERE id = ? AND followed_id = ?
+	`, followRequestId, userId)
+	if err != nil {
+		log.Println("Error accepting follow request:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
+}
+
+func DeclineFollowRequest(userId, followRequestId int) int {
+	_, err := database.DB.Exec(`
+		UPDATE follow_requests 
+		SET approval_status = 'declined'
+		WHERE id = ? AND followed_id = ?
+	`, followRequestId, userId)
+	if err != nil {
+		log.Println("Error declining follow request:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
 }

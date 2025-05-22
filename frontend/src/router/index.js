@@ -22,7 +22,7 @@ const routes = [
     { path: '/notifications', name: 'notifications', component: NotificationsView },
     { path: '/follows', name: 'follows', component: FollowsView },
     { path: '/groups', name: 'groups', component: GroupsView },
-    { path: '/groups/:id', name: 'group', component: GroupView },
+    { path: '/group/:id', name: 'group', component: GroupView },
     { path: '/events', name: 'events', component: EventsView },
     { path: '/chats', name: 'chats', component: ChatsView },
     { path: '/error', name: 'Error', component: ErrorView },

@@ -64,7 +64,7 @@ func HandleFollowAction(w http.ResponseWriter, r *http.Request) {
 	case "follow":
 		statusCode = service.Follow(userID, req.TargetID)
 	case "unfollow":
-		statusCode = service.Unfollow(userID, req.TargetID)
+		statusCode = repository.Unfollow(userID, req.TargetID)
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
 	}
@@ -184,9 +184,9 @@ func HandleFollowRequestApprove(w http.ResponseWriter, r *http.Request) {
 	var statusCode int
 	switch action {
 	case "accept":
-		statusCode = service.AcceptFollowRequest(userID, requestID)
+		statusCode = repository.AcceptFollowRequest(userID, requestID)
 	case "decline":
-		statusCode = service.AcceptFollowRequest(userID, requestID)
+		statusCode = repository.AcceptFollowRequest(userID, requestID)
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
 	}

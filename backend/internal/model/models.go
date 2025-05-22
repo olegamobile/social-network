@@ -15,15 +15,6 @@ type User struct {
 	IsPublic   bool   `json:"is_public"`
 }
 
-/* type Post struct {
-	ID         int    `json:"id"`
-	UserID     int    `json:"user_id"`
-	Username   string `json:"username"`
-	AvatarPath string `json:"avatar_url"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"created_at"`
-} */
-
 type Post struct {
 	ID         int     `json:"id"`
 	UserID     int     `json:"user_id"`
@@ -61,6 +52,20 @@ type Group struct {
 type FollowRequest struct {
 	TargetID int    `json:"target_id"`
 	Action   string `json:"action"` // "request", "follow", "unfollow"
+}
+
+type GroupRequest struct {
+	TargetID int    `json:"target_id"`
+	Action   string `json:"action"` // "request", "leave", "delete"
+}
+
+type Event struct {
+	ID          int    `json:"id"`
+	Group       string `json:"group"`
+	GroupID     int    `json:"group_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	DateTime    string `json:"datetime"`
 }
 
 type Notification struct {

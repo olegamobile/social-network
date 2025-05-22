@@ -6,10 +6,10 @@
             <template #sidebar>
                 <h3 class="text-lg font-semibold">Notifications</h3>
                 <button @click="showCurrent = true" :class="{ active: showCurrent }">
-                    Current ({{fetchedNotifications.filter(n => !n.is_read).length}})
+                    Current ({{fetchedNotifications ? fetchedNotifications.filter(n => !n.is_read).length : 0}})
                 </button>
                 <button @click="showCurrent = false" :class="{ active: !showCurrent }">
-                    Old ({{fetchedNotifications.filter(n => n.is_read).length}})
+                    Old ({{fetchedNotifications ? fetchedNotifications.filter(n => n.is_read).length : 0}})
                 </button>
             </template>
 
@@ -40,7 +40,7 @@ const { logout } = useAuth()
 const fetchedNotifications = ref([])
 
 const filteredNotifications = computed(() =>
-    fetchedNotifications.value.filter(n => n.is_read !== showCurrent.value)
+    (fetchedNotifications.value || []).filter(n => n.is_read !== showCurrent.value)
 )
 
 
@@ -61,6 +61,7 @@ async function fetchNotifications() {
         fetchedNotifications.value = await res.json()
 
     } catch (err) {
+        console.log("notifications fetch error:", err)
         errorStore.setError('Error', 'Something went wrong while fetching notifications.')
         router.push('/error')
     }
