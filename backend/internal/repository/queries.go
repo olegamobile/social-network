@@ -229,6 +229,34 @@ func GetGroupInvitationsByUserId(userId int) ([]model.Group, error) {
 	return groups, nil
 }
 
+func GetGroupsAdministeredByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	WHERE g.creator_id = ? AND g.status = 'enable';
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupsAdministeredByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupsAdministeredByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
+
 // GetFeedPostsBefore gets posts from userID user's follows and groups
 // using cursor-based pagination: anything before the previous post (cursorTime)
 // up to limit (default 10) items.

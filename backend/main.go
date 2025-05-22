@@ -14,23 +14,22 @@ import (
 
 func setHandlers() {
 	// CORS to allow developement on same address
-	//http.HandleFunc("/api/users", middleware.WithCORS(handlers.GetUsers))
-	http.HandleFunc("/api/users/", middleware.WithCORS(handlers.HandleUserByID)) // with trailing slash
+	http.HandleFunc("/api/users/", middleware.WithCORS(handlers.HandleUserByID))
 	http.HandleFunc("/api/users/search", middleware.WithCORS(handlers.SearchUsers))
-	//http.HandleFunc("/api/posts", middleware.WithCORS(handlers.GetPosts))
 	http.HandleFunc("/api/posts/", middleware.WithCORS(handlers.HandlePostsByUserId))
 	http.HandleFunc("/api/posts/create", middleware.WithCORS(handlers.HandleCreatePost))
 	http.HandleFunc("/api/group/posts/", middleware.WithCORS(handlers.HandlePostsByGroupId))
 	http.HandleFunc("/api/group/members/", middleware.WithCORS(handlers.HandleMembersByGroupId))
 	http.HandleFunc("/api/group/events/", middleware.WithCORS(handlers.HandleEventsByGroupId))
 	http.HandleFunc("/api/homefeed", middleware.WithCORS(handlers.GetFeedPosts))
-	//http.HandleFunc("/api/groups", middleware.WithCORS(handlers.GetGroups))
+
 	http.HandleFunc("/api/suggestgroups", middleware.WithCORS(handlers.HandleSuggestGroups))
 	http.HandleFunc("/api/groups/search", middleware.WithCORS(handlers.SearchGroups))
-	http.HandleFunc("/api/groups/user/", middleware.WithCORS(handlers.HandleGroupsByUserId))                  // groups with user id
-	http.HandleFunc("/api/groups/requested/", middleware.WithCORS(handlers.HandleGroupRequestsByUserId))      // group requests with user id
-	http.HandleFunc("/api/groups/invitations/", middleware.WithCORS(handlers.HandleGroupInvitationsByUserId)) // group requests with user id
-	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById))                             // group with group id
+	http.HandleFunc("/api/groups/user/", middleware.WithCORS(handlers.HandleGroupsByUserId))            // groups with user id
+	http.HandleFunc("/api/groups/requested", middleware.WithCORS(handlers.HandleGroupRequests))         // active user group requests
+	http.HandleFunc("/api/groups/invitations", middleware.WithCORS(handlers.HandleGroupInvitations))    // active user group invitations
+	http.HandleFunc("/api/groups/administered", middleware.WithCORS(handlers.HandleGroupsAdministered)) // active user group invitations
+	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById))                       // group with group id
 	http.HandleFunc("/api/group/join", middleware.WithCORS(handlers.HandleGroupMembership))
 
 	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))

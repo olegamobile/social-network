@@ -243,14 +243,14 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		fmt.Println("Method not allowed at HandleFollowAction")
+		fmt.Println("Method not allowed at HandleGroupMembership")
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	userID, err := service.ValidateSession(r)
 	if err != nil {
-		fmt.Println("ValidateSession error at HandleFollowAction:", err)
+		fmt.Println("ValidateSession error at HandleGroupMembership:", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -258,7 +258,7 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 	var req model.GroupRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Println("json error at HandleFollowAction:", err)
+		fmt.Println("json error at HandleGroupMembership:", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -266,11 +266,15 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 	var statusCode int
 	switch req.Action {
 	case "request":
-		statusCode = repository.GroupRequest(userID, req.TargetID)
+		statusCode = repository.GroupRequest(userID, req.TargetID) // 'approval_status' to pending, 'status' to enable
+		// todo: send notification to admin
 	case "leave":
-		statusCode = repository.LeaveGroup(userID, req.TargetID)
+		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
+	case "cancel":
+		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
+		// todo: remove notification
 	case "delete":
-		statusCode = repository.DeleteGroup(userID, req.TargetID)
+		statusCode = repository.DeleteGroup(userID, req.TargetID) // group 'status' to delete
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
 	}
@@ -300,7 +304,7 @@ func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(groups)
 }
 
-func HandleGroupRequestsByUserId(w http.ResponseWriter, r *http.Request) {
+func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)
 	if err != nil {
 		fmt.Println("validate error in HandleGroupRequestsByUserId:", err)
@@ -316,7 +320,7 @@ func HandleGroupRequestsByUserId(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(groups)
 }
 
-func HandleGroupInvitationsByUserId(w http.ResponseWriter, r *http.Request) {
+func HandleGroupInvitations(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)
 	if err != nil {
 		fmt.Println("validate error in HandleGroupInvitationsByUserId:", err)
@@ -325,6 +329,22 @@ func HandleGroupInvitationsByUserId(w http.ResponseWriter, r *http.Request) {
 	}
 
 	groups, err := repository.GetGroupInvitationsByUserId(userId)
+	if err != nil {
+		http.Error(w, "Failed to fetch group invitations", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(groups)
+}
+
+func HandleGroupsAdministered(w http.ResponseWriter, r *http.Request) {
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupInvitationsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := repository.GetGroupsAdministeredByUserId(userId)
 	if err != nil {
 		http.Error(w, "Failed to fetch group invitations", http.StatusInternalServerError)
 		return

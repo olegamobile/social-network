@@ -9,7 +9,7 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">No pending group invitations</p>
+        <p v-else class="text-nordic-light italic mb-5">No pending group invitations</p>
     </div>
 
 </template>
@@ -19,22 +19,18 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useErrorStore } from '@/stores/error'
-import { useUserStore } from '@/stores/user'
-import { storeToRefs } from 'pinia';
 
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const { logout } = useAuth()
 const router = useRouter()
 const errorStore = useErrorStore()
-const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
 
 const groups = ref([]);
 
 
 async function getInvites() {
     try {
-        const res = await fetch(`${apiUrl}/api/groups/invitations/${user.value.id}`, {
+        const res = await fetch(`${apiUrl}/api/groups/invitations`, {
             credentials: 'include'
         });
 

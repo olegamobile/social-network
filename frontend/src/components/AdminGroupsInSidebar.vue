@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Groups</h3>
+        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Administered Groups</h3>
         <ul v-if="groups && groups.length > 0" class="space-y-2 mb-5">
             <li v-for="group in groups" :key="group.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
@@ -9,7 +9,7 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic mb-5">Not a member of any groups yet.</p>
+        <p v-else class="text-nordic-light italic mb-5">No pending group invitations</p>
     </div>
 
 </template>
@@ -19,27 +19,22 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useErrorStore } from '@/stores/error'
-import { useUserStore } from '@/stores/user'
-import { storeToRefs } from 'pinia';
 
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const { logout } = useAuth()
 const router = useRouter()
 const errorStore = useErrorStore()
-const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
 
 const groups = ref([]);
 
 
-async function getGroups() {
+async function getAdminGroups() {
     try {
-        const res = await fetch(`${apiUrl}/api/groups/user/${user.value.id}`, {
-            credentials: 'include' // This sends the session cookie with the request
+        const res = await fetch(`${apiUrl}/api/groups/administered`, {
+            credentials: 'include'
         });
 
         if (res.status === 401) {
-            // Session is invalid — logout and redirect
             errorStore.setError('Session Expired', 'Your session has expired. Please log in again.');
             logout(); // your logout function
             router.push('/login');
@@ -47,18 +42,17 @@ async function getGroups() {
         }
 
         if (!res.ok) {
-            // Handle other non-successful HTTP statuses (e.g., 400, 404, 500)
-            const errorData = await res.json().catch(() => ({ message: 'Failed to fetch groups and parse error.' }));
+            const errorData = await res.json().catch(() => ({ message: 'Failed to fetch admin groups and parse error.' }));
             throw new Error(errorData.message || `HTTP error ${res.status}`);
         }
         groups.value = await res.json()
     } catch (error) {
-        errorStore.setError('Error Loading Groups', error.message || 'An unexpected error occurred while trying to load groups. Please try again later.');
+        errorStore.setError('Error Loading Invitations', error.message || 'An unexpected error occurred while trying to load admin groups. Please try again later.');
         router.push('/error')
         return
     }
 }
 onMounted(() => {
-    getGroups()
+    getAdminGroups()
 })
 </script>

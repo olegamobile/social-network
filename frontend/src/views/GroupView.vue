@@ -28,11 +28,11 @@
             <template #main>
 
                 <!-- button to join / leave / delete -->
-                <button :disabled="membershipStatus === 'pending'" @click="handleGroupAction"
+                <button @click="handleGroupAction"
                     class="mb-4 px-4 py-2 text-white rounded transition" :class="groupButtonClass">
                     {{
                         membershipStatus === '' ? 'Request to Join' :
-                            membershipStatus === 'pending' ? 'Request Sent' :
+                            membershipStatus === 'pending' ? 'Cancel Request' :
                                 membershipStatus === 'accepted' ? 'Leave Group' :
                                     membershipStatus === 'declined' ? 'Request to Join' :
                                         membershipStatus === 'admin' ? 'Delete Group' :
@@ -99,7 +99,7 @@ const groupButtonClass = computed(() => {
         return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
     }
     if (membershipStatus.value === 'pending') {
-        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-bg text-nordic-light cursor-not-allowed';
+        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-bg text-nordic-light';
     }
     if (membershipStatus.value === 'accepted') {
         //return 'bg-nordic-text-light hover:bg-nordic-primary-accent text-black';  // doesn't work for some reason
@@ -112,11 +112,11 @@ const groupButtonClass = computed(() => {
 });
 
 async function handleGroupAction() {
-    if (membershipStatus.value === 'pending') return
 
     let action = ''
     if (membershipStatus.value === '' || membershipStatus.value === 'declined') action = 'request'
     else if (membershipStatus.value === 'accepted') action = 'leave'
+    else if (membershipStatus.value === 'pending') action = 'cancel'
     else if (membershipStatus.value === 'admin') action = 'delete'
 
     try {

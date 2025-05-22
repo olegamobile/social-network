@@ -11,7 +11,7 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">Not following anyone</p>
+        <p v-else class="text-nordic-light italic mb-5">Not following anyone</p>
     </div>
 
     <!-- Users who follow me -->

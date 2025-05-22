@@ -5,7 +5,6 @@
     <TwoColumnLayout>
       <template #sidebar>
         <FollowsInSidebar :userId="user.id" />
-        <br />
         <RequestsInSidebar />
       </template>
 
