@@ -402,7 +402,7 @@ func GetPostsByUserId(targetId int) ([]model.Post, error) {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
 		}
-
+		p.PostType = "regular"
 		if avatarUrl.Valid {
 			p.AvatarPath = avatarUrl.String
 		} else {

@@ -286,16 +286,9 @@ func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	UserIDString := r.URL.Query().Get("user_id")
-	if UserIDString == "" {
-		fmt.Println("empty usetId")
-		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
-		return
-	}
-
-	UserID, err := strconv.Atoi(UserIDString)
+	userID, err := service.ValidateSession(r)
 	if err != nil {
-		fmt.Println("can not convert userId")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -319,12 +312,12 @@ func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
 	}
 	var comments []model.Comment
 	if Type == "regular" {
-		comments, err = repository.ReadAllCommentsForPost(PostID, UserID)
+		comments, err = repository.ReadAllCommentsForPost(PostID, userID)
 	} else if Type == "group" {
-		comments, err = repository.ReadAllCommentsForGroupPost(PostID, UserID)
+		comments, err = repository.ReadAllCommentsForGroupPost(PostID, userID)
 	}
 
-	fmt.Println("userId:", UserID)
+	fmt.Println("userId:", userID)
 	fmt.Println("postid:", PostID)
 	fmt.Println(comments)
 	if err != nil {
@@ -342,16 +335,9 @@ func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	UserIDString := r.URL.Query().Get("user_id")
-	if UserIDString == "" {
-		fmt.Println("empty usetId")
-		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
-		return
-	}
-
-	UserID, err := strconv.Atoi(UserIDString)
+	UserID, err := service.ValidateSession(r)
 	if err != nil {
-		fmt.Println("can not convert userId")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -374,7 +360,9 @@ func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&payload)
 
 	if err != nil || payload.Content == "" || payload.Type == "" {
-		fmt.Println("error in CreatePost:", err)
+		fmt.Println("type is:", payload.Type)
+		fmt.Println("content is:", payload.Content)
+		fmt.Println("error in Create comment:", err)
 		http.Error(w, "BadRequestError", http.StatusBadRequest)
 		return
 	}
