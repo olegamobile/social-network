@@ -55,14 +55,13 @@ type FollowRequest struct {
 }
 
 type Event struct {
-	ID          int    `json:"id"`
+	ID          *int    `json:"id,omitempty"`
 	Group       string `json:"group"`
 	GroupID     int    `json:"group_id"`
 	CreatorID   int    `json:"creator_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	EventDate   string `json:"event_datetime"`
-	Status      string `json:"status"`
 }
 
 

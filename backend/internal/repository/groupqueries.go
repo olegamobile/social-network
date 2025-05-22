@@ -232,7 +232,7 @@ func GetGroupEventsByGroupId(groupId int) ([]model.Event, error) {
 	var events []model.Event
 	for rows.Next() {
 		var e model.Event
-		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.Title, &e.Description, &e.DateTime)
+		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.Title, &e.Description, &e.EventDate)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
