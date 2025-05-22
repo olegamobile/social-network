@@ -11,7 +11,14 @@
             </template>
 
             <template #main>
-                <h2 class="text-3xl font-bold text-nordic-dark mb-6">Explore Groups</h2>
+                <!-- new post button and form -->
+                <button @click="showNewGroupForm = !showNewGroupForm"
+                    class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                    {{ showNewGroupForm ? 'Close Form' : 'Create New Group' }}
+                </button>
+                <NewGroupForm v-if="showNewGroupForm" @group-created="handleGroupCreated" class="mb-4" />
+
+                <h2 class="text-3xl font-bold text-nordic-dark my-6">Explore Groups</h2>
 
                 <!-- search box -->
                 <div class="max-w-lg w-full lg:max-w-xs mb-6">
@@ -67,6 +74,7 @@ import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
 import RequestedGroupsInSidebar from '@/components/RequestedGroupsInSidebar.vue'
 import InvitedGroupsInSidebar from '@/components/InvitedGroupsInSidebar.vue'
 import AdminGroupsInSidebar from '@/components/AdminGroupsInSidebar.vue'
+import NewGroupForm from '@/components/NewGroupForm.vue'
 import { useArrayUtils } from '@/composables/useArrayUtils';
 import throttle from 'lodash.throttle';
 
@@ -78,6 +86,13 @@ const { logout } = useAuth()
 const searchResults = ref([])
 const searchQuery = ref('')
 const searchInitiated = ref(false)
+
+const showNewGroupForm = ref(false)
+
+const handleGroupCreated = (id) => {
+    console.log("going to new group page")
+    router.push(`/group/${id}`)
+}
 
 async function _searchGroups() {
     searchInitiated.value = true;
