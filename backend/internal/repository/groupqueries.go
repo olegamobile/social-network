@@ -338,3 +338,38 @@ func GetAdminIdByGroupId(groupId int) (int, error) {
 	}
 	return adminId, nil
 }
+
+func CreateGroup(group model.Group, userId int) (int, error) {
+	query := `
+	INSERT INTO groups (creator_id, title, description)
+	VALUES (?, ?, ?)`
+
+	res, err := database.DB.Exec(query, userId, group.Title, group.Description)
+	if err != nil {
+		fmt.Println("exec error creating group:", err)
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
+}
+
+func AddGroupMember(userId, groupId int) error {
+	query := `
+	INSERT INTO group_members (group_id, user_id, approval_status)
+	VALUES (?, ?, 'accepted')	
+	ON CONFLICT (group_id, user_id) DO UPDATE SET
+		status = 'enable',
+		updated_by = ?
+	`
+	_, err := database.DB.Exec(query, groupId, userId, userId)
+
+	if err != nil {
+		fmt.Println("exec error adding group member:", err)
+	}
+	return err
+}

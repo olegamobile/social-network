@@ -23,7 +23,7 @@ func setHandlers() {
 	http.HandleFunc("/api/group/events/", middleware.WithCORS(handlers.HandleEventsByGroupId))
 	http.HandleFunc("/api/homefeed", middleware.WithCORS(handlers.GetFeedPosts))
 	http.HandleFunc("/api/events/create", middleware.WithCORS(handlers.HandleCreateEvent))
-    http.HandleFunc("/api/events/respond", middleware.WithCORS(handlers.HandleEventResponse))
+	http.HandleFunc("/api/events/respond", middleware.WithCORS(handlers.HandleEventResponse))
 
 	http.HandleFunc("/api/suggestgroups", middleware.WithCORS(handlers.HandleSuggestGroups))
 	http.HandleFunc("/api/groups/search", middleware.WithCORS(handlers.SearchGroups))
@@ -31,7 +31,8 @@ func setHandlers() {
 	http.HandleFunc("/api/groups/requested", middleware.WithCORS(handlers.HandleGroupRequests))         // active user group requests
 	http.HandleFunc("/api/groups/invitations", middleware.WithCORS(handlers.HandleGroupInvitations))    // active user group invitations
 	http.HandleFunc("/api/groups/administered", middleware.WithCORS(handlers.HandleGroupsAdministered)) // active user group invitations
-	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById))                       // group with group id
+	http.HandleFunc("/api/groups/create", middleware.WithCORS(handlers.HandleCreateGroup))
+	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById)) // group with group id
 	http.HandleFunc("/api/group/join", middleware.WithCORS(handlers.HandleGroupMembership))
 
 	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))

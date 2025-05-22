@@ -422,3 +422,36 @@ func HandleGroupById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }
+
+func HandleCreateGroup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var grp model.Group
+	err = json.NewDecoder(r.Body).Decode(&grp)
+	if err != nil {
+		fmt.Println("json error at HandleCreateGroup:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	grp.ID, err = service.CreateGroup(grp, userId)
+	if err != nil {
+		fmt.Println("CreateGroup error in HandleCreateGroup:", err)
+		http.Error(w, "failed to create group", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(grp)
+}

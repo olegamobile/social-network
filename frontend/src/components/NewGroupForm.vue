@@ -30,28 +30,17 @@ const description = ref('')
 
 
 const createGroup = async () => {
-
     try {
-
-        const payload = {
-            title: title.value,
-            description: description.value,
-        };
-
-        const formData = new FormData();
-        for (const [key, value] of Object.entries(payload)) {
-            formData.append(key, value);
-        }
-
         const res = await fetch(`${apiUrl}/api/groups/create`, {
             method: 'POST',
-            body: formData,
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
+            body: JSON.stringify({ title: title.value, description: description.value }),
         })
 
         if (res.ok) {
-            const groupId = await res.json()
-            emit('group-created', groupId)
+            const group = await res.json()
+            emit('group-created', group.id)
             title.value = ''
             description.value = ''
         } else {
@@ -60,7 +49,5 @@ const createGroup = async () => {
     } catch (error) {
         console.error(error)
     }
-
-
 }
 </script>

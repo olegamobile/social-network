@@ -90,7 +90,7 @@ const searchInitiated = ref(false)
 const showNewGroupForm = ref(false)
 
 const handleGroupCreated = (id) => {
-    console.log("going to new group page")
+    console.log("going to new group page:", id)
     router.push(`/group/${id}`)
 }
 
