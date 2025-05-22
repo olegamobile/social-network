@@ -275,56 +275,64 @@ func GetGroupsByUserId(userId int) ([]model.Group, error) {
 // up to limit (default 10) items.
 func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int) ([]model.Post, error) {
 	query := `
-    -- Regular posts
-    SELECT DISTINCT
-        p.id,
-        p.user_id,
-        u.first_name,
-        u.last_name,
-        u.avatar_path,
-        p.content,
-        p.image_path,
-        NULL AS group_id,
-        NULL AS group_name,
-        p.created_at AS created_at_sort
-    FROM posts p
-    JOIN users u ON p.user_id = u.id
-    WHERE p.status = 'enable'
-      AND (
-          p.user_id = ?
-          OR p.user_id IN (
-              SELECT followed_id FROM follow_requests
-              WHERE follower_id = ? AND approval_status = 'accepted'
-          )
-          )
-      AND p.created_at < ?
-	  AND p.id != ?
-        
-    UNION ALL
-    
-    -- Group posts
-    SELECT DISTINCT
-        gp.id,
-        gp.user_id,
-        u.first_name,
-        u.last_name,
-        u.avatar_path,
-        gp.content,
-        gp.image_path,
-        gp.group_id,
-        g.title AS group_name,
-        gp.created_at AS created_at_sort
-    FROM group_posts gp
-    JOIN group_members gm ON gp.group_id = gm.group_id
-        AND gm.user_id = ? AND gm.approval_status = 'accepted'
-    JOIN groups g ON gp.group_id = g.id
-    JOIN users u ON gp.user_id = u.id
-    WHERE gp.status = 'enable'
-      AND gp.created_at < ?
-	  AND gp.id != ?
-    
-    ORDER BY created_at_sort DESC
-    LIMIT ?;`
+    -- Regular posts with comment count
+SELECT
+    p.id,
+    p.user_id,
+    u.first_name,
+    u.last_name,
+    u.avatar_path,
+    p.content,
+    p.image_path,
+    NULL AS group_id,
+    NULL AS group_name,
+    p.created_at AS created_at_sort,
+    COUNT(c.id) AS comment_count,
+    'regular' AS post_type
+FROM posts p
+JOIN users u ON p.user_id = u.id
+LEFT JOIN comments c ON c.post_id = p.id AND c.status != 'delete'
+WHERE p.status = 'enable'
+  AND (
+      p.user_id = ?
+      OR p.user_id IN (
+          SELECT followed_id FROM follow_requests
+          WHERE follower_id = ? AND approval_status = 'accepted'
+      )
+  )
+  AND p.created_at < ?
+  AND p.id != ?
+GROUP BY p.id, u.id
+
+UNION ALL
+
+-- Group posts with comment count
+SELECT
+    gp.id,
+    gp.user_id,
+    u.first_name,
+    u.last_name,
+    u.avatar_path,
+    gp.content,
+    gp.image_path,
+    gp.group_id,
+    g.title AS group_name,
+    gp.created_at AS created_at_sort,
+    COUNT(gc.id) AS comment_count,
+    'group' AS post_type
+FROM group_posts gp
+JOIN group_members gm ON gp.group_id = gm.group_id
+    AND gm.user_id = ? AND gm.approval_status = 'accepted'
+JOIN groups g ON gp.group_id = g.id
+JOIN users u ON gp.user_id = u.id
+LEFT JOIN group_comments gc ON gc.group_post_id = gp.id AND gc.status != 'delete'
+WHERE gp.status = 'enable'
+  AND gp.created_at < ?
+  AND gp.id != ?
+GROUP BY gp.id, u.id, g.id
+
+ORDER BY created_at_sort DESC
+LIMIT ?;`
 
 	rows, err := database.DB.Query(query, userID, userID, cursorTime, lastPostId, userID, cursorTime, lastPostId, limit)
 	if err != nil {
@@ -350,6 +358,8 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
 			&post.GroupID,
 			&post.GroupName,
 			&post.CreatedAt,
+			&post.NumberOfComments,
+			&post.PostType,
 		)
 		if err != nil {
 			fmt.Println("scan rows err at GetFeedPostsBefore:", err)

@@ -310,7 +310,20 @@ func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("can not convert postId")
 		return
 	}
-	comments, err := repository.ReadAllCommentsForPost(PostID, UserID)
+
+	Type := r.URL.Query().Get("type")
+	if Type == "" {
+		fmt.Println("empty postId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+	var comments []model.Comment
+	if Type == "regular" {
+		comments, err = repository.ReadAllCommentsForPost(PostID, UserID)
+	} else if Type == "group" {
+		comments, err = repository.ReadAllCommentsForGroupPost(PostID, UserID)
+	}
+
 	fmt.Println("userId:", UserID)
 	fmt.Println("postid:", PostID)
 	fmt.Println(comments)
@@ -353,23 +366,24 @@ func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("can not convert postId")
 		return
 	}
-	err = r.ParseForm()
-	if err != nil {
-		http.Error(w, "BadRequestError", http.StatusBadRequest)
-		return
-	}
 
 	var payload struct {
 		Content string `json:"content"`
+		Type    string `json:"type"`
 	}
 	err = json.NewDecoder(r.Body).Decode(&payload)
 
-	if err != nil || payload.Content == "" {
+	if err != nil || payload.Content == "" || payload.Type == "" {
 		fmt.Println("error in CreatePost:", err)
 		http.Error(w, "BadRequestError", http.StatusBadRequest)
 		return
 	}
-	err = repository.InsertComment(payload.Content, UserID, PostID)
+
+	if payload.Type == "regular" {
+		err = repository.InsertComment(payload.Content, UserID, PostID)
+	} else if payload.Type == "group" {
+		err = repository.InsertGroupComment(payload.Content, UserID, PostID)
+	}
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
