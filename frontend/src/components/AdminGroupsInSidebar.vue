@@ -9,7 +9,7 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic mb-5">No pending group invitations</p>
+        <p v-else class="text-nordic-light italic mb-5">Not admin in any group</p>
     </div>
 
 </template>

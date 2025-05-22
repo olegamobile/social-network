@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     ),
     follow_req_id INTEGER,
     group_invite_id INTEGER,
-    group_id INTEGER,
+    group_members_id INTEGER,
     event_id INTEGER,
     content TEXT,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
@@ -219,16 +219,26 @@ CREATE TABLE IF NOT EXISTS notifications (
     updated_by INTEGER,
     status TEXT NOT NULL CHECK (
         status IN (
-            'enable', 
-            'disable', 
+            'enable',
+            'disable',
             'delete'
         )
     ) DEFAULT 'enable',
+    ref_type TEXT GENERATED ALWAYS AS (type) STORED,
+    ref_id INTEGER GENERATED ALWAYS AS (
+        COALESCE(
+            follow_req_id,
+            group_invite_id,
+            group_members_id,
+            event_id
+        )
+    ) STORED,
     FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (follow_req_id) REFERENCES follow_requests(id) ON DELETE CASCADE,
     FOREIGN KEY (group_invite_id) REFERENCES group_invitations(id) ON DELETE CASCADE,
-    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    UNIQUE(user_id, ref_type, ref_id)
 );
 -- Creating post_privacy table for specific user access to private posts
 CREATE TABLE IF NOT EXISTS post_privacy (

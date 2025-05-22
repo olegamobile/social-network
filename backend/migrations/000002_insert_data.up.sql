@@ -587,8 +587,8 @@ INSERT INTO group_messages (group_id, sender_id, content, created_at, updated_at
 (14, 12, 'Hackathon next month, form your teams!', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (15, 1, 'Coffee tasting event, who’s coming?', CURRENT_TIMESTAMP, NULL, NULL, 'enable');
 
--- Insert notifications (12 columns: user_id, type, follow_req_id, group_invite_id, group_id, event_id, content, is_read, created_at, updated_at, updated_at, status)
-INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_id, event_id, content, is_read, created_at, updated_at, updated_by, status) VALUES
+-- Insert notifications (12 columns: user_id, type, follow_req_id, group_invite_id, group_members_id, event_id, content, is_read, created_at, updated_at, updated_at, status)
+INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_members_id, event_id, content, is_read, created_at, updated_at, updated_by, status) VALUES
 -- Follow request notifications (aligned with follow_requests table)
 (1, 'follow_request', 1, NULL, NULL, NULL, 'Liam wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (1, 'follow_request', 2, NULL, NULL, NULL, 'Sofia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),

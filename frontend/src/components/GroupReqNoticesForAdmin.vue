@@ -1,39 +1,24 @@
 <template>
-    <div class="notifications-page">
-        <TopBar />
 
-        <TwoColumnLayout>
-            <template #sidebar>
-                <h3 class="text-lg font-semibold">Notifications</h3>
-                <button @click="showCurrent = true" :class="{ active: showCurrent }">
-                    Current ({{fetchedNotifications ? fetchedNotifications.filter(n => !n.is_read).length : 0}})
-                </button>
-                <button @click="showCurrent = false" :class="{ active: !showCurrent }">
-                    Old ({{fetchedNotifications ? fetchedNotifications.filter(n => n.is_read).length : 0}})
-                </button>
-            </template>
+    <h3 class="text-xl font-semibold text-nordic-dark mb-3">Requests to Join</h3>
+    <NotificationsList :notifications="filteredNotifications" @close="handleClose" @accept="handleAccept"
+        @decline="handleDecline" />
 
-            <template #main>
-                <h2 class="text-2xl font-bold mb-4">{{ showCurrent ? 'Current' : 'Old' }} Notifications</h2>
-                <NotificationsList :notifications="filteredNotifications" @close="handleClose" @accept="handleAccept"
-                    @decline="handleDecline" />
-            </template>
-        </TwoColumnLayout>
-    </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import TopBar from '@/components/TopBar.vue'
-import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
+
 import NotificationsList from '@/components/NotificationsList.vue'
+
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useErrorStore } from '@/stores/error'
 import { useAuth } from '@/composables/useAuth'
 
 const showCurrent = ref(true)
 const apiUrl = import.meta.env.VITE_API_URL
 const errorStore = useErrorStore()
+const route = useRoute()
 const router = useRouter()
 const { logout } = useAuth()
 
@@ -46,7 +31,7 @@ const filteredNotifications = computed(() =>
 
 async function fetchNotifications() {
     try {
-        const res = await fetch(`${apiUrl}/api/notifications`, {
+        const res = await fetch(`${apiUrl}/api/notifications/${route.params.id}/joingroup`, {
             credentials: 'include'
         })
 
@@ -134,26 +119,3 @@ function handleDecline(id) {
 }
 
 </script>
-
-<style scoped>
-.notifications-page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-button {
-    display: block;
-    margin: 0.5rem 0;
-    padding: 0.5rem 1rem;
-    background-color: #eee;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-button.active {
-    background-color: #ccc;
-    font-weight: bold;
-}
-</style>

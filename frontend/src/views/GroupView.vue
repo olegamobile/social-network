@@ -22,14 +22,18 @@
                         <MembersList :members="members" small class="my-4" />
                     </div>
 
+
+                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'"/>
+
+
                 </div>
             </template>
 
             <template #main>
 
                 <!-- button to join / leave / delete -->
-                <button @click="handleGroupAction"
-                    class="mb-4 px-4 py-2 text-white rounded transition" :class="groupButtonClass">
+                <button @click="handleGroupAction" class="mb-4 px-4 py-2 text-white rounded transition"
+                    :class="groupButtonClass">
                     {{
                         membershipStatus === '' ? 'Request to Join' :
                             membershipStatus === 'pending' ? 'Cancel Request' :
@@ -70,13 +74,14 @@
 <script setup>
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useErrorStore } from '@/stores/error'
 import TopBar from '@/components/TopBar.vue'
 import PostsList from '@/components/PostsList.vue'
 import EventList from '@/components/EventList.vue'
 import MembersList from '@/components/MembersList.vue'
-import { useErrorStore } from '@/stores/error'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import NewGroupPostForm from '@/components/NewGroupPostForm.vue'
+import GroupReqNoticesForAdmin from '@/components/GroupReqNoticesForAdmin.vue'
 
 const route = useRoute()
 const router = useRouter()

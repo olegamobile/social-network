@@ -24,6 +24,7 @@ func HandleSuggestGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(groups)
 }
@@ -47,6 +48,7 @@ func SearchGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(groups)
 }
 
@@ -266,8 +268,28 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 	var statusCode int
 	switch req.Action {
 	case "request":
-		statusCode = repository.GroupRequest(userID, req.TargetID) // 'approval_status' to pending, 'status' to enable
-		// todo: send notification to admin
+		var gmId int
+		gmId, statusCode = repository.GroupRequest(userID, req.TargetID) // 'approval_status' to pending, 'status' to enable
+		if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) {
+			fmt.Println("error code at HandleFollowAction:", statusCode)
+			http.Error(w, http.StatusText(statusCode), statusCode)
+			return
+		}
+
+		adminID, err := repository.GetAdminIdByGroupId(req.TargetID)
+		if err != nil {
+			fmt.Println("error getting admin in HandleGroupMembership:", err)
+			http.Error(w, "error getting admin id", http.StatusBadRequest)
+			return
+		}
+
+		fmt.Println("inserting notification")
+		err = repository.InsertNotification(userID, adminID, "group_join_request", gmId) // last id needs to be id at group members table
+		if err != nil {
+			fmt.Println("error inserting notification in HandleGroupMembership:", err)
+			http.Error(w, "error inserting notification in HandleGroupMembership", http.StatusBadRequest)
+			return
+		}
 	case "leave":
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
 	case "cancel":
@@ -285,6 +307,7 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -301,6 +324,8 @@ func HandleGroupsByUserId(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch groups", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(groups)
 }
 
@@ -317,6 +342,8 @@ func HandleGroupRequests(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch group requests", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(groups)
 }
 
@@ -333,6 +360,8 @@ func HandleGroupInvitations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch group invitations", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(groups)
 }
 
@@ -349,6 +378,8 @@ func HandleGroupsAdministered(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch group invitations", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(groups)
 }
 
@@ -387,6 +418,7 @@ func HandleGroupById(w http.ResponseWriter, r *http.Request) {
 		Membership: membership,
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }

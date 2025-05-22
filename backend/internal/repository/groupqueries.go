@@ -270,7 +270,7 @@ func InsertGroupPost(userID, groupID int, content string, imagePath *string) (in
 	return id, createdAt, nil
 }
 
-func GroupRequest(userID, groupID int) int {
+func GroupRequest(userID, groupID int) (int, int) {
 	query := `
 	INSERT INTO group_members (group_id, user_id, approval_status, status)
 	VALUES (?, ?, 'pending', 'enable')
@@ -279,11 +279,18 @@ func GroupRequest(userID, groupID int) int {
 		status = 'enable',
 		updated_by = ?
 	`
-	_, err := database.DB.Exec(query, groupID, userID, userID)
+	result, err := database.DB.Exec(query, groupID, userID, userID)
 	if err != nil {
-		return http.StatusInternalServerError
+		return 0, http.StatusInternalServerError
 	}
-	return http.StatusOK
+
+	// Get the last inserted row ID
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, http.StatusInternalServerError
+	}
+
+	return int(id), http.StatusOK
 }
 
 func LeaveGroup(userID, groupID int) int {
@@ -318,4 +325,16 @@ func DeleteGroup(userID, groupID int) int {
 		return http.StatusForbidden // Not allowed or group doesn't exist
 	}
 	return http.StatusOK
+}
+
+func GetAdminIdByGroupId(groupId int) (int, error) {
+	var adminId int
+	err := database.DB.QueryRow(`
+	SELECT creator_id
+	FROM groups
+	WHERE id =?`, groupId).Scan(&adminId)
+	if err != nil {
+		return 0, err
+	}
+	return adminId, nil
 }

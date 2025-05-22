@@ -5,6 +5,7 @@ import (
 	"backend/internal/model"
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 func GetAllNotificatons(userID int) ([]model.Notification, error) {
@@ -29,8 +30,11 @@ SELECT
     END AS sender_name,
     n.follow_req_id,
     n.group_invite_id,
-    n.group_id,
-    g.title AS group_title,
+    n.group_members_id,
+    
+    -- Group title selection based on type
+    COALESCE(ggm.title, ggi.title, ge.title) AS group_title,
+
     n.event_id,
     e.title AS event_title,
     n.content,
@@ -42,11 +46,13 @@ LEFT JOIN users u ON fr.follower_id = u.id
 LEFT JOIN users fu ON fr.follower_id = fu.id AND n.type = 'follow_request'
 LEFT JOIN group_invitations gi ON n.group_invite_id = gi.id
 LEFT JOIN users iu ON gi.inviter_id = iu.id AND n.type = 'group_invitation'
-LEFT JOIN group_members gm ON n.group_id = gm.group_id AND gm.user_id = n.user_id AND n.type = 'group_join_request'
+LEFT JOIN groups ggi ON gi.group_id = ggi.id AND n.type = 'group_invitation'
+LEFT JOIN group_members gm ON n.group_members_id = gm.id AND n.type = 'group_join_request'
 LEFT JOIN users gu ON gm.user_id = gu.id AND n.type = 'group_join_request'
-LEFT JOIN groups g ON n.group_id = g.id
+LEFT JOIN groups ggm ON gm.group_id = ggm.id AND n.type = 'group_join_request'
 LEFT JOIN events e ON n.event_id = e.id
 LEFT JOIN users eu ON e.creator_id = eu.id AND n.type = 'event_creation'
+LEFT JOIN groups ge ON e.group_id = ge.id AND n.type = 'event_creation'
 WHERE n.status = 'enable' AND n.user_id = ?
 	`, userID)
 	if err != nil {
@@ -181,4 +187,102 @@ func GetNewNotificatonsCount(userID int) (int, error) {
 		return count, err
 	}
 	return count, nil
+}
+
+func GetJoinRequests(groupId int) ([]model.Notification, error) {
+	query := `
+	SELECT n.id, n.type, n.user_id, u.first_name || ' ' || u.last_name, gm.group_id, g.title, n.content, n.is_read, n.created_at
+	FROM notifications n
+	JOIN group_members gm ON n.group_members_id = gm.id
+	JOIN groups g ON gm.group_id = g.id
+	JOIN users u ON gm.user_id = u.id
+	WHERE gm.group_id = ? AND n.type = 'group_join_request' AND n.status = 'enable';
+	`
+
+	rows, err := database.DB.Query(query, groupId)
+	if err != nil {
+		fmt.Println("query error at GetJoinRequests", err)
+		return nil, err
+	}
+
+	var notices []model.Notification
+	for rows.Next() {
+		var n model.Notification
+		err := rows.Scan(
+			&n.ID,
+			&n.Type,
+			&n.UserID,
+			&n.SenderName,
+			&n.GroupID,
+			&n.GroupTitle,
+			&n.Content,
+			&n.IsRead,
+			&n.CreatedAt,
+		)
+		if err != nil {
+			fmt.Println("scan error at GetAllNotificatons", err)
+			return notices, err
+		}
+		notices = append(notices, n)
+	}
+
+	return notices, nil
+}
+
+// userFromID: active user
+// userToID: person receiving notification
+// notifType: 'follow_request', 'group_invitation', 'group_join_request' or 'event_creation'
+// refID insert: follow_req_id, group_invite_id, group_id or event_id)
+func InsertNotification(userFromID, userToID int, notifType string, refID int) error {
+	var query string
+
+	now := time.Now().Format("2006-01-02 15:04:05")
+
+	switch notifType {
+	case "follow_request":
+		query = `
+			INSERT INTO notifications (user_id, type, follow_req_id)
+			VALUES (?, ?, ?)
+			ON CONFLICT(user_id, ref_type, ref_id)
+			DO UPDATE SET 
+				updated_at = ?,
+				updated_by = ?,
+				status = 'enable',
+				is_read = FALSE`
+	case "group_invitation":
+		query = `
+			INSERT INTO notifications (user_id, type, group_invite_id)
+			VALUES (?, ?, ?)
+			ON CONFLICT(user_id, ref_type, ref_id)
+			DO UPDATE SET 
+				updated_at = ?,
+				updated_by = ?,
+				status = 'enable',
+				is_read = FALSE`
+	case "group_join_request":
+		query = `
+			INSERT INTO notifications (user_id, type, group_members_id)
+			VALUES (?, ?, ?)
+			ON CONFLICT(user_id, ref_type, ref_id)
+			DO UPDATE SET 
+				updated_at = ?,
+				updated_by = ?,
+				status = 'enable',
+				is_read = FALSE`
+	case "event_creation":
+		query = `
+			INSERT INTO notifications (user_id, type, event_id)
+			VALUES (?, ?, ?)
+			ON CONFLICT(user_id, ref_type, ref_id)
+			DO UPDATE SET 
+				updated_at = ?,
+				updated_by = ?,
+				status = 'enable',
+				is_read = FALSE`
+	default:
+		return fmt.Errorf("invalid notification type: %s", notifType)
+	}
+
+	_, err := database.DB.Exec(query, userToID, notifType, refID, now, userFromID)
+	return err
 }
