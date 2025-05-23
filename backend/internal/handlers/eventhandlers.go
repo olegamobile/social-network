@@ -5,9 +5,10 @@ import (
 	"backend/internal/repository"
 	"backend/internal/service"
 	"encoding/json"
+
 	// "fmt"
 	"net/http"
-    "strconv"
+	"strconv"
 	"strings"
 )
 
@@ -121,10 +122,16 @@ func GetEventsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/events/user/")
-	userID, err := strconv.Atoi(idStr)
+	// idStr := strings.TrimPrefix(r.URL.Path, "/api/events/user/")
+	// userID, err := strconv.Atoi(idStr)
+	// if err != nil {
+	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// 	return
+	// }
+
+	userID, err := service.ValidateSession(r)
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 

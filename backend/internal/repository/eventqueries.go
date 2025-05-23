@@ -52,11 +52,12 @@ ON CONFLICT(event_id, user_id) DO UPDATE SET response = ?
 func GetEventByID(eventID int) (model.Event, error) {
 	var e model.Event
 	query := `
-		SELECT id, group_id, creator_id, title, description, event_datetime, status
-		FROM events
-		WHERE id = ?
+		SELECT e.id, e.group_id, g.title, e.creator_id, e.title, e.description, e.event_datetime
+		FROM events e
+		LEFT JOIN groups g ON e.group_id = g.id
+		WHERE e.id = ? AND e.status = 'enable'
 	`
-	err := database.DB.QueryRow(query).Scan(&e.ID, &e.GroupID, &e.CreatorID, &e.Title, &e.Description, &e.EventDate, &e.Status)
+	err := database.DB.QueryRow(query, eventID).Scan(&e.ID, &e.GroupID, &e.Group, &e.CreatorID, &e.Title, &e.Description, &e.EventDate)
 	return e, err
 }
 
@@ -125,4 +126,3 @@ func GetEventsByGroup(groupID int) ([]model.Event, error) {
 	}
 	return events, nil
 }
-
