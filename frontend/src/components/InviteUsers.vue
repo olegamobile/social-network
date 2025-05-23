@@ -29,8 +29,6 @@ function handleResults(results) {
         const isMember = members.some(member => member.id === invitableUser.user.id)
         return !isMember
     });
-
-    console.log(searchResults.value)
 }
 
 </script>

@@ -12,7 +12,6 @@
                     <span v-if="user.membership === ''">Invite</span>
                     <span v-else-if="user.membership === 'invited'">Invited</span>
                     <span v-else>Ininvitable</span>
-                    
                 </button>
 
                 <!-- link to profile -->
@@ -57,12 +56,14 @@ const inviteUser = async (userId) => {
             throw new Error(`HTTP error! status: ${response.status}`)
         }
 
-        //const result = await response.json()
-        console.log('Invitation successful:')
-        // Optionally show a success message or change the button to "Invited"
+        // Update local copy user membership status
+        const userIndex = props.results.findIndex(user => user.user.id === userId)
+        if (userIndex !== -1) {
+            props.results[userIndex].membership = 'invited'
+        }
+
     } catch (error) {
         console.error('Failed to invite user:', error)
-        // Optionally show an error message
     }
 }
 </script>
