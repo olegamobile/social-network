@@ -3,10 +3,10 @@
         <label for="search-users" class="sr-only">Search</label>
         <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-nordic-light"></i>
+                <i class="fas fa-search text-[var(--nordic-text-light)]"></i>
             </div>
             <input id="search-users" name="search"
-                class="block w-full pl-10 pr-3 py-2 border border-nordic-light rounded-md leading-5 bg-white placeholder-nordic-light focus:outline-none focus:ring-2 focus:ring-nordic-secondary-accent focus:border-nordic-secondary-accent sm:text-sm"
+                class="block w-full pl-10 pr-3 py-2 border border-[var(--nordic-border-light)] rounded-md leading-5 bg-white placeholder-[var(--nordic-text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--nordic-secondary-accent)] focus:border-[var(--nordic-secondary-accent)] sm:text-sm"
                 placeholder="Search users..." type="search" v-model="searchQuery" @input="searchUsers">
         </div>
     </div>

@@ -1,6 +1,6 @@
 <template>
-    <div class="space-y-4 bg-white p-4 border rounded-md shadow-sm w-full max-w-screen-lg">
-        <h2 class="text-xl font-semibold text-gray-800">Invite Users</h2>
+    <div class="space-y-4 bg-[var(--nordic-primary-bg)] p-4 border rounded-md shadow-sm w-full max-w-screen-lg">
+        <h2 class="text-xl font-semibold text-[var(--nordic-text-dark)]">Invite Users</h2>
 
         <SearchBox @results="handleResults" />
         <SearchResults :results="searchResults" :searchInitiated="searchInitiated" />
@@ -29,8 +29,6 @@ function handleResults(results) {
         const isMember = members.some(member => member.id === user.id)
         return !isMember
     });
-    //console.log("members:", members)
-    //console.log("search res:", searchResults.value)
 }
 
 </script>
