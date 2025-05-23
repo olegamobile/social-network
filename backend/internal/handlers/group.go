@@ -604,3 +604,48 @@ func HandleGroupInvitationSearch(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(invitables)
 }
+
+
+func ApproveGroupInvitation(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed at HandleFollowRequestApprove")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	data := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/group/invite/"), "/")
+	if len(data) != 2 {
+		http.Error(w, "Invalid request action syntax", http.StatusBadRequest)
+		return
+	}
+
+	action := data[1]
+	inviteID, err := strconv.Atoi(data[0])
+	if err != nil {
+		http.Error(w, "Invalid invite ID", http.StatusBadRequest)
+		return
+	}
+
+	// get invite info: group id and user id
+
+	// check if userId != GorupInvite_id then exit
+
+	membership, err := service.Membership(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to determine group membership status", http.StatusInternalServerError)
+		return
+	}
+
+	// if membership == "accepted" then set approval_status to "accepted" and exit
+	// if membership == "pending" or "declined" then set approval_status for invite and group_members to "accepted"
+	// if membership == "" then set approval_status for invite to "accepted" and add user to group
+
+
+	w.WriteHeader(http.StatusOK)
+}
