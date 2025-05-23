@@ -13,7 +13,7 @@
               @click="select(event)"
               :class="[
                 'cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150',
-                selectedEvent.id === event.id ? 'font-semibold text-nordic-primary-accent' : ''
+                selectedEvent.id === event.id ? 'text-nordic-primary-accent' : ''
               ]"
             >
               {{ event.title }}
@@ -23,7 +23,7 @@
         </div>
 
         <div class="mb-8">
-          <h4 class="text-lg font-semibold text-nordic-dark mb-2">Invited</h4>
+          <h4 class="text-xl font-semibold text-nordic-dark mb-3">Invited</h4>
           <ul v-if="invited.length > 0" class="space-y-2">
             <li
               v-for="event in invited"
@@ -38,7 +38,7 @@
         </div>
 
         <div>
-          <h4 class="text-lg font-semibold text-nordic-dark mb-2">Past</h4>
+          <h4 class="text-xl font-semibold text-nordic-dark mb-3">Past</h4>
           <ul v-if="past.length > 0" class="space-y-2">
             <li
               v-for="event in past"

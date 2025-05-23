@@ -1,7 +1,7 @@
 <template>
     <div class="event-card">
         <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-4">{{ event.title }}</h2>
+        <h2 class="text-2xl font-semibold text-nordic-dark mb-4">{{ event.title }}</h2>
 
         <div class="space-y-2">
           
@@ -29,7 +29,7 @@
         <button type="button" @click="$emit('edit', event.id)"
         class="bg-nordic-primary-accent text-white font-medium px-5 py-2 rounded-md hover:bg-nordic-secondary-accent transition">Going</button>
         <button type="button" @click="$emit('notGoing', event.id)"
-        class="bg-nordic-primary-accent text-white font-medium px-5 py-2 rounded-md hover:bg-nordic-secondary-accent transition">Not Going</button>
+        class="bg-nordic-secondary-bg text-nordic-dark font-medium px-5 py-2 rounded-md hover:bg-nordic-secondary-accent transition">Not Going</button>
         </div>
     </div>
     </div>
