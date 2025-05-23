@@ -32,8 +32,7 @@
             <template #main>
 
                 <!-- button to join / leave / delete -->
-                <button @click="prepareGroupAction" class="mb-4 px-4 py-2 rounded transition"
-                    :class="groupButtonClass">
+                <button @click="prepareGroupAction" class="mb-4 px-4 py-2 rounded transition" :class="groupButtonClass">
                     {{
                         membershipStatus === '' ? 'Request to Join' :
                             membershipStatus === 'pending' ? 'Cancel Request' :
@@ -55,14 +54,26 @@
                     </div>
                 </div>
 
+                <!-- members only content -->
                 <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
-                    <!-- new post button and form -->
-                    <button @click="showPostForm = !showPostForm"
-                        class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
-                        {{ showPostForm ? 'Cancel' : 'Create New Post' }}
-                    </button>
+                    <span class="flex gap-4">
+                        <!-- new post button and form -->
+                        <button @click="showPostForm = !showPostForm; showInviteForm = false"
+                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                            {{ showPostForm ? 'Cancel Post' : 'Create New Post' }}
+                        </button>
+
+                        <!-- Invite users button -->
+                        <button @click="showInviteForm = !showInviteForm; showPostForm = false"
+                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                            {{ showInviteForm ? 'Close Invitation Form' : 'Invite Users' }}
+                        </button>
+                    </span>
+
                     <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
                         @post-submitted="handlePostSubmitted" class="mb-8" />
+
+                    <InviteUsers v-if="showInviteForm" :members="members" class="mb-8"/>
 
                     <PostsList :posts="posts" />
                 </div>
@@ -70,12 +81,12 @@
         </TwoColumnLayout>
 
         <ConfirmDialog :visible="showLeaveConfirmation" title="Leave Group"
-            message="Are you sure you want to leave this group? This action cannot be undone." @confirm="handleGroupAction"
-            @cancel="showLeaveConfirmation = false" />
+            message="Are you sure you want to leave this group? This action cannot be undone."
+            @confirm="handleGroupAction" @cancel="showLeaveConfirmation = false" />
 
         <ConfirmDialog :visible="showDeleteConfirmation" title="Delete Group"
-            message="Are you sure you want to delete this group? This action cannot be undone." @confirm="handleGroupAction"
-            @cancel="showDeleteConfirmation = false" />
+            message="Are you sure you want to delete this group? This action cannot be undone."
+            @confirm="handleGroupAction" @cancel="showDeleteConfirmation = false" />
     </div>
 </template>
 
@@ -91,6 +102,7 @@ import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import NewGroupPostForm from '@/components/NewGroupPostForm.vue'
 import GroupReqNoticesForAdmin from '@/components/GroupReqNoticesForAdmin.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import InviteUsers from '@/components/InviteUsers.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -101,6 +113,7 @@ const posts = ref([])
 const members = ref([])
 const events = ref([])
 const showPostForm = ref(false)
+const showInviteForm = ref(false)
 const showLeaveConfirmation = ref(false)
 const showDeleteConfirmation = ref(false)
 const membershipStatus = ref('')
