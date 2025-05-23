@@ -32,7 +32,7 @@
             <template #main>
 
                 <!-- button to join / leave / delete -->
-                <button @click="prepareForGroupAction" class="mb-4 px-4 py-2 text-white rounded transition"
+                <button @click="prepareGroupAction" class="mb-4 px-4 py-2 rounded transition"
                     :class="groupButtonClass">
                     {{
                         membershipStatus === '' ? 'Request to Join' :
@@ -114,7 +114,7 @@ const groupButtonClass = computed(() => {
         return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
     }
     if (membershipStatus.value === 'pending') {
-        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-bg text-nordic-light';
+        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-accent text-nordic-light';
     }
     if (membershipStatus.value === 'accepted') {
         //return 'bg-nordic-text-light hover:bg-nordic-primary-accent text-black';  // doesn't work for some reason
@@ -126,7 +126,7 @@ const groupButtonClass = computed(() => {
     return '';
 });
 
-function prepareForGroupAction() {
+function prepareGroupAction() {
     if (!showLeaveConfirmation.value && membershipStatus.value === 'accepted') {
         showLeaveConfirmation.value = true
         return
@@ -137,7 +137,6 @@ function prepareForGroupAction() {
     }
     handleGroupAction()
 }
-
 
 async function handleGroupAction() {
     let action = ''
