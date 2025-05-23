@@ -5,6 +5,7 @@ import (
 	"backend/internal/database"
 	"backend/internal/handlers"
 	"backend/internal/middleware"
+	"backend/internal/utils"
 	"fmt"
 	"log"
 	"net/http"
@@ -59,10 +60,11 @@ func setHandlers() {
 	http.HandleFunc("/api/notifications/new", middleware.WithCORS(handlers.GetNewNotifications))
 	http.HandleFunc("/api/notifications/{id}/joingroup", middleware.WithCORS(handlers.HandleJoinReqsByGroupId))
 
-	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections))
+	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections)) // Is CORS needed for websockets?
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 
-	// Serve the avatars directory as static content with CORS
+	// Serve the image directories as static content with CORS
+
 	avatarsFS := http.FileServer(http.Dir("./data/uploads/avatars"))
 	avatarHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		middleware.WithCORS(avatarsFS.ServeHTTP)(w, r)
@@ -75,6 +77,17 @@ func setHandlers() {
 	})
 	http.Handle("/data/uploads/posts/", http.StripPrefix("/data/uploads/posts/", postImageHandler))
 
+	commentsFS := http.FileServer(http.Dir("./data/uploads/comments"))
+	commentImageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		middleware.WithCORS(commentsFS.ServeHTTP)(w, r)
+	})
+	http.Handle("/data/uploads/comments/", http.StripPrefix("/data/uploads/comments/", commentImageHandler))
+
+	defaultFS := http.FileServer(http.Dir("./data/default"))
+	defaultImageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		middleware.WithCORS(defaultFS.ServeHTTP)(w, r)
+	})
+	http.Handle("/data/default/", http.StripPrefix("/data/default/", defaultImageHandler))
 }
 
 func main() {
@@ -85,6 +98,8 @@ func main() {
 		log.Fatal(err)
 	}
 	defer database.Close()
+
+	utils.DeleteUnusedImages()
 
 	setHandlers()
 	fmt.Printf("Backend running on port %s, allowing requests from %s\n", config.Port, config.FrontendURL)

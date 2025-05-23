@@ -522,8 +522,6 @@ func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, i
 	`
 	args := []any{data.FirstName, data.LastName, data.DOB, utils.NullableString(data.Nickname), utils.NullableString(data.About), data.IsPublic}
 
-	fmt.Println("data at UpdateUser:", data)
-
 	if data.DeleteAvatar {
 		query += `, avatar_path = NULL`
 	} else if data.AvatarPath.Valid {
