@@ -283,10 +283,8 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println("inserting notification")
 		err = repository.InsertNotification(userID, adminID, "group_join_request", gmId) // last id needs to be id at group members table
 		if err != nil {
-			fmt.Println("error inserting notification in HandleGroupMembership:", err)
 			http.Error(w, "error inserting notification in HandleGroupMembership", http.StatusBadRequest)
 			return
 		}

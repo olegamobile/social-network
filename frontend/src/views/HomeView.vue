@@ -59,6 +59,7 @@ const postsListRef = ref(null); // To access the sentinel in PostsList
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
+    showPostForm.value = !showPostForm.value
 }
 
 async function _getHomeFeed() {

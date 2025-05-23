@@ -98,7 +98,7 @@ func UploadAvatar(file multipart.File, header *multipart.FileHeader) (sql.NullSt
 		fmt.Println("bad extension:", ext)
 		return avatarPath, fmt.Errorf("illegal extension")
 	}
-	filename := fmt.Sprintf("avatars/%d%s", time.Now().UnixNano(), ext)
+	filename := fmt.Sprintf("data/uploads/avatars/%d%s", time.Now().UnixNano(), ext)
 
 	dst, err := os.Create(filename)
 	if err != nil {
