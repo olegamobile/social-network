@@ -129,7 +129,7 @@ func GetGroupById(groupId int) (model.Group, error) {
 	err := database.DB.QueryRow(`
 	SELECT id, title, description
 	FROM groups
-	WHERE id = ?`, groupId).Scan(&group.ID, &group.Title, &group.Description)
+	WHERE id = ? AND status = 'enable'`, groupId).Scan(&group.ID, &group.Title, &group.Description)
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
