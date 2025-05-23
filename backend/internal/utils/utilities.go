@@ -18,7 +18,3 @@ func IsAllowedImageExtension(ext string) bool {
 	allowed := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
 	return allowed[ext]
 }
-
-func DeleteUnusedImages() {
-
-}

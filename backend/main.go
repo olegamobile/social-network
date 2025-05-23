@@ -5,7 +5,6 @@ import (
 	"backend/internal/database"
 	"backend/internal/handlers"
 	"backend/internal/middleware"
-	"backend/internal/utils"
 	"fmt"
 	"log"
 	"net/http"
@@ -99,7 +98,7 @@ func main() {
 	}
 	defer database.Close()
 
-	utils.DeleteUnusedImages()
+	deleteUnusedImages()
 
 	setHandlers()
 	fmt.Printf("Backend running on port %s, allowing requests from %s\n", config.Port, config.FrontendURL)
