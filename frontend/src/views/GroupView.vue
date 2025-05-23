@@ -23,7 +23,7 @@
                     </div>
 
 
-                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'"/>
+                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'" />
 
 
                 </div>
@@ -32,7 +32,7 @@
             <template #main>
 
                 <!-- button to join / leave / delete -->
-                <button @click="handleGroupAction" class="mb-4 px-4 py-2 text-white rounded transition"
+                <button @click="prepareForGroupAction" class="mb-4 px-4 py-2 text-white rounded transition"
                     :class="groupButtonClass">
                     {{
                         membershipStatus === '' ? 'Request to Join' :
@@ -68,6 +68,14 @@
                 </div>
             </template>
         </TwoColumnLayout>
+
+        <ConfirmDialog :visible="showLeaveConfirmation" title="Leave Group"
+            message="Are you sure you want to leave this group? This action cannot be undone." @confirm="handleGroupAction"
+            @cancel="showLeaveConfirmation = false" />
+
+        <ConfirmDialog :visible="showDeleteConfirmation" title="Delete Group"
+            message="Are you sure you want to delete this group? This action cannot be undone." @confirm="handleGroupAction"
+            @cancel="showDeleteConfirmation = false" />
     </div>
 </template>
 
@@ -82,6 +90,7 @@ import MembersList from '@/components/MembersList.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import NewGroupPostForm from '@/components/NewGroupPostForm.vue'
 import GroupReqNoticesForAdmin from '@/components/GroupReqNoticesForAdmin.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -92,7 +101,8 @@ const posts = ref([])
 const members = ref([])
 const events = ref([])
 const showPostForm = ref(false)
-
+const showLeaveConfirmation = ref(false)
+const showDeleteConfirmation = ref(false)
 const membershipStatus = ref('')
 
 const handlePostSubmitted = (newPost) => {
@@ -116,8 +126,20 @@ const groupButtonClass = computed(() => {
     return '';
 });
 
-async function handleGroupAction() {
+function prepareForGroupAction() {
+    if (!showLeaveConfirmation.value && membershipStatus.value === 'accepted') {
+        showLeaveConfirmation.value = true
+        return
+    }
+    if (!showDeleteConfirmation.value && membershipStatus.value === 'admin') {
+        showDeleteConfirmation.value = true
+        return
+    }
+    handleGroupAction()
+}
 
+
+async function handleGroupAction() {
     let action = ''
     if (membershipStatus.value === '' || membershipStatus.value === 'declined') action = 'request'
     else if (membershipStatus.value === 'accepted') action = 'leave'
@@ -150,6 +172,13 @@ async function handleGroupAction() {
         membershipStatus.value = resp.membership
     } catch (err) {
         console.error(err)
+    }
+
+    showLeaveConfirmation.value = false
+    showDeleteConfirmation.value = false
+
+    if (action == 'delete') {
+        router.push('/groups')
     }
 }
 
@@ -189,7 +218,7 @@ async function getGroup(groupId) {
 
     } catch (err) {
         console.log("error fetching group:", err)
-        errorStore.setError('Error', 'Something went wrong while loading group data.')
+        errorStore.setError('Error', 'Failed to get group data.')
         router.push('/error')
         return
     }
