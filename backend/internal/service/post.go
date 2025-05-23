@@ -48,7 +48,7 @@ func SaveUploadedFile(file multipart.File, header *multipart.FileHeader) (string
 	}
 
 	filename := uuid.New().String() + filepath.Ext(header.Filename)
-	dst := filepath.Join("uploads/posts", filename)
+	dst := filepath.Join("data/uploads/posts", filename)
 
 	out, err := os.Create(dst)
 	if err != nil {

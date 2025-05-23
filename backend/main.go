@@ -63,17 +63,17 @@ func setHandlers() {
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 
 	// Serve the avatars directory as static content with CORS
-	avatarsFS := http.FileServer(http.Dir("./avatars"))
+	avatarsFS := http.FileServer(http.Dir("./data/uploads/avatars"))
 	avatarHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		middleware.WithCORS(avatarsFS.ServeHTTP)(w, r)
 	})
-	http.Handle("/avatars/", http.StripPrefix("/avatars/", avatarHandler))
+	http.Handle("/data/uploads/avatars/", http.StripPrefix("/data/uploads/avatars/", avatarHandler))
 
-	postsFS := http.FileServer(http.Dir("./uploads/posts"))
+	postsFS := http.FileServer(http.Dir("./data/uploads/posts"))
 	postImageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		middleware.WithCORS(postsFS.ServeHTTP)(w, r)
 	})
-	http.Handle("/uploads/posts/", http.StripPrefix("/uploads/posts/", postImageHandler))
+	http.Handle("/data/uploads/posts/", http.StripPrefix("/data/uploads/posts/", postImageHandler))
 
 }
 

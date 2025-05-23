@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const DBPath = "data/app.db"
+const DBPath = "data/db/app.db"
 const MigrationsPath = "migrations"
 
 var (
