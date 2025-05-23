@@ -393,3 +393,29 @@ func ApproveGroupRequest(userID, groupID, adminID int, action string) int {
 
 	return http.StatusOK
 }
+
+func InviteToGroup(groupInvite model.GroupInvitation) (int, error) {
+	query := `
+	INSERT INTO group_invitations (group_id, user_id, inviter_id, approval_status)
+	VALUES (?, ?, ?, 'pending')
+	ON CONFLICT(group_id, user_id) DO UPDATE SET
+    	approval_status = 'pending',
+    	status = 'enable',
+    	updated_by = EXCLUDED.updated_by -- Use EXCLUDED to refer to the new values
+	WHERE
+    	approval_status != 'accepted' AND status != 'enable';`
+
+	result, err := database.DB.Exec(
+		query,
+		groupInvite.GroupID,
+		groupInvite.UserId,
+		groupInvite.Inviter,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	groupInviteId, err := result.LastInsertId()
+
+	return int(groupInviteId), err
+}

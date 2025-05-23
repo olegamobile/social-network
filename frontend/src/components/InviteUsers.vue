@@ -3,14 +3,14 @@
         <h2 class="text-xl font-semibold text-[var(--nordic-text-dark)]">Invite Users</h2>
 
         <SearchBox @results="handleResults" />
-        <SearchResults :results="searchResults" :searchInitiated="searchInitiated" />
+        <SearchResultsInvite :results="searchResults" :searchInitiated="searchInitiated" />
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import SearchBox from './SearchBox.vue'
-import SearchResults from './SearchResults.vue'
+import SearchResultsInvite from './SearchResultsInvite.vue'
 
 const emit = defineEmits(['post-submitted'])
 const searchResults = ref([])
@@ -29,6 +29,8 @@ function handleResults(results) {
         const isMember = members.some(member => member.id === user.id)
         return !isMember
     });
+
+    console.log(searchResults.value)
 }
 
 </script>
