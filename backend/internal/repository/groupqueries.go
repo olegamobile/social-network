@@ -405,7 +405,7 @@ func InviteToGroup(groupInvite model.GroupInvitation) (int, error) {
 	WHERE
     	approval_status != 'accepted' AND status != 'enable';`
 
-	result, err := database.DB.Exec(
+	_, err := database.DB.Exec(
 		query,
 		groupInvite.GroupID,
 		groupInvite.UserId,
@@ -415,7 +415,97 @@ func InviteToGroup(groupInvite model.GroupInvitation) (int, error) {
 		return 0, err
 	}
 
-	groupInviteId, err := result.LastInsertId()
+	query = `SELECT id FROM group_invitations WHERE group_id = ? AND user_id = ?` // last insert won't work when update at on conflict
+	var groupInviteId int
+	err = database.DB.QueryRow(query, groupInvite.GroupID, groupInvite.UserId).Scan(&groupInviteId)
 
 	return int(groupInviteId), err
+}
+
+/* func SearchUsersForInvite(query string) ([]model.User, error) {
+	q := "%" + query + "%" // Add wildcards for LIKE clause
+	rows, err := database.DB.Query(`
+		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public
+		FROM users
+		WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ?
+		`,
+		q, q, q,
+	)
+	if err != nil {
+		fmt.Println("query error at SearchUsers:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+	for rows.Next() {
+		var u model.User
+		var nickname sql.NullString
+		var about sql.NullString
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl, &u.IsPublic)
+		if err != nil {
+			fmt.Println("scan error at SearchUsers:", err)
+			return nil, err
+		}
+		if nickname.Valid {
+			u.Username = nickname.String
+		} else {
+			u.Username = ""
+		}
+
+		if about.Valid {
+			u.About = about.String
+		} else {
+			u.About = ""
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
+		}
+
+		users = append(users, u)
+	}
+
+	return users, nil
+} */
+
+func GetMembershipStatus(userID, groupID int) (string, error) {
+	// Check group_members table
+	var memberStatus string
+	memberQuery := `
+		SELECT approval_status 
+		FROM group_members 
+		WHERE user_id = ? AND group_id = ? AND status = 'enable'
+	`
+	err := database.DB.QueryRow(memberQuery, userID, groupID).Scan(&memberStatus)
+	if err != nil && err != sql.ErrNoRows {
+		return "", fmt.Errorf("failed to query group_members: %w", err)
+	}
+
+	// Check group_invitations table
+	var invitationStatus string
+	invitationQuery := `
+		SELECT approval_status 
+		FROM group_invitations 
+		WHERE user_id = ? AND group_id = ? AND status = 'enable'
+	`
+	err = database.DB.QueryRow(invitationQuery, userID, groupID).Scan(&invitationStatus)
+	if err != nil && err != sql.ErrNoRows {
+		return "", fmt.Errorf("failed to query group_invitations: %w", err)
+	}
+
+	// Apply business logic
+	if memberStatus == "accepted" || invitationStatus == "accepted" {
+		return "accepted", nil
+	}
+
+	if invitationStatus == "pending" {
+		return "invited", nil
+	}
+
+	return "", nil
 }

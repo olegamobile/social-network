@@ -2,15 +2,23 @@
     <div v-if="results && results.length > 0" class="mb-8">
         <h3 class="text-xl font-semibold text-[var(--nordic-text-dark)] mb-3">Search Results</h3>
         <ul class="space-y-2">
-            <li v-for="user in results" :key="user.id"
+            <li v-for="user in results" :key="user.user.id"
                 class="text-[var(--nordic-text-light)] hover:text-[var(--nordic-primary-accent)] transition-colors duration-150">
-                <button @click="inviteUser(user.id)"
-                    class="bg-[var(--nordic-primary-accent)] text-white px-2 py-1 mr-4 rounded hover:bg-[var(--nordic-secondary-accent)]">
-                    Invite
+
+                <!-- invite button -->
+                <button @click="inviteUser(user.user.id)"
+                    :disabled="user.membership === 'invited' || user.membership === 'accepted'"
+                    class="w-20 bg-[var(--nordic-primary-accent)] text-white px-2 py-1 mr-4 rounded hover:bg-[var(--nordic-secondary-accent)] disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span v-if="user.membership === ''">Invite</span>
+                    <span v-else-if="user.membership === 'invited'">Invited</span>
+                    <span v-else>Ininvitable</span>
+                    
                 </button>
-                <RouterLink :to="`/profile/${user.id}`">
-                    {{ user.first_name }} {{ user.last_name }}
-                    <span v-if="user.username"> - {{ user.username }}</span>
+
+                <!-- link to profile -->
+                <RouterLink :to="`/profile/${user.user.id}`">
+                    {{ user.user.first_name }} {{ user.user.last_name }}
+                    <span v-if="user.user.username"> - {{ user.user.username }}</span>
                 </RouterLink>
             </li>
         </ul>
