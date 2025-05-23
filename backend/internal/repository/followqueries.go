@@ -20,14 +20,25 @@ func FollowApproval(userId, targetId int) (string, int) {
 	return approval, http.StatusOK
 }
 
-func SendFollowRequest(followerID, followedID int) error {
+func SendFollowRequest(followerID, followedID int) (int, error) {
 	_, err := database.DB.Exec(`
         INSERT INTO follow_requests (follower_id, followed_id, approval_status)
         VALUES (?, ?, 'pending')
         ON CONFLICT(follower_id, followed_id) DO UPDATE SET approval_status='pending'
     `, followerID, followedID)
 
-	return err
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	}
+
+	var id int
+	row := database.DB.QueryRow("SELECT id FROM follow_requests WHERE follower_id = ? AND followed_id = ?", followerID, followedID)
+	err = row.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, err
 }
 
 func StartToFollow(followerID, followedID int) error {
