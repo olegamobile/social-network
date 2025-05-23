@@ -163,7 +163,6 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to save image", http.StatusInternalServerError)
 			return
 		}
-		//fmt.Println("Form avatar found at:", updateData.AvatarPath.String)
 	} else {
 		fmt.Println("No avatar file found at updating profile:", err)
 	}
