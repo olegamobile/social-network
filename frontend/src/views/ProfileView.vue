@@ -6,9 +6,9 @@
             <template #sidebar>
 
                 <!-- avatar image -->
-                <div class="flex flex-col items-center mb-4">
+                <div class="flex flex-col items-center mt-4 mb-8">
                     <div v-if="user?.avatar_url"
-                        class="profile-avatar w-24 h-24 rounded-full overflow-hidden border border-nordic-light">
+                        class="profile-avatar w-32 h-32 rounded-full overflow-hidden border border-nordic-light">
                         <img :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
                             class="w-full h-full object-cover" />
                     </div>
@@ -36,13 +36,13 @@
             <template #main>
 
                 <!-- follow button -->
-                <button v-if="showFollowButton" :disabled="followStatus === 'pending'" @click="handleFollowAction"
-                    class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition" :class="followButtonClass">
+                <button v-if="showFollowButton" @click="prepareFollowAction" class="mb-4 px-4 py-2 rounded transition"
+                    :class="followButtonClass">
                     {{
                         followStatus === 'not following public' ? 'Follow' :
                             followStatus === 'not following private' ? 'Request to Follow' :
                                 followStatus === 'accepted' ? 'Stop Following' :
-                                    followStatus === 'pending' ? 'Follow Requested' :
+                                    followStatus === 'pending' ? 'Cancel Request' :
                                         ''
                     }}
                 </button>
@@ -61,6 +61,10 @@
             </template>
 
         </TwoColumnLayout>
+
+        <ConfirmDialog :visible="showStopFollowingConfirmation" title="Stop Following"
+            :message="`Are you sure you want to stop following ${user?.first_name}?`"
+            @confirm="handleFollowAction" @cancel="showStopFollowingConfirmation = false" />
     </div>
 </template>
 
@@ -76,6 +80,7 @@ import EditProfile from '@/components/EditProfile.vue'
 import { useUserStore } from '@/stores/user'
 import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
 import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const route = useRoute()
 const user = ref(null)
@@ -87,6 +92,7 @@ const errorStore = useErrorStore()
 const showEditForm = ref(false);
 const userStore = useUserStore()
 const followStatus = ref('')
+const showStopFollowingConfirmation = ref(false)
 
 // Compute formatted birthday so it doesn't affect userStore
 const formattedBirthday = computed(() => {
@@ -111,7 +117,7 @@ const followButtonClass = computed(() => {
         return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
     }
     if (followStatus.value === 'pending') {
-        return 'bg-nordic-secondary-bg text-nordic-light cursor-not-allowed';
+        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-accent text-nordic-light';
     }
     return '';
 });
@@ -184,13 +190,21 @@ async function fetchUserAndPosts(userId) {
     }
 }
 
-async function handleFollowAction() {
-    if (followStatus.value === 'pending') return
+function prepareFollowAction() {
+    if (!showStopFollowingConfirmation.value && followStatus.value === 'accepted') {
+        showStopFollowingConfirmation.value = true
+        return
+    }
+    handleFollowAction()
+}
 
+async function handleFollowAction() {
     let action = ''
     if (followStatus.value === 'not following private') action = 'request'
     else if (followStatus.value === 'not following public') action = 'follow'
     else if (followStatus.value === 'accepted') action = 'unfollow'
+    else if (followStatus.value === 'pending') action = 'cancel'
+
 
     try {
         const res = await fetch(`${apiUrl}/api/follow`, {
@@ -218,6 +232,8 @@ async function handleFollowAction() {
     } catch (err) {
         console.error(err)
     }
+
+    showStopFollowingConfirmation.value = false
 }
 
 

@@ -1,17 +1,24 @@
 <template>
-    <div class="space-y-4 bg-white p-4 border rounded-md shadow-sm w-full max-w-screen-lg">
+    <div
+        class="space-y-4 bg-[var(--nordic-primary-bg)] p-4 border border-[var(--nordic-border-light)] rounded-md shadow-sm w-full max-w-screen-lg">
         <!-- header -->
-        <h2 class="text-xl font-semibold text-gray-800">Create a New Post</h2>
+        <h2 class="text-xl font-semibold text-[var(--nordic-text-dark)]">Create a New Post</h2>
 
         <!-- content input -->
-        <textarea v-model="content" rows="4" placeholder="Enter your message" class="w-full p-3 border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 
-      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+        <textarea v-model="content" rows="4" placeholder="Enter your message"
+            class="w-full p-3 border border-[var(--nordic-border-light)] rounded-md 
+             text-[var(--nordic-text-dark)] placeholder-[var(--nordic-text-light)] 
+             bg-white
+             focus:outline-none focus:ring-2 focus:ring-[var(--nordic-secondary-accent)] focus:border-[var(--nordic-secondary-accent)] resize-y"></textarea>
 
         <!-- upload image -->
         <div class="space-y-2">
-            <label class="block text-sm font-medium text-nordic-light">Image (Optional):</label>
-            <input type="file" @change="handleFileUpload" accept="image/*"
-                class="block w-full text-sm text-nordic-light file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-nordic-light hover:file:bg-gray-200" />
+            <label class="block text-sm font-medium text-[var(--nordic-text-light)]">Image (Optional):</label>
+            <input type="file" @change="handleFileUpload" accept="image/*" class="block w-full text-sm text-[var(--nordic-text-light)]
+               file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+               file:text-sm file:font-semibold 
+               file:bg-[var(--nordic-secondary-bg)] file:text-[var(--nordic-text-dark)] 
+               hover:file:bg-[var(--nordic-border-light)]" />
         </div>
 
         <!-- submit button -->

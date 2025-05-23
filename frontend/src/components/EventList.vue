@@ -3,7 +3,7 @@
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Events</h3>
         <li v-for="event in events" :key="event.id" class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
             <RouterLink :to="`/event/${event.id}`">
-            <p><strong>{{ event.title }}</strong><br>{{ formatDate(event.datetime) }}</p>
+            <p><strong>{{ event.title }}</strong><br>{{ formatDate(event.event_datetime) }}</p>
             </RouterLink>
         </li>        
     </ul>

@@ -71,9 +71,12 @@ func HandleFollowAction(w http.ResponseWriter, r *http.Request) {
 	case "follow":
 		statusCode = service.Follow(userID, req.TargetID)
 	case "unfollow":
-		statusCode = repository.Unfollow(userID, req.TargetID)
+		statusCode = repository.RemoveFollow(userID, req.TargetID)
+	case "cancel":
+		statusCode = repository.RemoveFollow(userID, req.TargetID)
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
+		return
 	}
 
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
