@@ -87,6 +87,11 @@ type GroupInvitation struct {
 	Inviter int    `json:"inviter_id"`
 }
 
+type InvitableUser struct {
+	User       User   `json:"user"`
+	Membership string `json:"membership"`
+}
+
 type Notification struct {
 	ID            int     `json:"id"`
 	Type          string  `json:"type"` // 'follow_request', 'group_invitation', 'group_join_request', 'event_creation'

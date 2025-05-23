@@ -541,3 +541,66 @@ func HandleGroupInvitation(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func HandleGroupInvitationSearch(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed at HandleGroupInvitationSearch")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	_, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var invitables []model.InvitableUser
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		json.NewEncoder(w).Encode(invitables) // Return empty array for empty query
+		return
+	}
+
+	users, err := repository.SearchUsers(query)
+	if err != nil {
+		http.Error(w, "Error searching users", http.StatusInternalServerError)
+		return
+	}
+
+	type req struct {
+		GroupId string `json:"group_id"`
+	}
+	var groupInfo req
+
+	err = json.NewDecoder(r.Body).Decode(&groupInfo)
+	if err != nil {
+		fmt.Println("json error at HandleGroupInvitationSearch:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	groupId, err := strconv.Atoi(groupInfo.GroupId)
+	if err != nil {
+		fmt.Println("strconv.Atoi error at HandleGroupInvitationSearch:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	for _, user := range users {
+		var inv model.InvitableUser
+		inv.User = user
+		membership, err := repository.GetMembershipStatus(user.ID, groupId)
+		if err != nil {
+			fmt.Println("error getting membership at HandleGroupInvitationSearch:", err)
+			http.Error(w, "error getting membership status", http.StatusBadRequest)
+			return
+		}
+		inv.Membership = membership
+		invitables = append(invitables, inv)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(invitables)
+}
