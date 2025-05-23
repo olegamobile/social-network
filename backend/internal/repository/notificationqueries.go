@@ -30,7 +30,12 @@ SELECT
     END AS sender_name,
     n.follow_req_id,
     n.group_invite_id,
-    n.group_members_id,
+
+	  CASE 
+        WHEN n.type = 'group_invitation' THEN gi.group_id
+        WHEN n.type = 'group_join_request' THEN gm.group_id
+        ELSE NULL
+    END AS group_id,
     
     -- Group title selection based on type
     COALESCE(ggm.title, ggi.title, ge.title) AS group_title,

@@ -455,3 +455,55 @@ func HandleCreateGroup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(grp)
 }
+
+func HandleGroupRequestApprove(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed at HandleFollowRequestApprove")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+
+	if err != nil {
+		fmt.Println("ValidateSession error at HandleFollowRequestApprove:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req model.GroupRequestApproval
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body at HandleFollowRequestApprove", http.StatusBadRequest)
+		return
+	}
+
+	groupID := req.GroupID
+	requesterID := req.RequesterID
+
+	membership, err := service.Membership(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to determine group membership status", http.StatusInternalServerError)
+		return
+	}
+
+	if membership != "admin" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	action := strings.TrimPrefix(r.URL.Path, "/api/group/requests/")
+	if action != "accepted" && action != "declined" {
+		http.Error(w, "Invalid request action syntax", http.StatusBadRequest)
+		return
+	}
+
+	statusCode := repository.ApproveGroupRequest(requesterID, groupID, userID, action)
+
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		fmt.Println("error code at HandleGroupRequestApprove:", statusCode)
+		http.Error(w, http.StatusText(statusCode), statusCode)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

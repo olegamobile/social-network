@@ -34,6 +34,7 @@ func setHandlers() {
 	http.HandleFunc("/api/groups/create", middleware.WithCORS(handlers.HandleCreateGroup))
 	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById)) // group with group id
 	http.HandleFunc("/api/group/join", middleware.WithCORS(handlers.HandleGroupMembership))
+	http.HandleFunc("/api/group/requests/{approval_status}", middleware.WithCORS(handlers.HandleGroupRequestApprove))
 
 	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))
 

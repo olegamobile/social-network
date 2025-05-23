@@ -35,7 +35,7 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 		case "group_invitation":
 			pending, err = repository.CheckInvitationStatus(*notifications[i].GroupInviteID)
 		case "group_join_request":
-			pending, err = repository.CheckJoinRequestStatus(notifications[i].UserID, *notifications[i].GroupID)
+			pending, err = repository.CheckJoinRequestStatus(*notifications[i].SenderID, *notifications[i].GroupID)
 		case "event_creation":
 			pending, err = repository.CheckEventInvitationStatus(notifications[i].UserID, *notifications[i].EventID)
 		}
