@@ -462,7 +462,6 @@ func HandleGroupRequestApprove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID, err := service.ValidateSession(r)
-
 	if err != nil {
 		fmt.Println("ValidateSession error at HandleFollowRequestApprove:", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -500,6 +499,43 @@ func HandleGroupRequestApprove(w http.ResponseWriter, r *http.Request) {
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		fmt.Println("error code at HandleGroupRequestApprove:", statusCode)
 		http.Error(w, http.StatusText(statusCode), statusCode)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func HandleGroupInvitation(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed at HandleFollowRequestApprove")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var groupInvite model.GroupInvitation
+	err = json.NewDecoder(r.Body).Decode(&groupInvite)
+	if err != nil {
+		fmt.Println("json error at HandleGroupInvitation:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+	groupInvite.Inviter = userID
+
+	groupInvite.ID, err = repository.InviteToGroup(groupInvite)
+	if err != nil {
+		http.Error(w, "Failed to create invitation", http.StatusUnauthorized)
+		return
+	}
+
+	err = repository.InsertNotification(groupInvite.Inviter, groupInvite.UserId, "group_invitation", groupInvite.ID)
+	if err != nil {
+		http.Error(w, "error inserting notification in HandleGroupInvitation", http.StatusBadRequest)
 		return
 	}
 

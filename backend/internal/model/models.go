@@ -80,6 +80,13 @@ type GroupRequestApproval struct {
 	RequesterID int `json:"requester_id"`
 }
 
+type GroupInvitation struct {
+	ID      int    `json:"id"`
+	UserId  int    `json:"user_id"`
+	GroupID string `json:"group_id"`
+	Inviter int    `json:"inviter_id"`
+}
+
 type Notification struct {
 	ID            int     `json:"id"`
 	Type          string  `json:"type"` // 'follow_request', 'group_invitation', 'group_join_request', 'event_creation'
