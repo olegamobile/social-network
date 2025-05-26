@@ -396,14 +396,16 @@ func ApproveGroupRequest(userID, groupID, adminID int, action string) int {
 
 func InviteToGroup(groupInvite model.GroupInvitation) (int, error) {
 	query := `
-	INSERT INTO group_invitations (group_id, user_id, inviter_id, approval_status)
-	VALUES (?, ?, ?, 'pending')
-	ON CONFLICT(group_id, user_id) DO UPDATE SET
-    	approval_status = 'pending',
-    	status = 'enable',
-    	updated_by = EXCLUDED.updated_by -- Use EXCLUDED to refer to the new values
-	WHERE
-    	approval_status != 'accepted' AND status != 'enable';`
+INSERT INTO group_invitations (group_id, user_id, inviter_id, approval_status)
+VALUES (?, ?, ?, 'pending')
+ON CONFLICT(group_id, user_id) DO UPDATE SET
+    approval_status = 'pending',
+    status = 'enable',
+    updated_by = EXCLUDED.inviter_id
+WHERE
+    approval_status != 'accepted'
+    OR 
+	status = 'delete';`
 
 	_, err := database.DB.Exec(
 		query,
@@ -457,4 +459,38 @@ func GetMembershipStatus(userID, groupID int) (string, error) {
 	}
 
 	return "", nil
+}
+
+func GetGroupInviteInfo(inviteID int) (int, int, error) {
+	// Check group_members table
+	var groupID, invitedID int
+	memberQuery := `
+		SELECT group_id, user_id
+		FROM group_invitations
+		WHERE id = ? AND status = 'enable'
+	`
+	err := database.DB.QueryRow(memberQuery, inviteID).Scan(&groupID, &invitedID)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, 0, fmt.Errorf("failed to query group invitation info: %w", err)
+	}
+
+	return groupID, invitedID, nil
+}
+
+func UpdateGroupInviteStatus(inviteID, userID int, action string) int {
+	query := `
+		UPDATE group_invitations SET
+			approval_status = ?,
+			updated_by = ?,
+			status = 'delete'  
+		WHERE 
+		id = ? AND
+		status = 'enable'  
+	`
+	_, err := database.DB.Exec(query, action, userID, inviteID)
+	if err != nil {
+		return http.StatusInternalServerError
+	}
+
+	return http.StatusOK
 }

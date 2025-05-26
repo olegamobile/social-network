@@ -135,6 +135,30 @@ async function approveGroupRequest(groupID, senderID, action) {
 }
 
 
+async function approveGroupInvite(groupInviteID, action) {
+    try {
+        const res = await fetch(`${apiUrl}/api/group/invite/${groupInviteID}/${action}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to accept/decline group invitation: ${res.status}`)
+
+    } catch (err) {
+        errorStore.setError('Error', `Error while accepting/declining group invitation`)
+        router.push('/error')
+    }
+}
+
 onMounted(() => {
     fetchNotifications()
 })
@@ -162,11 +186,16 @@ async function handleAccept(id) {
             readNotification(n.id)
             fetchNotifications();
             break;
+        case 'group_invitation':
+            await approveGroupInvite(n.group_invite_id, 'accepted');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
     }
 
 }
 
-function handleDecline(id) {
+async function handleDecline(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
     if (!n.is_read) n.is_read = true
     readNotification(n.id)
@@ -174,9 +203,18 @@ function handleDecline(id) {
     switch (n.type) {
         case 'follow_request':
             approveFollowRequest(n.follow_req_id, 'decline');
+            readNotification(n.id)
+            fetchNotifications();
             break;
         case 'group_join_request':
-            approveGroupRequest(n.group_id, n.sender_id, 'declined');
+            await approveGroupRequest(n.group_id, n.sender_id, 'declined');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+        case 'group_invitation':
+            await approveGroupInvite(n.group_invite_id, 'declined');
+            readNotification(n.id)
+            fetchNotifications();
             break;
     }
 }

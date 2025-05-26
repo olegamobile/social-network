@@ -36,6 +36,7 @@ func setHandlers() {
 	http.HandleFunc("/api/group/join", middleware.WithCORS(handlers.HandleGroupMembership))
 	http.HandleFunc("/api/group/requests/{approval_status}", middleware.WithCORS(handlers.HandleGroupRequestApprove))
 	http.HandleFunc("/api/group/invite", middleware.WithCORS(handlers.HandleGroupInvitation))
+	http.HandleFunc("/api/group/invite/{id}/{approval_status}", middleware.WithCORS(handlers.ApproveGroupInvitation))
 	http.HandleFunc("/api/group/invite/search", middleware.WithCORS(handlers.HandleGroupInvitationSearch))
 
 	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))
