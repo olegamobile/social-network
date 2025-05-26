@@ -605,7 +605,6 @@ func HandleGroupInvitationSearch(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(invitables)
 }
 
-
 func ApproveGroupInvitation(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		fmt.Println("Method not allowed at HandleFollowRequestApprove")
@@ -633,8 +632,16 @@ func ApproveGroupInvitation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get invite info: group id and user id
+	groupID, invitedID, err := repository.GetGroupInviteInfo(inviteID)
+	if err != nil {
+		http.Error(w, "Failed to get group invitation info", http.StatusInternalServerError)
+		return
+	}
 
-	// check if userId != GorupInvite_id then exit
+	if userID != invitedID {
+		http.Error(w, "Only own invitations could be approved", http.StatusUnauthorized)
+		return
+	}
 
 	membership, err := service.Membership(userID, groupID)
 	if err != nil {
@@ -642,10 +649,37 @@ func ApproveGroupInvitation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if membership == "accepted" then set approval_status to "accepted" and exit
-	// if membership == "pending" or "declined" then set approval_status for invite and group_members to "accepted"
-	// if membership == "" then set approval_status for invite to "accepted" and add user to group
+	var statusCode int
+	switch membership {
+	case "accepted":
+		// User is already a member, just update invite status
+		statusCode = repository.UpdateGroupInviteStatus(inviteID, userID, action)
+	case "pending", "declined", "":
+		// Update both invite and member status
+		statusCode = repository.UpdateGroupInviteStatus(inviteID, userID, action)
+		if action == "accepted" {
+			err = repository.AddGroupMember(userID, groupID)
+			if err != nil {
+				http.Error(w, "Failed to add group member", http.StatusInternalServerError)
+				return
+			}
+		}
 
+	default:
+		http.Error(w, "Invalid membership status", http.StatusInternalServerError)
+		return
+	}
+
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		fmt.Println("error code at ApproveGroupInvitation:", statusCode)
+		http.Error(w, http.StatusText(statusCode), statusCode)
+		return
+	}
+
+	if err != nil {
+		http.Error(w, "Failed to process invitation", http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
