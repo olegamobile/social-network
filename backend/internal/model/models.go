@@ -1,6 +1,11 @@
 package model
 
-import "database/sql"
+import (
+	"database/sql"
+	"sync"
+
+	"github.com/gorilla/websocket"
+)
 
 type User struct {
 	ID         int    `json:"id"`
@@ -109,3 +114,22 @@ type Notification struct {
 	Pending       bool    `json:"pending"`
 	CreatedAt     string  `json:"created_at"`
 }
+
+type WSMessage struct {
+	Type    string `json:"type"`
+	From    string `json:"from"`
+	To      string `json:"receiver_id,omitempty"`
+	Content string `json:"content,omitempty"`
+}
+
+type Client struct {
+	UserID string
+	Conn   *websocket.Conn
+	Send   chan WSMessage // individual send channel
+}
+
+var (
+	Broadcast = make(chan WSMessage)     // for global broadcast
+	Clients   = make(map[string]*Client) // userID -> client
+	Mu        sync.Mutex
+)

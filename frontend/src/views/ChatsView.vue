@@ -99,7 +99,7 @@ const chats = ref([
     {
         id: 1,
         name: 'Omar',
-        userId: '101', // Keep user IDs as strings to avoid Go JSON parsing issues
+        userId: '7', // Keep user IDs as strings to avoid Go JSON parsing issues
         messages: [
             { id: 1, text: 'Hey!', sender: 'Omar', timestamp: new Date(Date.now() - 3600000) },
             { id: 2, text: 'Hi there!', sender: 'You', timestamp: new Date(Date.now() - 3500000) }
@@ -144,45 +144,40 @@ function watchIncomingMessages() {
         const message = state.message;
         if (!message || message.type !== 'chat_message') return;
 
-        // Only process messages where we are the receiver
+        //check if the message is not for the current user
         if (message.receiver_id !== currentUserId) return;
 
         // Check if this is a new chat we don't have yet
         const existingChat = chats.value.find(c => c.userId === message.sender_id);
 
         if (!existingChat && message.sender_id) {
-            // Need to fetch user info based on sender_id
-            // This is a placeholder - in a real app, you would fetch this from your API
-            fetchUserInfo(message.sender_id).then(userData => {
-                // Create a new chat for this sender
-                const newChat = {
+
+            //fetch sender info based on sender_id 
+          fetch(`/api/users/${message.sender_id}`)
+          .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch user info');
+            }
+            return response.json();
+        })
+        .then(senderData => {
+            const newChat = {
+                chatId: Date.now(),
+                chatPartnerName: senderData.name,
+                userId: message.sender_id,
+                messages: [{
                     id: Date.now(),
-                    name: userData.name || `User ${message.sender_id}`,
-                    userId: message.sender_id,
-                    messages: [{
-                        id: Date.now(),
-                        text: message.content,
-                        sender: userData.name || `User ${message.sender_id}`,
-                        timestamp: new Date()
-                    }]
-                };
-
-                chats.value.push(newChat);
-            });
-        }
-    });
-}
-
-// Placeholder function - in a real app, replace with actual API call
-async function fetchUserInfo(userId) {
-    // In production, replace this with a real API call
-    console.log(`Fetching user info for ID: ${userId}`);
-
-    // Mock data - replace with actual API call
-    return {
-        id: userId,
-        name: `User ${userId}` // Placeholder name
-    };
+                    text: message.content,
+                    sender: senderData.name
+                }]
+            };
+            chats.value.push(newChat);
+        })
+        .catch(error => {
+            console.error('Error fetching user info:', error);
+        });
+    }
+});
 }
 
 function select(chat) {
