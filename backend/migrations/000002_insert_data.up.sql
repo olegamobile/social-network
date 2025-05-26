@@ -138,7 +138,7 @@ INSERT INTO group_invitations (group_id, user_id, inviter_id, approval_status, c
 (4, 13, 2, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
 (5, 1, 7, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (6, 8, 11, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
-(7, 5, 4, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
+(7, 5, 4, 'accepted', CURRENT_TIMESTAMP, NULL, 'delete'),
 (8, 9, 8, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (9, 2, 13, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
 (10, 3, 6, 'declined', CURRENT_TIMESTAMP, NULL, 'enable'),
