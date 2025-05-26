@@ -22,6 +22,8 @@ func setHandlers() {
 	http.HandleFunc("/api/group/members/", middleware.WithCORS(handlers.HandleMembersByGroupId))
 	http.HandleFunc("/api/group/events/", middleware.WithCORS(handlers.HandleEventsByGroupId))
 	http.HandleFunc("/api/homefeed", middleware.WithCORS(handlers.GetFeedPosts))
+	http.HandleFunc("/api/events/create", middleware.WithCORS(handlers.HandleCreateEvent))
+	http.HandleFunc("/api/events/respond", middleware.WithCORS(handlers.HandleEventResponse))
 
 	http.HandleFunc("/api/suggestgroups", middleware.WithCORS(handlers.HandleSuggestGroups))
 	http.HandleFunc("/api/groups/search", middleware.WithCORS(handlers.SearchGroups))
@@ -29,8 +31,12 @@ func setHandlers() {
 	http.HandleFunc("/api/groups/requested", middleware.WithCORS(handlers.HandleGroupRequests))         // active user group requests
 	http.HandleFunc("/api/groups/invitations", middleware.WithCORS(handlers.HandleGroupInvitations))    // active user group invitations
 	http.HandleFunc("/api/groups/administered", middleware.WithCORS(handlers.HandleGroupsAdministered)) // active user group invitations
-	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById))                       // group with group id
+	http.HandleFunc("/api/groups/create", middleware.WithCORS(handlers.HandleCreateGroup))
+	http.HandleFunc("/api/group/", middleware.WithCORS(handlers.HandleGroupById)) // group with group id
 	http.HandleFunc("/api/group/join", middleware.WithCORS(handlers.HandleGroupMembership))
+	http.HandleFunc("/api/group/requests/{approval_status}", middleware.WithCORS(handlers.HandleGroupRequestApprove))
+	http.HandleFunc("/api/group/invite", middleware.WithCORS(handlers.HandleGroupInvitation))
+	http.HandleFunc("/api/group/invite/search", middleware.WithCORS(handlers.HandleGroupInvitationSearch))
 
 	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))
 
@@ -55,22 +61,34 @@ func setHandlers() {
 	http.HandleFunc("/api/notifications/new", middleware.WithCORS(handlers.GetNewNotifications))
 	http.HandleFunc("/api/notifications/{id}/joingroup", middleware.WithCORS(handlers.HandleJoinReqsByGroupId))
 
-	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections))
+	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections)) // Is CORS needed for websockets?
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)
 
-	// Serve the avatars directory as static content with CORS
-	avatarsFS := http.FileServer(http.Dir("./avatars"))
+	// Serve the image directories as static content with CORS
+
+	avatarsFS := http.FileServer(http.Dir("./data/uploads/avatars"))
 	avatarHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		middleware.WithCORS(avatarsFS.ServeHTTP)(w, r)
 	})
-	http.Handle("/avatars/", http.StripPrefix("/avatars/", avatarHandler))
+	http.Handle("/data/uploads/avatars/", http.StripPrefix("/data/uploads/avatars/", avatarHandler))
 
-	postsFS := http.FileServer(http.Dir("./uploads/posts"))
+	postsFS := http.FileServer(http.Dir("./data/uploads/posts"))
 	postImageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		middleware.WithCORS(postsFS.ServeHTTP)(w, r)
 	})
-	http.Handle("/uploads/posts/", http.StripPrefix("/uploads/posts/", postImageHandler))
+	http.Handle("/data/uploads/posts/", http.StripPrefix("/data/uploads/posts/", postImageHandler))
 
+	commentsFS := http.FileServer(http.Dir("./data/uploads/comments"))
+	commentImageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		middleware.WithCORS(commentsFS.ServeHTTP)(w, r)
+	})
+	http.Handle("/data/uploads/comments/", http.StripPrefix("/data/uploads/comments/", commentImageHandler))
+
+	defaultFS := http.FileServer(http.Dir("./data/default"))
+	defaultImageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		middleware.WithCORS(defaultFS.ServeHTTP)(w, r)
+	})
+	http.Handle("/data/default/", http.StripPrefix("/data/default/", defaultImageHandler))
 }
 
 func main() {
@@ -81,6 +99,8 @@ func main() {
 		log.Fatal(err)
 	}
 	defer database.Close()
+
+	deleteUnusedImages()
 
 	setHandlers()
 	fmt.Printf("Backend running on port %s, allowing requests from %s\n", config.Port, config.FrontendURL)

@@ -6,27 +6,29 @@ import (
 	"net/http"
 )
 
-func FollowRequest(followerID, followedID int) int {
+func FollowRequest(followerID, followedID int) (int, int) {
 	if followerID == followedID {
-		return http.StatusBadRequest
+		return 0, http.StatusBadRequest
 	}
 
 	isPublic, statusCode := repository.ProfilePrivacyByUserId(followedID)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
-		return statusCode
+		return 0, statusCode
 	}
-	if !isPublic {
-		err := repository.SendFollowRequest(followerID, followedID)
+	var frID int
+	var err error
 
+	if !isPublic {
+		frID, err = repository.SendFollowRequest(followerID, followedID)
 		if err != nil {
 			log.Println("Error inserting/updating follow request:", err)
-			return http.StatusInternalServerError
+			return 0, http.StatusInternalServerError
 		}
 	} else {
-		return http.StatusBadRequest
+		return 0, http.StatusBadRequest
 	}
 
-	return http.StatusOK
+	return frID, http.StatusOK
 }
 
 func Follow(followerID, followedID int) int {

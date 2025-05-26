@@ -57,16 +57,26 @@ func HandleFollowAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var statusCode int
+	var statusCode, frID int
 	switch req.Action {
 	case "request":
-		statusCode = service.FollowRequest(userID, req.TargetID)
+		frID, statusCode = service.FollowRequest(userID, req.TargetID)
+		if statusCode == http.StatusOK {
+			err = repository.InsertNotification(userID, req.TargetID, "follow_request", frID)
+			if err != nil {
+				http.Error(w, "error inserting notification in HandleGroupMembership", http.StatusBadRequest)
+				return
+			}
+		}
 	case "follow":
 		statusCode = service.Follow(userID, req.TargetID)
 	case "unfollow":
-		statusCode = repository.Unfollow(userID, req.TargetID)
+		statusCode = repository.RemoveFollow(userID, req.TargetID)
+	case "cancel":
+		statusCode = repository.RemoveFollow(userID, req.TargetID)
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
+		return
 	}
 
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code

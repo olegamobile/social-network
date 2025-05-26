@@ -43,7 +43,6 @@ const filteredNotifications = computed(() =>
     (fetchedNotifications.value || []).filter(n => n.is_read !== showCurrent.value)
 )
 
-
 async function fetchNotifications() {
     try {
         const res = await fetch(`${apiUrl}/api/notifications`, {
@@ -107,6 +106,34 @@ async function approveFollowRequest(id, action) {
     }
 }
 
+async function approveGroupRequest(groupID, senderID, action) {
+    try {
+        const res = await fetch(`${apiUrl}/api/group/requests/${action}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                group_id: groupID,
+                requester_id: senderID
+            })
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to accept/decline group request: ${res.status}`)
+
+    } catch (err) {
+        errorStore.setError('Error', `Error while accepting/declining group request`)
+        router.push('/error')
+    }
+}
+
 
 onMounted(() => {
     fetchNotifications()
@@ -119,18 +146,39 @@ function handleClose(id) {
     readNotification(n.id)
 }
 
-function handleAccept(id) {
+async function handleAccept(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
     if (!n.is_read) n.is_read = true
     readNotification(n.id)
-    approveFollowRequest(n.follow_req_id, 'accept')
+
+    switch (n.type) {
+        case 'follow_request':
+            await approveFollowRequest(n.follow_req_id, 'accept');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+        case 'group_join_request':
+            await approveGroupRequest(n.group_id, n.sender_id, 'accepted');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+    }
+
 }
 
 function handleDecline(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
     if (!n.is_read) n.is_read = true
     readNotification(n.id)
-    approveFollowRequest(n.follow_req_id, 'decline')
+
+    switch (n.type) {
+        case 'follow_request':
+            approveFollowRequest(n.follow_req_id, 'decline');
+            break;
+        case 'group_join_request':
+            approveGroupRequest(n.group_id, n.sender_id, 'declined');
+            break;
+    }
 }
 
 </script>

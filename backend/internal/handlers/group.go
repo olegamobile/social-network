@@ -283,10 +283,8 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println("inserting notification")
 		err = repository.InsertNotification(userID, adminID, "group_join_request", gmId) // last id needs to be id at group members table
 		if err != nil {
-			fmt.Println("error inserting notification in HandleGroupMembership:", err)
 			http.Error(w, "error inserting notification in HandleGroupMembership", http.StatusBadRequest)
 			return
 		}
@@ -421,4 +419,188 @@ func HandleGroupById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
+}
+
+func HandleCreateGroup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userId, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("validate error in HandleGroupsByUserId:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var grp model.Group
+	err = json.NewDecoder(r.Body).Decode(&grp)
+	if err != nil {
+		fmt.Println("json error at HandleCreateGroup:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	grp.ID, err = service.CreateGroup(grp, userId)
+	if err != nil {
+		fmt.Println("CreateGroup error in HandleCreateGroup:", err)
+		http.Error(w, "failed to create group", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(grp)
+}
+
+func HandleGroupRequestApprove(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed at HandleFollowRequestApprove")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		fmt.Println("ValidateSession error at HandleFollowRequestApprove:", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req model.GroupRequestApproval
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body at HandleFollowRequestApprove", http.StatusBadRequest)
+		return
+	}
+
+	groupID := req.GroupID
+	requesterID := req.RequesterID
+
+	membership, err := service.Membership(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to determine group membership status", http.StatusInternalServerError)
+		return
+	}
+
+	if membership != "admin" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	action := strings.TrimPrefix(r.URL.Path, "/api/group/requests/")
+	if action != "accepted" && action != "declined" {
+		http.Error(w, "Invalid request action syntax", http.StatusBadRequest)
+		return
+	}
+
+	statusCode := repository.ApproveGroupRequest(requesterID, groupID, userID, action)
+
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
+		fmt.Println("error code at HandleGroupRequestApprove:", statusCode)
+		http.Error(w, http.StatusText(statusCode), statusCode)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func HandleGroupInvitation(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed at HandleFollowRequestApprove")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var groupInvite model.GroupInvitation
+	err = json.NewDecoder(r.Body).Decode(&groupInvite)
+	if err != nil {
+		fmt.Println("json error at HandleGroupInvitation:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+	groupInvite.Inviter = userID
+
+	groupInvite.ID, err = repository.InviteToGroup(groupInvite)
+	if err != nil {
+		http.Error(w, "Failed to create invitation", http.StatusUnauthorized)
+		return
+	}
+
+	err = repository.InsertNotification(groupInvite.Inviter, groupInvite.UserId, "group_invitation", groupInvite.ID)
+	if err != nil {
+		http.Error(w, "error inserting notification in HandleGroupInvitation", http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func HandleGroupInvitationSearch(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed at HandleGroupInvitationSearch")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	_, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var invitables []model.InvitableUser
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		json.NewEncoder(w).Encode(invitables) // Return empty array for empty query
+		return
+	}
+
+	users, err := repository.SearchUsers(query)
+	if err != nil {
+		http.Error(w, "Error searching users", http.StatusInternalServerError)
+		return
+	}
+
+	type req struct {
+		GroupId string `json:"group_id"`
+	}
+	var groupInfo req
+
+	err = json.NewDecoder(r.Body).Decode(&groupInfo)
+	if err != nil {
+		fmt.Println("json error at HandleGroupInvitationSearch:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	groupId, err := strconv.Atoi(groupInfo.GroupId)
+	if err != nil {
+		fmt.Println("strconv.Atoi error at HandleGroupInvitationSearch:", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	for _, user := range users {
+		var inv model.InvitableUser
+		inv.User = user
+		membership, err := repository.GetMembershipStatus(user.ID, groupId)
+		if err != nil {
+			fmt.Println("error getting membership at HandleGroupInvitationSearch:", err)
+			http.Error(w, "error getting membership status", http.StatusBadRequest)
+			return
+		}
+		inv.Membership = membership
+		invitables = append(invitables, inv)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(invitables)
 }

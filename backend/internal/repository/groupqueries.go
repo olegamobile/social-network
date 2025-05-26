@@ -129,7 +129,7 @@ func GetGroupById(groupId int) (model.Group, error) {
 	err := database.DB.QueryRow(`
 	SELECT id, title, description
 	FROM groups
-	WHERE id = ?`, groupId).Scan(&group.ID, &group.Title, &group.Description)
+	WHERE id = ? AND status = 'enable'`, groupId).Scan(&group.ID, &group.Title, &group.Description)
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
@@ -183,7 +183,7 @@ func GetGroupMembersByGroupId(groupId int) ([]model.User, error) {
 	SELECT u.id, u.first_name, u.last_name, u.avatar_path
 	FROM users u
 	JOIN group_members gm ON u.id = gm.user_id
-	WHERE gm.group_id = ?;`, groupId)
+	WHERE gm.group_id = ? AND gm.status = 'enable' AND u.status = 'enable' AND approval_status = 'accepted';`, groupId)
 
 	if err != nil {
 		fmt.Println("rows error at GetGroupMembersByGroupId", err)
@@ -232,7 +232,7 @@ func GetGroupEventsByGroupId(groupId int) ([]model.Event, error) {
 	var events []model.Event
 	for rows.Next() {
 		var e model.Event
-		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.Title, &e.Description, &e.DateTime)
+		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.Title, &e.Description, &e.EventDate)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
@@ -279,18 +279,19 @@ func GroupRequest(userID, groupID int) (int, int) {
 		status = 'enable',
 		updated_by = ?
 	`
-	result, err := database.DB.Exec(query, groupID, userID, userID)
+	_, err := database.DB.Exec(query, groupID, userID, userID)
 	if err != nil {
 		return 0, http.StatusInternalServerError
 	}
 
-	// Get the last inserted row ID
-	id, err := result.LastInsertId()
+	var id int
+	row := database.DB.QueryRow("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?", groupID, userID)
+	err = row.Scan(&id)
 	if err != nil {
 		return 0, http.StatusInternalServerError
 	}
 
-	return int(id), http.StatusOK
+	return id, http.StatusOK
 }
 
 func LeaveGroup(userID, groupID int) int {
@@ -337,4 +338,123 @@ func GetAdminIdByGroupId(groupId int) (int, error) {
 		return 0, err
 	}
 	return adminId, nil
+}
+
+func CreateGroup(group model.Group, userId int) (int, error) {
+	query := `
+	INSERT INTO groups (creator_id, title, description)
+	VALUES (?, ?, ?)`
+
+	res, err := database.DB.Exec(query, userId, group.Title, group.Description)
+	if err != nil {
+		fmt.Println("exec error creating group:", err)
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
+}
+
+func AddGroupMember(userId, groupId int) error {
+	query := `
+	INSERT INTO group_members (group_id, user_id, approval_status)
+	VALUES (?, ?, 'accepted')	
+	ON CONFLICT (group_id, user_id) DO UPDATE SET
+		status = 'enable',
+		updated_by = ?
+	`
+	_, err := database.DB.Exec(query, groupId, userId, userId)
+
+	if err != nil {
+		fmt.Println("exec error adding group member:", err)
+	}
+	return err
+}
+
+func ApproveGroupRequest(userID, groupID, adminID int, action string) int {
+	query := `
+		UPDATE group_members SET
+			approval_status = ?,
+			updated_by = ?
+		WHERE 
+			status = 'enable' AND 
+			approval_status = 'pending' AND 
+			user_id = ? AND 
+			group_id = ?
+	`
+	_, err := database.DB.Exec(query, action, adminID, userID, groupID)
+	if err != nil {
+		return http.StatusInternalServerError
+	}
+
+	return http.StatusOK
+}
+
+func InviteToGroup(groupInvite model.GroupInvitation) (int, error) {
+	query := `
+	INSERT INTO group_invitations (group_id, user_id, inviter_id, approval_status)
+	VALUES (?, ?, ?, 'pending')
+	ON CONFLICT(group_id, user_id) DO UPDATE SET
+    	approval_status = 'pending',
+    	status = 'enable',
+    	updated_by = EXCLUDED.updated_by -- Use EXCLUDED to refer to the new values
+	WHERE
+    	approval_status != 'accepted' AND status != 'enable';`
+
+	_, err := database.DB.Exec(
+		query,
+		groupInvite.GroupID,
+		groupInvite.UserId,
+		groupInvite.Inviter,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	query = `SELECT id FROM group_invitations WHERE group_id = ? AND user_id = ?` // last insert won't work when update at on conflict
+	var groupInviteId int
+	err = database.DB.QueryRow(query, groupInvite.GroupID, groupInvite.UserId).Scan(&groupInviteId)
+
+	return int(groupInviteId), err
+}
+
+func GetMembershipStatus(userID, groupID int) (string, error) {
+	// Check group_members table
+	var memberStatus string
+	memberQuery := `
+		SELECT approval_status 
+		FROM group_members 
+		WHERE user_id = ? AND group_id = ? AND status = 'enable'
+	`
+	err := database.DB.QueryRow(memberQuery, userID, groupID).Scan(&memberStatus)
+	if err != nil && err != sql.ErrNoRows {
+		return "", fmt.Errorf("failed to query group_members: %w", err)
+	}
+
+	// Check group_invitations table
+	var invitationStatus string
+	invitationQuery := `
+		SELECT approval_status 
+		FROM group_invitations 
+		WHERE user_id = ? AND group_id = ? AND status = 'enable'
+	`
+	err = database.DB.QueryRow(invitationQuery, userID, groupID).Scan(&invitationStatus)
+	if err != nil && err != sql.ErrNoRows {
+		return "", fmt.Errorf("failed to query group_invitations: %w", err)
+	}
+
+	// Apply business logic
+	if memberStatus == "accepted" {
+		return "accepted", nil
+	}
+
+	if invitationStatus == "pending" {
+		return "invited", nil
+	}
+
+	return "", nil
 }

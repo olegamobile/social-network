@@ -23,7 +23,7 @@
                     </div>
 
 
-                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'"/>
+                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'" />
 
 
                 </div>
@@ -32,8 +32,7 @@
             <template #main>
 
                 <!-- button to join / leave / delete -->
-                <button @click="handleGroupAction" class="mb-4 px-4 py-2 text-white rounded transition"
-                    :class="groupButtonClass">
+                <button @click="prepareGroupAction" class="mb-4 px-4 py-2 rounded transition" :class="groupButtonClass">
                     {{
                         membershipStatus === '' ? 'Request to Join' :
                             membershipStatus === 'pending' ? 'Cancel Request' :
@@ -46,8 +45,8 @@
 
                 <!-- title image -->
                 <div class="relative">
-                    <img :src="`${apiUrl}/uploads/posts/groupdefault.jpg`" alt="Page Image"
-                        class="w-full mb-4 h-40 object-cover rounded" />
+                    <img :src="`${apiUrl}/data/default/groupdefault01.jpg`" alt="Page Image"
+                        class="w-full max-w-screen-lg mb-4 h-40 object-cover rounded" />
                     <div class="absolute inset-0 flex items-center justify-center">
                         <h1 v-if="group && group.title" class="text-white text-5xl font-extrabold text-center">
                             {{ group.title }}
@@ -55,19 +54,39 @@
                     </div>
                 </div>
 
+                <!-- members only content -->
                 <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
-                    <!-- new post button and form -->
-                    <button @click="showPostForm = !showPostForm"
-                        class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
-                        {{ showPostForm ? 'Cancel' : 'Create New Post' }}
-                    </button>
+                    <span class="flex gap-4">
+                        <!-- new post button and form -->
+                        <button @click="showPostForm = !showPostForm; showInviteForm = false"
+                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                            {{ showPostForm ? 'Cancel Post' : 'Create New Post' }}
+                        </button>
+
+                        <!-- Invite users button -->
+                        <button @click="showInviteForm = !showInviteForm; showPostForm = false"
+                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                            {{ showInviteForm ? 'Close Invitation Form' : 'Invite Users' }}
+                        </button>
+                    </span>
+
                     <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
                         @post-submitted="handlePostSubmitted" class="mb-8" />
+
+                    <InviteUsers v-if="showInviteForm" :members="members" class="mb-8"/>
 
                     <PostsList :posts="posts" />
                 </div>
             </template>
         </TwoColumnLayout>
+
+        <ConfirmDialog :visible="showLeaveConfirmation" title="Leave Group"
+            message="Are you sure you want to leave this group? This action cannot be undone."
+            @confirm="handleGroupAction" @cancel="showLeaveConfirmation = false" />
+
+        <ConfirmDialog :visible="showDeleteConfirmation" title="Delete Group"
+            message="Are you sure you want to delete this group? This action cannot be undone."
+            @confirm="handleGroupAction" @cancel="showDeleteConfirmation = false" />
     </div>
 </template>
 
@@ -82,6 +101,8 @@ import MembersList from '@/components/MembersList.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import NewGroupPostForm from '@/components/NewGroupPostForm.vue'
 import GroupReqNoticesForAdmin from '@/components/GroupReqNoticesForAdmin.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import InviteUsers from '@/components/InviteUsers.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -92,7 +113,9 @@ const posts = ref([])
 const members = ref([])
 const events = ref([])
 const showPostForm = ref(false)
-
+const showInviteForm = ref(false)
+const showLeaveConfirmation = ref(false)
+const showDeleteConfirmation = ref(false)
 const membershipStatus = ref('')
 
 const handlePostSubmitted = (newPost) => {
@@ -104,7 +127,7 @@ const groupButtonClass = computed(() => {
         return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
     }
     if (membershipStatus.value === 'pending') {
-        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-bg text-nordic-light';
+        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-accent text-nordic-light';
     }
     if (membershipStatus.value === 'accepted') {
         //return 'bg-nordic-text-light hover:bg-nordic-primary-accent text-black';  // doesn't work for some reason
@@ -116,8 +139,19 @@ const groupButtonClass = computed(() => {
     return '';
 });
 
-async function handleGroupAction() {
+function prepareGroupAction() {
+    if (!showLeaveConfirmation.value && membershipStatus.value === 'accepted') {
+        showLeaveConfirmation.value = true
+        return
+    }
+    if (!showDeleteConfirmation.value && membershipStatus.value === 'admin') {
+        showDeleteConfirmation.value = true
+        return
+    }
+    handleGroupAction()
+}
 
+async function handleGroupAction() {
     let action = ''
     if (membershipStatus.value === '' || membershipStatus.value === 'declined') action = 'request'
     else if (membershipStatus.value === 'accepted') action = 'leave'
@@ -150,6 +184,13 @@ async function handleGroupAction() {
         membershipStatus.value = resp.membership
     } catch (err) {
         console.error(err)
+    }
+
+    showLeaveConfirmation.value = false
+    showDeleteConfirmation.value = false
+
+    if (action == 'delete') {
+        router.push('/groups')
     }
 }
 
@@ -189,7 +230,7 @@ async function getGroup(groupId) {
 
     } catch (err) {
         console.log("error fetching group:", err)
-        errorStore.setError('Error', 'Something went wrong while loading group data.')
+        errorStore.setError('Error', 'Failed to get group data.')
         router.push('/error')
         return
     }
