@@ -137,7 +137,7 @@ async function approveGroupRequest(groupID, senderID, action) {
 
 async function approveGroupInvite(groupInviteID, action) {
     try {
-        const res = await fetch(`${apiUrl}/api/group/invite/${id}/${action}`, {
+        const res = await fetch(`${apiUrl}/api/group/invite/${groupInviteID}/${action}`, {
             method: 'POST',
             credentials: 'include',
             headers: {
