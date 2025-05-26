@@ -1,14 +1,14 @@
 <template>
 
     <h3 class="text-xl font-semibold text-nordic-dark mb-3">Requests to Join</h3>
-    <NotificationsList :notifications="filteredNotifications" @close="handleClose" @accept="handleAccept"
+    <GroupRequestsList :notifications="filteredNotifications" @close="handleClose" @accept="handleAccept"
         @decline="handleDecline" />
 
 </template>
 
 <script setup>
 
-import NotificationsList from '@/components/NotificationsList.vue'
+import GroupRequestsList from '@/components/GroupRequestsList.vue'
 
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -72,10 +72,18 @@ async function readNotification(id) {
     }
 }
 
-async function approveFollowRequest(id, action) {
+async function approveGroupRequest(groupID, senderID, action) {
     try {
-        const res = await fetch(`${apiUrl}/api/follow/requests/${id}/${action}`, {
-            credentials: 'include'
+        const res = await fetch(`${apiUrl}/api/group/requests/${action}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                group_id: groupID,
+                requester_id: senderID
+            })
         })
 
         if (res.status === 401) {
@@ -84,10 +92,10 @@ async function approveFollowRequest(id, action) {
             return;
         }
 
-        if (!res.ok) throw new Error(`Failed to accept/decline follow request: ${res.status}`)
+        if (!res.ok) throw new Error(`Failed to accept/decline group request: ${res.status}`)
 
     } catch (err) {
-        errorStore.setError('Error', `Error while accepting/declining follow request`)
+        errorStore.setError('Error', `Error while accepting/declining group request`)
         router.push('/error')
     }
 }
@@ -104,18 +112,20 @@ function handleClose(id) {
     readNotification(n.id)
 }
 
-function handleAccept(id) {
+async function handleAccept(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
     if (!n.is_read) n.is_read = true
-    readNotification(n.id)
-    approveFollowRequest(n.follow_req_id, 'accept')
+    await approveGroupRequest(n.group_id, n.sender_id, 'accepted');
+    await readNotification(n.id)
+    await fetchNotifications();
 }
 
-function handleDecline(id) {
+async function handleDecline(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
     if (!n.is_read) n.is_read = true
-    readNotification(n.id)
-    approveFollowRequest(n.follow_req_id, 'decline')
+    await approveGroupRequest(n.group_id, n.sender_id, 'declined');
+    await readNotification(n.id)
+    await fetchNotifications();
 }
 
 </script>
