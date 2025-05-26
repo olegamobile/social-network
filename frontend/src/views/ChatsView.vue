@@ -100,7 +100,7 @@ const chats = ref([
     {
         id: 1,
         name: 'Omar',
-        userId: '101', // Keep user IDs as strings to avoid Go JSON parsing issues
+        userId: '7', // Keep user IDs as strings to avoid Go JSON parsing issues
         messages: [
             { id: 1, text: 'Hey!', sender: 'Omar', timestamp: new Date(Date.now() - 3600000) },
             { id: 2, text: 'Hi there!', sender: 'You', timestamp: new Date(Date.now() - 3500000) }
@@ -144,7 +144,7 @@ function listenForNewChats() {
         const message = state.message;
         if (!message || message.type !== 'chat_message') return;
 
-        //check that the message is not from the current user itself
+        //check if the message is not for the current user
         if (message.receiver_id !== currentUserId) return;
 
         // check if current users chats allready include one with the same sender
@@ -153,35 +153,32 @@ function listenForNewChats() {
         //if not existing, create a new one
         if (!existingChat && message.sender_id) {
 
-            //fetch sender info based on sender_id
-            //replace this with a fetch from API
-            fetchUserInfo(message.sender_id).then(senderData => {
-                // Create a new chat with this sender
-                const newChat = {
-                    chatId: Date.now(),
-                    chatPartnerName: senderData.name,
-                    userId: message.sender_id,
-                    messages: [{
-                        id: Date.now(),
-                        text: message.content,
-                        sender: senderData.name
-                    }]
-                };
-                chats.value.push(newChat);
-            });
-        }
-    });
-}
-
-// Placeholder function 
-async function fetchUserInfo(sender_id) {
-    // replace this with a real API call
-    console.log(`Fetching user info for ID: ${sender_id}`);
-
-    return {
-        id: userId,
-        name: `User ${userId}` // Placeholder name
-    };
+            //fetch sender info based on sender_id 
+          fetch(`/api/users/${message.sender_id}`)
+          .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch user info');
+            }
+            return response.json();
+        })
+        .then(senderData => {
+            const newChat = {
+                chatId: Date.now(),
+                chatPartnerName: senderData.name,
+                userId: message.sender_id,
+                messages: [{
+                    id: Date.now(),
+                    text: message.content,
+                    sender: senderData.name
+                }]
+            };
+            chats.value.push(newChat);
+        })
+        .catch(error => {
+            console.error('Error fetching user info:', error);
+        });
+    }
+});
 }
 
 function select(chat) {
