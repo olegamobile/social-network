@@ -330,6 +330,16 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var viewers []int
+	if privacyLvl == "private" {
+		err := json.Unmarshal([]byte(r.FormValue("selected_viewers")), &viewers)
+		if err != nil {
+			http.Error(w, "Invalid viewers list", http.StatusBadRequest)
+			return
+		}
+		fmt.Println("viewers:", viewers)
+	}
+
 	var imagePath *string
 	file, header, err := r.FormFile("image")
 	if err == nil {
@@ -346,7 +356,7 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, statusCode := service.CreatePost(content, privacyLvl, imagePath, userID)
+	post, statusCode := service.CreatePost(content, privacyLvl, imagePath, userID, viewers)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		http.Error(w, http.StatusText(statusCode), statusCode)
 		return

@@ -27,10 +27,11 @@
     <div v-if="followers && privacy_level === 'private'">
       <h3 class="block text-sm font-medium text-[var(--nordic-text-light)]">Select who can see private post</h3>
 
-      <ul v-if="followers.length > 0">
+      <ul v-if="followers.length > 0" class="m-1">
         <li v-for="user in followers" :key="user.id"
-          class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+          class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer ml-2">
           <div class="flex items-center gap-2">
+
             <!-- Checkbox -->
             <input type="checkbox" :value="user.id" :checked="selectedViewers.includes(user.id)"
               @change="toggleUserSelection(user.id)" />
@@ -99,6 +100,8 @@ function toggleUserSelection(userId) {
   } else {
     selectedViewers.value.splice(index, 1)
   }
+
+  console.log("checked user ids:", selectedViewers.value)
 }
 
 const submitPost = async () => {
@@ -108,7 +111,8 @@ const submitPost = async () => {
 
     const payload = {
       content: content.value,
-      privacy_level: privacy_level.value
+      privacy_level: privacy_level.value,
+      selected_viewers: JSON.stringify(selectedViewers.value)
     };
 
     const formData = new FormData();

@@ -278,12 +278,34 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
     JOIN users u ON p.user_id = u.id
     WHERE p.status = 'enable'
       AND (
+	  	  -- own posts
           p.user_id = ?
-          OR p.user_id IN (
-              SELECT followed_id FROM follow_requests
-              WHERE follower_id = ? AND approval_status = 'accepted'
-          )
-          )
+
+		  -- non-private posts from followed users
+          OR (
+		      p.privacy_level != 'private'
+		      AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+              )
+            )
+		  
+		  -- private posts
+          OR (
+              p.privacy_level = 'private'
+			  AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+                )
+              AND EXISTS (
+                  SELECT 1 FROM post_privacy pp
+                  WHERE pp.post_id = p.id
+                    AND pp.user_id = ?
+                    AND pp.status = 'enable'
+                )
+            )
+        )
+
       AND p.created_at < ?
 	  AND p.id != ?
         
@@ -313,7 +335,7 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
     ORDER BY created_at_sort DESC
     LIMIT ?;`
 
-	rows, err := database.DB.Query(query, userID, userID, cursorTime, lastPostId, userID, cursorTime, lastPostId, limit)
+	rows, err := database.DB.Query(query, userID, userID, userID, userID, cursorTime, lastPostId, userID, cursorTime, lastPostId, limit)
 	if err != nil {
 		fmt.Println("query err at GetFeedPostsBefore:", err)
 		return nil, err
@@ -639,4 +661,16 @@ AND u.id IN (
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func AddViewersToPrivatePost(postId int, viewerIDs []int) error {
+	query := `INSERT INTO post_privacy (post_id, user_id) VALUES (?, ?)`
+	for _, viewer := range viewerIDs {
+		_, err := database.DB.Exec(query, postId, viewer)
+		if err != nil {
+			fmt.Println("error inserting viewers for private post:", err)
+			return err
+		}
+	}
+	return nil
 }
