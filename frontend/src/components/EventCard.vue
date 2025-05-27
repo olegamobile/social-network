@@ -7,7 +7,7 @@
 
         <p>
            <span class="font-semibold text-nordic-dark">Creator:</span>
-           <span class="text-nordic-light ml-1">{{ event.creator?.nickname || (event.creator?.first_name + ' ' + event.creator?.last_name) }}</span> 
+           <span class="text-nordic-light ml-1">{{ event.creator?.first_name + ' ' + event.creator?.last_name }}</span> 
         </p>
           <p>
            <span class="font-semibold text-nordic-dark">Group:</span>
