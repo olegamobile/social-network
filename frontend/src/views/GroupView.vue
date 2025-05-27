@@ -23,7 +23,7 @@
                     </div>
 
 
-                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'" />
+                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'" @update-members='getMembers(route.params.id)' />
 
 
                 </div>

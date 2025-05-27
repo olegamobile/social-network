@@ -23,11 +23,10 @@ const router = useRouter()
 const { logout } = useAuth()
 
 const fetchedNotifications = ref([])
-
 const filteredNotifications = computed(() =>
     (fetchedNotifications.value || []).filter(n => n.is_read !== showCurrent.value)
 )
-
+const emit = defineEmits(['update-members'])
 
 async function fetchNotifications() {
     try {
@@ -118,6 +117,7 @@ async function handleAccept(id) {
     await approveGroupRequest(n.group_id, n.sender_id, 'accepted');
     await readNotification(n.id)
     await fetchNotifications();
+    emit('update-members');
 }
 
 async function handleDecline(id) {
