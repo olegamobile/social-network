@@ -22,7 +22,6 @@ defineProps({
     }
 })
 
-
 // Emit events to the parent component
 const emit = defineEmits(['close', 'accept', 'decline'])
 

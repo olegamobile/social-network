@@ -22,7 +22,6 @@
 
 <script setup>
 
-
 // Accept props
 defineProps({
     notification: {
@@ -30,7 +29,6 @@ defineProps({
         required: true
     }
 })
-
 
 // Emit events to the parent component
 const emit = defineEmits(['close', 'accept', 'decline'])
