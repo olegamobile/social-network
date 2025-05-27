@@ -393,10 +393,6 @@ func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		comments, err = repository.ReadAllCommentsForGroupPost(PostID, userID)
 	}
 
-	fmt.Println("userId:", userID)
-	fmt.Println("postid:", PostID)
-	fmt.Println(comments)
-	fmt.Println(len(comments))
 	if err != nil {
 		fmt.Println(err)
 		return
