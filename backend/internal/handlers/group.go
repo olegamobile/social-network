@@ -588,9 +588,17 @@ func HandleGroupInvitationSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	invitables, err = service.GetUsersMembership(invitables, users, groupId)
-	if err != nil {
-		http.Error(w, "error getting membership status", http.StatusBadRequest)
+	for _, user := range users {
+		var inv model.InvitableUser
+		inv.User = user
+		membership, err := repository.GetMembershipStatus(user.ID, groupId)
+		if err != nil {
+			fmt.Println("error getting membership at HandleGroupInvitationSearch:", err)
+			http.Error(w, "error getting membership status", http.StatusBadRequest)
+			return
+		}
+		inv.Membership = membership
+		invitables = append(invitables, inv)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -624,7 +632,44 @@ func ApproveGroupInvitation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statusCode := service.ApproveGroupInvitation(inviteID, userID, action)
+	// get invite info: group id and user id
+	groupID, invitedID, err := repository.GetGroupInviteInfo(inviteID)
+	if err != nil {
+		http.Error(w, "Failed to get group invitation info", http.StatusInternalServerError)
+		return
+	}
+
+	if userID != invitedID {
+		http.Error(w, "Only own invitations could be approved", http.StatusUnauthorized)
+		return
+	}
+
+	membership, err := service.Membership(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to determine group membership status", http.StatusInternalServerError)
+		return
+	}
+
+	var statusCode int
+	switch membership {
+	case "accepted":
+		// User is already a member, just update invite status
+		statusCode = repository.UpdateGroupInviteStatus(inviteID, userID, action)
+	case "pending", "declined", "":
+		// Update both invite and member status
+		statusCode = repository.UpdateGroupInviteStatus(inviteID, userID, action)
+		if action == "accepted" {
+			err = repository.AddGroupMember(userID, groupID)
+			if err != nil {
+				http.Error(w, "Failed to add group member", http.StatusInternalServerError)
+				return
+			}
+		}
+
+	default:
+		http.Error(w, "Invalid membership status", http.StatusInternalServerError)
+		return
+	}
 
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		fmt.Println("error code at ApproveGroupInvitation:", statusCode)

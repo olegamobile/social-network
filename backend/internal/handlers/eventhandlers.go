@@ -8,8 +8,8 @@ import (
 
 	// "fmt"
 	"net/http"
-	// "strconv"
-	// "strings"
+	"strconv"
+	"strings"
 )
 
 func HandleCreateEvent(w http.ResponseWriter, r *http.Request) {
@@ -73,4 +73,114 @@ func HandleEventResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func GetHandleEventByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Extract the event ID from the URL
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/events/")
+	eventID, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid event ID", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user is a member of the group
+	event, err := repository.GetEventByID(eventID)
+	if err != nil {
+		http.Error(w, "Event not found", http.StatusNotFound)
+		return
+	}
+
+	isMember, err := repository.CheckUserGroupMembership(userID, event.GroupID)
+	if err != nil {
+		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
+		return
+	}
+	if !isMember {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(event)
+}
+
+func GetEventsByUserID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// idStr := strings.TrimPrefix(r.URL.Path, "/api/events/user/")
+	// userID, err := strconv.Atoi(idStr)
+	// if err != nil {
+	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// 	return
+	// }
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	events, err := repository.GetEventsByUser(userID)
+	if err != nil {
+		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(events)
+}
+
+func GetEventsByGroupID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	groupStr := strings.TrimPrefix(r.URL.Path, "/api/events/group/")
+	groupID, err := strconv.Atoi(groupStr)
+	if err != nil {
+		http.Error(w, "Invalid group ID", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user is a member of the group
+	isMember, err := repository.CheckUserGroupMembership(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
+		return
+	}
+	if !isMember {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
+
+	events, err := repository.GetEventsByGroup(groupID, userID)
+	if err != nil {
+		http.Error(w, "Failed to fetch events for group", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(events)
 }
