@@ -31,7 +31,7 @@ SELECT
     n.follow_req_id,
     n.group_invite_id,
 
-	  CASE 
+	CASE 
         WHEN n.type = 'group_invitation' THEN gi.group_id
         WHEN n.type = 'group_join_request' THEN gm.group_id
         ELSE NULL
@@ -44,7 +44,12 @@ SELECT
     e.title AS event_title,
     n.content,
     n.is_read,
-	n.created_at
+	
+	CASE 
+        WHEN n.updated_at IS NULL THEN n.created_at
+        ELSE n.updated_at
+    END AS notification_time
+
 FROM notifications n
 LEFT JOIN follow_requests fr ON n.follow_req_id = fr.id
 LEFT JOIN users u ON fr.follower_id = u.id
@@ -59,6 +64,7 @@ LEFT JOIN events e ON n.event_id = e.id
 LEFT JOIN users eu ON e.creator_id = eu.id AND n.type = 'event_creation'
 LEFT JOIN groups ge ON e.group_id = ge.id AND n.type = 'event_creation'
 WHERE n.status = 'enable' AND n.user_id = ?
+ORDER BY notification_time DESC
 	`, userID)
 	if err != nil {
 		fmt.Println("query error at GetAllNotificatons", err)
@@ -196,7 +202,7 @@ func GetNewNotificatonsCount(userID int) (int, error) {
 
 func GetJoinRequests(groupId int) ([]model.Notification, error) {
 	query := `
-	SELECT n.id, n.type, n.user_id, u.first_name || ' ' || u.last_name, gm.group_id, g.title, n.content, n.is_read, n.created_at
+	SELECT n.id, n.type, n.user_id, gm.user_id, u.first_name || ' ' || u.last_name, gm.group_id, g.title, n.content, n.is_read, n.created_at
 	FROM notifications n
 	JOIN group_members gm ON n.group_members_id = gm.id
 	JOIN groups g ON gm.group_id = g.id
@@ -217,6 +223,7 @@ func GetJoinRequests(groupId int) ([]model.Notification, error) {
 			&n.ID,
 			&n.Type,
 			&n.UserID,
+			&n.SenderID,
 			&n.SenderName,
 			&n.GroupID,
 			&n.GroupTitle,
