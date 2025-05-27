@@ -1,2 +1,2 @@
 .DS_Store
-backend/data/app.db
+/backend/data/db/app.db

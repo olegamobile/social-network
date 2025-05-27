@@ -6,7 +6,7 @@
             <template #sidebar>
                 <div class="mb-8">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-xl font-semibold text-nordic-dark">Chats</h3>
+                        <h3 class="text-xl font-semibold text-nordic-dark">Privat chats</h3>
                         <span v-if="isConnected"
                             class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Online
@@ -36,7 +36,8 @@
                 </div>
 
                 <div class="mb-8">
-                    <h4 class="text-lg font-medium text-nordic-dark mb-2">Followed Users</h4>
+                         <h4 class="text-xl font-semibold text-nordic-dark">Start a conversation: </h4>
+                    <h4 class="text-lg font-medium text-nordic-dark mb-2">Following</h4>
                     <ul v-if="followed.length > 0" class="space-y-2">
                         <li v-for="user in followed" :key="user.id">
                             <button @click="startChat(user)"
@@ -94,12 +95,12 @@ const websocketStore = useWebSocketStore()
 const isConnected = computed(() => websocketStore.isConnected)
 const wsUrl = import.meta.env.VITE_WS_URL
 
-// Mock data for chats
+//temporary data for testing
 const chats = ref([
     {
         id: 1,
         name: 'Omar',
-        userId: '101', // Keep user IDs as strings to avoid Go JSON parsing issues
+        userId: '7', // Keep user IDs as strings to avoid Go JSON parsing issues
         messages: [
             { id: 1, text: 'Hey!', sender: 'Omar', timestamp: new Date(Date.now() - 3600000) },
             { id: 2, text: 'Hi there!', sender: 'You', timestamp: new Date(Date.now() - 3500000) }
@@ -107,76 +108,77 @@ const chats = ref([
     }
 ])
 
+//temporary data for testing
 const selectedChat = ref(null)
 const followed = ref([{ id: 2, name: 'Dolgorsürengiin', userId: '102' }])
 const followers = ref([{ id: 3, name: 'Alex', userId: '103' }])
 
-// Set the initial selected chat
+
 onMounted(() => {
+  
+    // when this ChatsView.vue page is rendered /mounted:
+    // fetch chats list from API
+    // display chat list
+    // open the first chat
+
+    // Set default selected_chat
     if (chats.value.length > 0) {
         selectedChat.value = chats.value[0]
     }
 
-    // Connect to WebSocket when component mounts
     connectWebSocket()
-
-    // Listen for incoming messages
-    watchIncomingMessages()
+    listenForNewChats()
 })
 
 function connectWebSocket() {
     websocketStore.connect(websocketStore.connect(`${wsUrl}/ws`))
 }
 
-function watchIncomingMessages() {
+//listens for new converasation starters by other users
+function listenForNewChats() {
     // Store the current user ID for comparison
     const currentUserId = localStorage.getItem('userId') || '0';
 
-    // This watcher is used for messages that don't belong to existing chats
-    // (e.g., new conversations initiated by others)
+   //listen for new webSocket chat_messages:
     websocketStore.$subscribe((mutation, state) => {
         const message = state.message;
         if (!message || message.type !== 'chat_message') return;
 
-        // Only process messages where we are the receiver
+        //check if the message is not for the current user
         if (message.receiver_id !== currentUserId) return;
 
-        // Check if this is a new chat we don't have yet
+        // check if current users chats allready include one with the same sender
         const existingChat = chats.value.find(c => c.userId === message.sender_id);
 
+        //if not existing, create a new one
         if (!existingChat && message.sender_id) {
-            // Need to fetch user info based on sender_id
-            // This is a placeholder - in a real app, you would fetch this from your API
-            fetchUserInfo(message.sender_id).then(userData => {
-                // Create a new chat for this sender
-                const newChat = {
+
+            //fetch sender info based on sender_id 
+          fetch(`/api/users/${message.sender_id}`)
+          .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch user info');
+            }
+            return response.json();
+        })
+        .then(senderData => {
+            const newChat = {
+                chatId: Date.now(),
+                chatPartnerName: senderData.name,
+                userId: message.sender_id,
+                messages: [{
                     id: Date.now(),
-                    name: userData.name || `User ${message.sender_id}`,
-                    userId: message.sender_id,
-                    messages: [{
-                        id: Date.now(),
-                        text: message.content,
-                        sender: userData.name || `User ${message.sender_id}`,
-                        timestamp: new Date()
-                    }]
-                };
-
-                chats.value.push(newChat);
-            });
-        }
-    });
-}
-
-// Placeholder function - in a real app, replace with actual API call
-async function fetchUserInfo(userId) {
-    // In production, replace this with a real API call
-    console.log(`Fetching user info for ID: ${userId}`);
-
-    // Mock data - replace with actual API call
-    return {
-        id: userId,
-        name: `User ${userId}` // Placeholder name
-    };
+                    text: message.content,
+                    sender: senderData.name
+                }]
+            };
+            chats.value.push(newChat);
+        })
+        .catch(error => {
+            console.error('Error fetching user info:', error);
+        });
+    }
+});
 }
 
 function select(chat) {
@@ -191,7 +193,7 @@ function startChat(user) {
     } else {
         const newChat = {
             id: Date.now(),
-            name: user.name,
+            chatPartnerName: user.name,
             userId: user.userId,
             messages: []
         }

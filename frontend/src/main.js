@@ -6,7 +6,7 @@ import router from './router'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 
-const app = createApp(App)
+const app = createApp(App)    
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
@@ -28,8 +28,12 @@ try {
     app.mount('#app'); // mount app after successful credentials check
 } catch (error) {
     // If not logged in and not already on login page, redirect to login
-    if (router.currentRoute.value.path !== '/login') {
-        router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } });
+    if (router.currentRoute.value.path !== '/login' && router.currentRoute.value.path !== '/register') {
+        if (router.currentRoute.value.path === '/error') {  // don't redirect to error page
+            router.replace('/login')
+        } else {
+            router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } });
+        }
     }
     app.mount('#app');
 }

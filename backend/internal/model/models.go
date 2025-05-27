@@ -2,6 +2,8 @@ package model
 
 import (
 	"database/sql"
+	"github.com/gorilla/websocket"
+	"sync"
 	"time"
 )
 
@@ -21,15 +23,6 @@ type User struct {
 	AvatarPath string     `json:"avatar_url"`
 	IsPublic   bool       `json:"is_public"`
 }
-
-/* type Post struct {
-	ID         int    `json:"id"`
-	UserID     int    `json:"user_id"`
-	Username   string `json:"username"`
-	AvatarPath string `json:"avatar_url"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"created_at"`
-} */
 
 type Post struct {
 	ID               int     `json:"id"`
@@ -92,6 +85,44 @@ type FollowRequest struct {
 	Action   string `json:"action"` // "request", "follow", "unfollow"
 }
 
+type Event struct {
+	ID          *int   `json:"id,omitempty"`
+	Group       string `json:"group"`
+	GroupID     int    `json:"group_id"`
+	CreatorID   int    `json:"creator_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	EventDate   string `json:"event_datetime"`
+}
+
+type EventResponse struct {
+	EventID  int    `json:"event_id"`
+	UserID   int    `json:"user_id"`
+	Response string `json:"response"` // going / not_going / pending
+}
+
+type GroupRequest struct {
+	TargetID int    `json:"target_id"`
+	Action   string `json:"action"` // "request", "leave", "delete"
+}
+
+type GroupRequestApproval struct {
+	GroupID     int `json:"group_id"`
+	RequesterID int `json:"requester_id"`
+}
+
+type GroupInvitation struct {
+	ID      int    `json:"id"`
+	UserId  int    `json:"user_id"`
+	GroupID string `json:"group_id"`
+	Inviter int    `json:"inviter_id"`
+}
+
+type InvitableUser struct {
+	User       User   `json:"user"`
+	Membership string `json:"membership"`
+}
+
 type Notification struct {
 	ID            int     `json:"id"`
 	Type          string  `json:"type"` // 'follow_request', 'group_invitation', 'group_join_request', 'event_creation'
@@ -109,3 +140,22 @@ type Notification struct {
 	Pending       bool    `json:"pending"`
 	CreatedAt     string  `json:"created_at"`
 }
+
+type WSMessage struct {
+	Type    string `json:"type"`
+	From    string `json:"from"`
+	To      string `json:"receiver_id,omitempty"`
+	Content string `json:"content,omitempty"`
+}
+
+type Client struct {
+	UserID string
+	Conn   *websocket.Conn
+	Send   chan WSMessage // individual send channel
+}
+
+var (
+	Broadcast = make(chan WSMessage)     // for global broadcast
+	Clients   = make(map[string]*Client) // userID -> client
+	Mu        sync.Mutex
+)

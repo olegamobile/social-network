@@ -2,7 +2,7 @@
     <!-- Sent Requests -->
     <div>
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Sent Requests</h3>
-        <ul v-if="pendingSent.length > 0" class="space-y-2">
+        <ul v-if="pendingSent.length > 0" class="space-y-2 mb-5">
             <li v-for="user in pendingSent" :key="user.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                 <RouterLink :to="`/profile/${user.id}`">
@@ -10,15 +10,13 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">You haven't sent any requests yet.</p>
+        <p v-else class="text-nordic-light italic mb-5">You haven't sent any requests yet.</p>
     </div>
-
-    <br />
 
     <!-- Received Requests -->
     <div>
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Received Requests</h3>
-        <ul v-if="pendingReceived.length > 0" class="space-y-2">
+        <ul v-if="pendingReceived.length > 0" class="space-y-2 mb-5">
             <li v-for="user in pendingReceived" :key="user.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                 <RouterLink :to="`/profile/${user.id}`">
@@ -26,7 +24,7 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">You have no pending requests.</p>
+        <p v-else class="text-nordic-light italic mb-5">You have no pending requests.</p>
     </div>
 
 </template>

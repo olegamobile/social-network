@@ -6,10 +6,10 @@
             <template #sidebar>
                 <h3 class="text-lg font-semibold">Notifications</h3>
                 <button @click="showCurrent = true" :class="{ active: showCurrent }">
-                    Current ({{fetchedNotifications.filter(n => !n.is_read).length}})
+                    Current ({{fetchedNotifications ? fetchedNotifications.filter(n => !n.is_read).length : 0}})
                 </button>
                 <button @click="showCurrent = false" :class="{ active: !showCurrent }">
-                    Old ({{fetchedNotifications.filter(n => n.is_read).length}})
+                    Old ({{fetchedNotifications ? fetchedNotifications.filter(n => n.is_read).length : 0}})
                 </button>
             </template>
 
@@ -40,9 +40,8 @@ const { logout } = useAuth()
 const fetchedNotifications = ref([])
 
 const filteredNotifications = computed(() =>
-    fetchedNotifications.value.filter(n => n.is_read !== showCurrent.value)
+    (fetchedNotifications.value || []).filter(n => n.is_read !== showCurrent.value)
 )
-
 
 async function fetchNotifications() {
     try {
@@ -61,6 +60,7 @@ async function fetchNotifications() {
         fetchedNotifications.value = await res.json()
 
     } catch (err) {
+        console.log("notifications fetch error:", err)
         errorStore.setError('Error', 'Something went wrong while fetching notifications.')
         router.push('/error')
     }
@@ -106,6 +106,58 @@ async function approveFollowRequest(id, action) {
     }
 }
 
+async function approveGroupRequest(groupID, senderID, action) {
+    try {
+        const res = await fetch(`${apiUrl}/api/group/requests/${action}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                group_id: groupID,
+                requester_id: senderID
+            })
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to accept/decline group request: ${res.status}`)
+
+    } catch (err) {
+        errorStore.setError('Error', `Error while accepting/declining group request`)
+        router.push('/error')
+    }
+}
+
+
+async function approveGroupInvite(groupInviteID, action) {
+    try {
+        const res = await fetch(`${apiUrl}/api/group/invite/${groupInviteID}/${action}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        if (res.status === 401) {
+            logout();
+            router.push('/login');
+            return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to accept/decline group invitation: ${res.status}`)
+
+    } catch (err) {
+        errorStore.setError('Error', `Error while accepting/declining group invitation`)
+        router.push('/error')
+    }
+}
 
 onMounted(() => {
     fetchNotifications()
@@ -118,18 +170,53 @@ function handleClose(id) {
     readNotification(n.id)
 }
 
-function handleAccept(id) {
+async function handleAccept(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
     if (!n.is_read) n.is_read = true
     readNotification(n.id)
-    approveFollowRequest(n.follow_req_id, 'accept')
+
+    switch (n.type) {
+        case 'follow_request':
+            await approveFollowRequest(n.follow_req_id, 'accept');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+        case 'group_join_request':
+            await approveGroupRequest(n.group_id, n.sender_id, 'accepted');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+        case 'group_invitation':
+            await approveGroupInvite(n.group_invite_id, 'accepted');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+    }
+
 }
 
-function handleDecline(id) {
+async function handleDecline(id) {
     const n = fetchedNotifications.value.find(n => n.id === id)
     if (!n.is_read) n.is_read = true
     readNotification(n.id)
-    approveFollowRequest(n.follow_req_id, 'decline')
+
+    switch (n.type) {
+        case 'follow_request':
+            approveFollowRequest(n.follow_req_id, 'decline');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+        case 'group_join_request':
+            await approveGroupRequest(n.group_id, n.sender_id, 'declined');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+        case 'group_invitation':
+            await approveGroupInvite(n.group_invite_id, 'declined');
+            readNotification(n.id)
+            fetchNotifications();
+            break;
+    }
 }
 
 </script>

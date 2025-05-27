@@ -1,13 +1,8 @@
 <template>
     <div class="not-found">
         <TopBar />
-        <TwoColumnLayout>
-            <template #main>
-                <h1>404 - Page Not Found</h1>
-                <p>The page you're looking for doesn't exist.</p>
-            </template>
-
-        </TwoColumnLayout>
+        <h1 class="mt-20">404 - Page Not Found</h1>
+        <p>The page you're looking for doesn't exist.</p>
     </div>
 </template>
 

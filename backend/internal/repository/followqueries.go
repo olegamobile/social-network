@@ -5,6 +5,7 @@ import (
 	"backend/internal/model"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -19,14 +20,25 @@ func FollowApproval(userId, targetId int) (string, int) {
 	return approval, http.StatusOK
 }
 
-func SendFollowRequest(followerID, followedID int) error {
+func SendFollowRequest(followerID, followedID int) (int, error) {
 	_, err := database.DB.Exec(`
         INSERT INTO follow_requests (follower_id, followed_id, approval_status)
         VALUES (?, ?, 'pending')
         ON CONFLICT(follower_id, followed_id) DO UPDATE SET approval_status='pending'
     `, followerID, followedID)
 
-	return err
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	}
+
+	var id int
+	row := database.DB.QueryRow("SELECT id FROM follow_requests WHERE follower_id = ? AND followed_id = ?", followerID, followedID)
+	err = row.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, err
 }
 
 func StartToFollow(followerID, followedID int) error {
@@ -41,7 +53,7 @@ func StartToFollow(followerID, followedID int) error {
 
 func GetFollowersByUserID(userID int) ([]model.User, error) {
 	query := `
-        SELECT u.id, u.first_name, u.last_name, u.nickname
+        SELECT u.id, u.first_name, u.last_name, u.nickname, u.avatar_path
         FROM follow_requests fr
         JOIN users u ON fr.follower_id = u.id
         WHERE fr.followed_id = ? AND fr.approval_status = 'accepted'
@@ -56,13 +68,22 @@ func GetFollowersByUserID(userID int) ([]model.User, error) {
 	for rows.Next() {
 		var u model.User
 		var nickname sql.NullString
-		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &nickname); err != nil {
+		var avatarUrl sql.NullString
+
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &nickname, &avatarUrl); err != nil {
 			return nil, err
 		}
 		u.Username = ""
 		if nickname.Valid {
 			u.Username = nickname.String
 		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
+		}
+
 		users = append(users, u)
 	}
 	return users, nil
@@ -157,4 +178,56 @@ func GetFollowRequestsReceivedByUser(userID int) ([]model.User, error) {
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func RemoveFollow(followerID, followedID int) int {
+	_, err := database.DB.Exec(`
+        DELETE FROM follow_requests
+        WHERE follower_id = ? AND followed_id = ?
+    `, followerID, followedID)
+
+	if err != nil {
+		log.Println("Error deleting follow request:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
+}
+
+/* func RemoveFollow(followerID, followedID int) int {
+	_, err := database.DB.Exec(`
+		UPDATE follow_requests
+		SET status = 'delete'
+		WHERE id = ? AND followed_id = ?
+	`, followedID, followerID)
+	if err != nil {
+		log.Println("Error removing follow request:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
+} */
+
+func AcceptFollowRequest(userId, followRequestId int) int {
+	_, err := database.DB.Exec(`
+		UPDATE follow_requests 
+		SET approval_status = 'accepted'
+		WHERE id = ? AND followed_id = ?
+	`, followRequestId, userId)
+	if err != nil {
+		log.Println("Error accepting follow request:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
+}
+
+func DeclineFollowRequest(userId, followRequestId int) int {
+	_, err := database.DB.Exec(`
+		UPDATE follow_requests 
+		SET approval_status = 'declined'
+		WHERE id = ? AND followed_id = ?
+	`, followRequestId, userId)
+	if err != nil {
+		log.Println("Error declining follow request:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
 }

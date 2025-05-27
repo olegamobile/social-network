@@ -1,8 +1,8 @@
 <template>
     <!-- Users I am following -->
     <div>
-        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followed</h3>
-        <ul v-if="followedUsers.length > 0" class="space-y-2">
+        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Following</h3>
+        <ul v-if="followedUsers && followedUsers.length > 0" class="space-y-2 mb-5">
             <li v-for="user in followedUsers" :key="user.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                 <RouterLink :to="`/profile/${user.id}`">
@@ -11,15 +11,13 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">Not following anyone</p>
+        <p v-else class="text-nordic-light italic mb-5">Not following anyone</p>
     </div>
-
-    <br />
 
     <!-- Users who follow me -->
     <div>
-        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followers</h3>
-        <ul v-if="followers.length > 0" class="space-y-2">
+        <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followed by</h3>
+        <ul v-if="followers && followers.length > 0" class="space-y-2 mb-5">
             <li v-for="user in followers" :key="user.id"
                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                 <RouterLink :to="`/profile/${user.id}`">
@@ -28,7 +26,7 @@
                 </RouterLink>
             </li>
         </ul>
-        <p v-else class="text-nordic-light italic">No one following</p>
+        <p v-else class="text-nordic-light italic mb-5">No one following</p>
     </div>
 </template>
 

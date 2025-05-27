@@ -24,6 +24,7 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 
 	if err != nil {
 		fmt.Println("error getting user by email:", err)
+		return user, err
 	}
 
 	if nickname.Valid {
@@ -44,7 +45,7 @@ func GetUserByEmail(req model.LoginRequest) (model.User, error) {
 		user.AvatarPath = ""
 	}
 
-	return user, err
+	return user, nil
 }
 
 func InsertSession(sessionID string, user model.User, expiresAt time.Time) error {
@@ -139,71 +140,7 @@ func GetUserById(id int, viewFull bool) (model.User, error) {
 	return user, err
 }
 
-/* func GetAllUsers() ([]model.User, error) {
-	rows, _ := database.DB.Query("SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public FROM users")
-	defer rows.Close()
-
-	var users []model.User
-	for rows.Next() {
-		var u model.User
-		var nickname sql.NullString
-		var about sql.NullString
-		var avatarUrl sql.NullString
-
-		err := rows.Scan(&u.ID, &nickname, &u.Email, &u.FirstName, &u.LastName, &u.Birthday, &about, &avatarUrl, &u.IsPublic)
-		if err != nil {
-			return users, err
-		}
-		if nickname.Valid {
-			u.Username = nickname.String
-		} else {
-			u.Username = ""
-		}
-
-		if about.Valid {
-			u.About = about.String
-		} else {
-			u.About = ""
-		}
-
-		if avatarUrl.Valid {
-			u.AvatarPath = avatarUrl.String
-		} else {
-			u.AvatarPath = ""
-		}
-
-		users = append(users, u)
-	}
-
-	return users, nil
-} */
-
-func GetAllGroups() ([]model.Group, error) {
-	rows, err := database.DB.Query(`
-		SELECT id, title, description 
-		FROM groups 
-		WHERE status = 'enable'
-	`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var groups []model.Group
-	for rows.Next() {
-		var g model.Group
-		err := rows.Scan(&g.ID, &g.Title, &g.Description)
-		if err != nil {
-			return groups, err
-		}
-		groups = append(groups, g)
-	}
-
-	return groups, nil
-}
-
 func GetGroupsByUserId(userId int) ([]model.Group, error) {
-	// group info from groups where that id can be found on same row as userId on group_members
 	query := `
 	SELECT g.id, g.title, g.description
 	FROM groups g
@@ -234,107 +171,177 @@ func GetGroupsByUserId(userId int) ([]model.Group, error) {
 	return groups, nil
 }
 
-/* func GetAllPosts() ([]model.Post, error) {
-	rows, err := database.DB.Query(`
-	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
-	FROM posts
-	JOIN users ON posts.user_id = users.id
-	ORDER BY posts.id DESC;
-`)
+func GetGroupRequestsByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	JOIN group_members gm ON g.id = gm.group_id
+	WHERE gm.user_id = ? AND g.status = 'enable' AND gm.status = 'enable' AND gm.approval_status = 'pending' ;
+	`
+
+	rows, err := database.DB.Query(query, userId)
 	if err != nil {
+		fmt.Println("query error in GetGroupRequestsByUserId", err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	var posts []model.Post
+	var groups []model.Group
 	for rows.Next() {
-		var p model.Post
-		var firstname, lastname string
-		var avatarUrl sql.NullString
-
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt)
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
 		if err != nil {
-			return nil, err
+			fmt.Println("scan error in GetGroupRequestsByUserId", err)
+			return groups, err
 		}
-
-		if avatarUrl.Valid {
-			p.AvatarPath = avatarUrl.String
-		} else {
-			p.AvatarPath = ""
-		}
-
-		p.Username = firstname + " " + lastname
-		posts = append(posts, p)
+		groups = append(groups, g)
 	}
 
-	return posts, nil
-} */
+	return groups, nil
+}
+
+func GetGroupInvitationsByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	JOIN group_invitations gi ON g.id = gi.group_id
+	WHERE gi.user_id = ? AND g.status = 'enable' AND gi.status = 'enable' AND gi.approval_status = 'pending' ;
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupInvitationsByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupInvitationsByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
+
+func GetGroupsAdministeredByUserId(userId int) ([]model.Group, error) {
+	query := `
+	SELECT g.id, g.title, g.description
+	FROM groups g
+	WHERE g.creator_id = ? AND g.status = 'enable';
+	`
+
+	rows, err := database.DB.Query(query, userId)
+	if err != nil {
+		fmt.Println("query error in GetGroupsAdministeredByUserId", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []model.Group
+	for rows.Next() {
+		var g model.Group
+		err := rows.Scan(&g.ID, &g.Title, &g.Description)
+		if err != nil {
+			fmt.Println("scan error in GetGroupsAdministeredByUserId", err)
+			return groups, err
+		}
+		groups = append(groups, g)
+	}
+
+	return groups, nil
+}
 
 // GetFeedPostsBefore gets posts from userID user's follows and groups
 // using cursor-based pagination: anything before the previous post (cursorTime)
 // up to limit (default 10) items.
 func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int) ([]model.Post, error) {
 	query := `
-    -- Regular posts with comment count
-SELECT
-    p.id,
-    p.user_id,
-    u.first_name,
-    u.last_name,
-    u.avatar_path,
-    p.content,
-    p.image_path,
-    NULL AS group_id,
-    NULL AS group_name,
-    p.created_at AS created_at_sort,
+    -- Regular posts
+    SELECT DISTINCT
+        p.id,
+        p.user_id,
+        u.first_name,
+        u.last_name,
+        u.avatar_path,
+        p.content,
+        p.image_path,
+        NULL AS group_id,
+        NULL AS group_name,
+        p.created_at AS created_at_sort,
     COUNT(c.id) AS comment_count,
     'regular' AS post_type
-FROM posts p
-JOIN users u ON p.user_id = u.id
-LEFT JOIN comments c ON c.post_id = p.id AND c.status != 'delete'
-WHERE p.status = 'enable'
-  AND (
-      p.user_id = ?
-      OR p.user_id IN (
-          SELECT followed_id FROM follow_requests
-          WHERE follower_id = ? AND approval_status = 'accepted'
-      )
-  )
-  AND p.created_at < ?
-  AND p.id != ?
-GROUP BY p.id, u.id
+    FROM posts p
+    JOIN users u ON p.user_id = u.id
+	LEFT JOIN comments c ON c.post_id = p.id AND c.status != 'delete'
+    WHERE p.status = 'enable'
+      AND (
+	  	  -- own posts
+          p.user_id = ?
 
-UNION ALL
+		  -- non-private posts from followed users
+          OR (
+		      p.privacy_level != 'private'
+		      AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+              )
+            )
+		  
+		  -- private posts
+          OR (
+              p.privacy_level = 'private'
+			  AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+                )
+              AND EXISTS (
+                  SELECT 1 FROM post_privacy pp
+                  WHERE pp.post_id = p.id
+                    AND pp.user_id = ?
+                    AND pp.status = 'enable'
+                )
+            )
+        )
 
--- Group posts with comment count
-SELECT
-    gp.id,
-    gp.user_id,
-    u.first_name,
-    u.last_name,
-    u.avatar_path,
-    gp.content,
-    gp.image_path,
-    gp.group_id,
-    g.title AS group_name,
-    gp.created_at AS created_at_sort,
-    COUNT(gc.id) AS comment_count,
-    'group' AS post_type
-FROM group_posts gp
-JOIN group_members gm ON gp.group_id = gm.group_id
-    AND gm.user_id = ? AND gm.approval_status = 'accepted'
-JOIN groups g ON gp.group_id = g.id
-JOIN users u ON gp.user_id = u.id
-LEFT JOIN group_comments gc ON gc.group_post_id = gp.id AND gc.status != 'delete'
-WHERE gp.status = 'enable'
-  AND gp.created_at < ?
-  AND gp.id != ?
-GROUP BY gp.id, u.id, g.id
+      AND p.created_at < ?
+	  AND p.id != ?
+    GROUP BY p.id, u.id    
+    UNION ALL
+    
+    -- Group posts
+    SELECT DISTINCT
+        gp.id,
+        gp.user_id,
+        u.first_name,
+        u.last_name,
+        u.avatar_path,
+        gp.content,
+        gp.image_path,
+        gp.group_id,
+        g.title AS group_name,
+        gp.created_at AS created_at_sort,
+    	COUNT(gc.id) AS comment_count,
+    	'group' AS post_type
+    FROM group_posts gp
+    JOIN group_members gm ON gp.group_id = gm.group_id
+        AND gm.user_id = ? AND gm.approval_status = 'accepted'
+    JOIN groups g ON gp.group_id = g.id
+    JOIN users u ON gp.user_id = u.id
+	LEFT JOIN group_comments gc ON gc.group_post_id = gp.id AND gc.status != 'delete'
+    WHERE gp.status = 'enable'
+      AND gp.created_at < ?
+	  AND gp.id != ?
+    GROUP BY gp.id, u.id, g.id
+    ORDER BY created_at_sort DESC
+    LIMIT ?;`
 
-ORDER BY created_at_sort DESC
-LIMIT ?;`
-
-	rows, err := database.DB.Query(query, userID, userID, cursorTime, lastPostId, userID, cursorTime, lastPostId, limit)
+	rows, err := database.DB.Query(query, userID, userID, userID, userID, cursorTime, lastPostId, userID, cursorTime, lastPostId, limit)
 	if err != nil {
 		fmt.Println("query err at GetFeedPostsBefore:", err)
 		return nil, err
@@ -377,23 +384,48 @@ LIMIT ?;`
 	return posts, nil
 }
 
-func GetPostsByUserId(targetId int) ([]model.Post, error) {
+func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT 
-		posts.id, 
-		posts.user_id, 
-		users.first_name, 
-		users.last_name, 
-		users.avatar_path, 
-		posts.content, 
-		posts.created_at, 
+	SELECT p.id, p.user_id, u.first_name, u.last_name, u.avatar_path, p.content, p.created_at, 
 		COUNT(c.id) AS comment_count
-	FROM posts
-	JOIN users ON posts.user_id = users.id
+	FROM posts p
+	JOIN users u ON p.user_id = u.id
 	LEFT JOIN comments c ON c.post_id = posts.id AND c.status != 'delete'
-	WHERE posts.user_id = ? AND posts.status = 'enable'
-	GROUP BY posts.id, users.id
-	ORDER BY posts.id DESC;`, targetId)
+	WHERE p.status = 'enable' AND p.user_id = ?
+	      AND (
+		  -- posts on own profile
+		    p.user_id = ?
+
+		  -- public posts
+		  OR
+		    p.privacy_level = 'public'	
+
+		  -- almost private posts from followed users
+          OR (
+		      p.privacy_level = 'almost_private'
+		      AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+              )
+            )
+		  
+		  -- private posts
+          OR (
+              p.privacy_level = 'private'
+			  AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+                )
+              AND EXISTS (
+                  SELECT 1 FROM post_privacy pp
+                  WHERE pp.post_id = p.id
+                    AND pp.user_id = ?
+                    AND pp.status = 'enable'
+                )
+            )
+        )
+	GROUP BY posts.id, users.id		
+	ORDER BY p.id DESC;`, targetId, userId, userId, userId, userId)
 
 	if err != nil {
 		fmt.Println("rows error at GetPostsByUserId", err)
@@ -427,12 +459,19 @@ func GetPostsByUserId(targetId int) ([]model.Post, error) {
 	return posts, nil
 }
 
-func InsertPost(userID int, content string, privacy string) (int, string, error) {
-	result, err := database.DB.Exec(
-		"INSERT INTO posts (user_id, content, privacy_level) VALUES (?, ?, ?)",
-		userID, content, privacy,
-	)
+func InsertPost(userID int, content string, privacy string, imagePath *string) (int, string, error) {
+	var query string
+	var args []any
 
+	if imagePath != nil {
+		query = "INSERT INTO posts (user_id, content, privacy_level, image_path) VALUES (?, ?, ?, ?)"
+		args = []any{userID, content, privacy, *imagePath}
+	} else {
+		query = "INSERT INTO posts (user_id, content, privacy_level) VALUES (?, ?, ?)"
+		args = []any{userID, content, privacy}
+	}
+
+	result, err := database.DB.Exec(query, args...)
 	if err != nil {
 		fmt.Println("error 1 at insert post", err)
 		return 0, "", err
@@ -445,7 +484,11 @@ func InsertPost(userID int, content string, privacy string) (int, string, error)
 	}
 
 	var createdAt string
-	_ = database.DB.QueryRow("SELECT created_at FROM posts WHERE id = ?", id).Scan(&createdAt)
+	err = database.DB.QueryRow("SELECT created_at FROM posts WHERE id = ?", id).Scan(&createdAt)
+	if err != nil {
+		fmt.Println("error 3 at insert post (fetching created_at)", err)
+		return 0, "", err
+	}
 
 	return int(id), createdAt, nil
 }
@@ -544,8 +587,6 @@ func UpdateUser(userID int, data model.UpdateProfileData) (model.User, string, i
 			updated_at = CURRENT_TIMESTAMP
 	`
 	args := []any{data.FirstName, data.LastName, data.DOB, utils.NullableString(data.Nickname), utils.NullableString(data.About), data.IsPublic}
-
-	fmt.Println("data at UpdateUser:", data)
 
 	if data.DeleteAvatar {
 		query += `, avatar_path = NULL`
@@ -664,4 +705,16 @@ AND u.id IN (
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func AddViewersToPrivatePost(postId int, viewerIDs []int) error {
+	query := `INSERT INTO post_privacy (post_id, user_id) VALUES (?, ?)`
+	for _, viewer := range viewerIDs {
+		_, err := database.DB.Exec(query, postId, viewer)
+		if err != nil {
+			fmt.Println("error inserting viewers for private post:", err)
+			return err
+		}
+	}
+	return nil
 }

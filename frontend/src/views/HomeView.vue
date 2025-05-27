@@ -5,18 +5,20 @@
         <TwoColumnLayout>
             <template #sidebar>
                 <FollowsInSidebar :userId="user.id" v-if="user" /> <!-- not user.value.id ! -->
-                <br />
                 <GroupsInSidebar />
             </template>
 
             <template #main>
+                <!-- title -->
                 <h2 class="text-3xl font-bold text-nordic-dark mb-6">Home Feed</h2>
 
-                <button @click="showPostForm = !showPostForm" class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
-                    {{ showPostForm ? 'Cancel' : 'Create New Post' }}
+                <!-- new post button and form -->
+                <button @click="showPostForm = !showPostForm" class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                    {{ showPostForm ? 'Close Form' : 'Create New Post' }}
                 </button>
                 <NewPostForm v-if="showPostForm" @post-submitted="handlePostSubmitted" class="mb-8" />
 
+                <!-- feed -->
                 <PostsList ref="postsListRef" :posts="posts" />
             </template>
         </TwoColumnLayout>
@@ -57,6 +59,7 @@ const postsListRef = ref(null); // To access the sentinel in PostsList
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
+    showPostForm.value = !showPostForm.value
 }
 
 async function _getHomeFeed() {

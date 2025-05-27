@@ -3,28 +3,30 @@ package service
 import (
 	"backend/internal/model"
 	"backend/internal/repository"
-	"encoding/json"
+	"backend/internal/utils"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
+
+	"github.com/google/uuid"
 )
 
-func CreatePost(r *http.Request, userID int) (model.Post, int) {
+func CreatePost(content, privacyLvl string, imagePath *string, userID int, viewerIDs []int) (model.Post, int) {
+
 	var post model.Post
-
-	var payload struct {
-		Content string `json:"content"`
-		Privacy string `json:"privacy_level"`
-	}
-	err := json.NewDecoder(r.Body).Decode(&payload)
-
-	if err != nil || payload.Content == "" {
-		fmt.Println("error in CreatePost:", err)
-		return post, http.StatusBadRequest
-	}
-
-	id, createdAt, err := repository.InsertPost(userID, payload.Content, payload.Privacy)
+	id, createdAt, err := repository.InsertPost(userID, content, privacyLvl, imagePath)
 	if err != nil {
 		return post, http.StatusInternalServerError
+	}
+
+	if privacyLvl == "private" {
+		err := repository.AddViewersToPrivatePost(id, viewerIDs)
+		if err != nil {
+			return post, http.StatusInternalServerError
+		}
 	}
 
 	usr, err := repository.GetUserById(userID, true)
@@ -36,8 +38,35 @@ func CreatePost(r *http.Request, userID int) (model.Post, int) {
 	post.UserID = userID
 	post.Username = usr.FirstName + " " + usr.LastName
 	post.AvatarPath = usr.AvatarPath
-	post.Content = payload.Content
+	post.ImagePath = imagePath
+	post.Content = content
 	post.CreatedAt = createdAt
 	post.PostType = "regular"
 	return post, http.StatusOK
+}
+
+func SaveUploadedFile(file multipart.File, header *multipart.FileHeader) (string, error) {
+
+	ext := filepath.Ext(header.Filename)
+
+	if ext == "" || !utils.IsAllowedImageExtension(ext) {
+		fmt.Println("bad extension:", ext)
+		return "", fmt.Errorf("illegal extension")
+	}
+
+	filename := uuid.New().String() + filepath.Ext(header.Filename)
+	dst := filepath.Join("data/uploads/posts", filename)
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return "", err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+	if err != nil {
+		return "", err
+	}
+
+	return "/" + dst, nil
 }

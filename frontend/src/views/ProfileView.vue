@@ -5,31 +5,18 @@
         <TwoColumnLayout>
             <template #sidebar>
 
-                <!-- follow button -->
-                <div v-if="showFollowButton" class="mb-2">
-                    <button :disabled="followStatus === 'pending'" @click="handleFollowAction"
-                        class="px-4 py-2 rounded text-white" :class="followButtonClass">
-                        {{
-                            followStatus === 'not following public' ? 'Follow' :
-                                followStatus === 'not following private' ? 'Request to Follow' :
-                                    followStatus === 'accepted' ? 'Stop Following' :
-                                        followStatus === 'pending' ? 'Follow Requested' :
-                                            ''
-                        }}
-                    </button>
-                </div>
-
                 <!-- avatar image -->
-                <div class="flex flex-col items-center mb-4">
+                <div class="flex flex-col items-center mt-4 mb-8">
                     <div v-if="user?.avatar_url"
-                        class="profile-avatar w-24 h-24 rounded-full overflow-hidden border border-nordic-light">
+                        class="profile-avatar w-32 h-32 rounded-full overflow-hidden border border-nordic-light">
                         <img :src="`${apiUrl}/${user.avatar_url}`" alt="User Avatar"
                             class="w-full h-full object-cover" />
                     </div>
                 </div>
 
                 <!-- first and last name -->
-                <h3 class="text-xl font-semibold text-nordic-dark mb-3">{{ user?.first_name }} {{ user?.last_name }}</h3>
+                <h3 class="text-xl font-semibold text-nordic-dark mb-3">{{ user?.first_name }} {{ user?.last_name }}
+                </h3>
 
                 <!-- info: show if following or public -->
                 <p v-if="user?.email" class="mb-3"><strong>Email:</strong><br>{{ user?.email }}</p>
@@ -41,14 +28,29 @@
                 <p v-if="user?.is_public" class="mt-3 mb-7"><strong>Public profile</strong></p>
                 <p v-if="!user?.is_public" class="mt-3 mb-7"><strong>Private profile</strong></p>
 
-                <FollowsInSidebar v-if="formattedBirthday" :userId="user.id"/>   <!-- birthday exists = allowed to view -->
+                <!-- birthday exists = allowed to view -->
+                <FollowsInSidebar v-if="formattedBirthday" :userId="user.id" />
+                <GroupsInSidebar v-if="formattedBirthday" :userId="user.id" />
             </template>
 
             <template #main>
+
+                <!-- follow button -->
+                <button v-if="showFollowButton" @click="prepareFollowAction" class="mb-4 px-4 py-2 rounded transition"
+                    :class="followButtonClass">
+                    {{
+                        followStatus === 'not following public' ? 'Follow' :
+                            followStatus === 'not following private' ? 'Request to Follow' :
+                                followStatus === 'accepted' ? 'Stop Following' :
+                                    followStatus === 'pending' ? 'Cancel Request' :
+                                        ''
+                    }}
+                </button>
+
                 <!-- edit profile button and form -->
                 <button v-if="userStore.user && route.params.id == userStore.user.id"
                     @click="showEditForm = !showEditForm"
-                    class="mb-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                    class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                     {{ showEditForm ? 'Close Editor' : 'Edit Profile' }}
                 </button>
                 <EditProfile v-if="showEditForm" />
@@ -59,6 +61,10 @@
             </template>
 
         </TwoColumnLayout>
+
+        <ConfirmDialog :visible="showStopFollowingConfirmation" title="Stop Following"
+            :message="`Are you sure you want to stop following ${user?.first_name}?`"
+            @confirm="handleFollowAction" @cancel="showStopFollowingConfirmation = false" />
     </div>
 </template>
 
@@ -73,6 +79,8 @@ import { useErrorStore } from '@/stores/error'
 import EditProfile from '@/components/EditProfile.vue'
 import { useUserStore } from '@/stores/user'
 import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
+import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const route = useRoute()
 const user = ref(null)
@@ -84,6 +92,7 @@ const errorStore = useErrorStore()
 const showEditForm = ref(false);
 const userStore = useUserStore()
 const followStatus = ref('')
+const showStopFollowingConfirmation = ref(false)
 
 // Compute formatted birthday so it doesn't affect userStore
 const formattedBirthday = computed(() => {
@@ -108,7 +117,7 @@ const followButtonClass = computed(() => {
         return 'bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white';
     }
     if (followStatus.value === 'pending') {
-        return 'bg-nordic-secondary-bg text-nordic-light cursor-not-allowed';
+        return 'bg-nordic-secondary-bg hover:bg-nordic-secondary-accent text-nordic-light';
     }
     return '';
 });
@@ -181,13 +190,21 @@ async function fetchUserAndPosts(userId) {
     }
 }
 
-async function handleFollowAction() {
-    if (followStatus.value === 'pending') return
+function prepareFollowAction() {
+    if (!showStopFollowingConfirmation.value && followStatus.value === 'accepted') {
+        showStopFollowingConfirmation.value = true
+        return
+    }
+    handleFollowAction()
+}
 
+async function handleFollowAction() {
     let action = ''
     if (followStatus.value === 'not following private') action = 'request'
     else if (followStatus.value === 'not following public') action = 'follow'
     else if (followStatus.value === 'accepted') action = 'unfollow'
+    else if (followStatus.value === 'pending') action = 'cancel'
+
 
     try {
         const res = await fetch(`${apiUrl}/api/follow`, {
@@ -215,6 +232,8 @@ async function handleFollowAction() {
     } catch (err) {
         console.error(err)
     }
+
+    showStopFollowingConfirmation.value = false
 }
 
 
@@ -225,6 +244,7 @@ onMounted(() => {
 
 // React to route param changes (reload when going from one profile to another)
 watch(() => route.params.id, (newId) => {
+    posts.value = []
     fetchUserAndPosts(newId)
 })
 
