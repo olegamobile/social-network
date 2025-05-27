@@ -237,6 +237,7 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		GroupID:    &groupID,
 		GroupName:  &group.Title,
 		CreatedAt:  createdAt,
+		PostType:   "group",
 	}
 
 	w.Header().Set("Content-Type", "application/json")

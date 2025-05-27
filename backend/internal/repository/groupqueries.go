@@ -170,7 +170,7 @@ func GetGroupPostsByGroupId(groupId int) ([]model.Post, error) {
 		} else {
 			p.AvatarPath = ""
 		}
-
+		p.PostType = "group"
 		p.Username = firstname + " " + lastname
 		posts = append(posts, p)
 	}

@@ -390,7 +390,7 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 		COUNT(c.id) AS comment_count
 	FROM posts p
 	JOIN users u ON p.user_id = u.id
-	LEFT JOIN comments c ON c.post_id = posts.id AND c.status != 'delete'
+	LEFT JOIN comments c ON c.post_id = p.id AND c.status != 'delete'
 	WHERE p.status = 'enable' AND p.user_id = ?
 	      AND (
 		  -- posts on own profile
@@ -424,7 +424,7 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
                 )
             )
         )
-	GROUP BY posts.id, users.id		
+	GROUP BY p.id, u.id		
 	ORDER BY p.id DESC;`, targetId, userId, userId, userId, userId)
 
 	if err != nil {
