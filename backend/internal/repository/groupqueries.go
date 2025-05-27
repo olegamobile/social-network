@@ -141,10 +141,13 @@ func GetGroupById(groupId int) (model.Group, error) {
 
 func GetGroupPostsByGroupId(groupId int) ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT gp.id, gp.user_id, gp.image_path, gp.content, gp.created_at, u.first_name, u.last_name, u.avatar_path
+	SELECT gp.id, gp.user_id, gp.image_path, gp.content, gp.created_at, u.first_name, u.last_name, u.avatar_path, COUNT(gc.id) AS comment_count
 	FROM group_posts gp
 	JOIN users u ON gp.user_id = u.id
-	WHERE gp.group_id = ?
+	LEFT JOIN group_comments gc ON gc.group_post_id = gp.id AND gc.status != 'delete'
+    WHERE gp.status = 'enable'
+	AND gp.group_id = ?
+	GROUP BY gp.id
 	ORDER BY gp.id DESC;`, groupId)
 
 	if err != nil {
@@ -159,7 +162,7 @@ func GetGroupPostsByGroupId(groupId int) ([]model.Post, error) {
 		var firstname, lastname string
 		var avatarUrl sql.NullString
 
-		err := rows.Scan(&p.ID, &p.UserID, &p.ImagePath, &p.Content, &p.CreatedAt, &firstname, &lastname, &avatarUrl)
+		err := rows.Scan(&p.ID, &p.UserID, &p.ImagePath, &p.Content, &p.CreatedAt, &firstname, &lastname, &avatarUrl, &p.NumberOfComments)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
@@ -170,7 +173,7 @@ func GetGroupPostsByGroupId(groupId int) ([]model.Post, error) {
 		} else {
 			p.AvatarPath = ""
 		}
-
+		p.PostType = "group"
 		p.Username = firstname + " " + lastname
 		posts = append(posts, p)
 	}

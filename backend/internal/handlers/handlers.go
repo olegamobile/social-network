@@ -357,6 +357,107 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(post)
 }
 
+func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	PostIDstring := r.URL.Query().Get("post_id")
+	if PostIDstring == "" {
+		fmt.Println("empty postId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+	PostID, err := strconv.Atoi(PostIDstring)
+	if err != nil {
+		fmt.Println("can not convert postId")
+		return
+	}
+
+	Type := r.URL.Query().Get("type")
+	if Type == "" {
+		fmt.Println("empty postId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+	var comments []model.Comment
+	if Type == "regular" {
+		comments, err = repository.ReadAllCommentsForPost(PostID, userID)
+	} else if Type == "group" {
+		comments, err = repository.ReadAllCommentsForGroupPost(PostID, userID)
+	}
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(comments)
+
+}
+
+func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	UserID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	PostIDstring := r.URL.Query().Get("post_id")
+	if PostIDstring == "" {
+		fmt.Println("empty postId")
+		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
+		return
+	}
+	PostID, err := strconv.Atoi(PostIDstring)
+	if err != nil {
+		fmt.Println("can not convert postId")
+		return
+	}
+
+	var payload struct {
+		Content string `json:"content"`
+		Type    string `json:"type"`
+	}
+	err = json.NewDecoder(r.Body).Decode(&payload)
+
+	if err != nil || payload.Content == "" || payload.Type == "" {
+		fmt.Println("type is:", payload.Type)
+		fmt.Println("content is:", payload.Content)
+		fmt.Println("error in Create comment:", err)
+		http.Error(w, "BadRequestError", http.StatusBadRequest)
+		return
+	}
+
+	if payload.Type == "regular" {
+		err = repository.InsertComment(payload.Content, UserID, PostID)
+	} else if payload.Type == "group" {
+		err = repository.InsertGroupComment(payload.Content, UserID, PostID)
+	}
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"success": true,
+	})
+
+}
+
 func GetSuggestedUsers(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)
 	if err != nil {
