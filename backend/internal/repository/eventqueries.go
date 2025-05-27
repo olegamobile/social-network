@@ -100,16 +100,19 @@ func GetEventsByUser(userID int) ([]model.Event, error) {
 	return events, nil
 }
 
-func GetEventsByGroup(groupID int) ([]model.Event, error) {
+func GetEventsByGroup(groupID, userID int) ([]model.Event, error) {
 	query := `
-	SELECT e.id, g.title, e.group_id, e.creator_id, e.title, e.description, e.event_datetime
+	SELECT DISTINCT e.id, g.title, e.group_id, e.creator_id, e.title, e.description, e.event_datetime
 	FROM events e
 	JOIN groups g ON e.group_id = g.id
-	WHERE e.group_id = ? AND e.status = 'enable'
+	LEFT JOIN event_responses er ON er.event_id = e.id
+	WHERE e.group_id = ?
+	  AND e.status = 'enable'
+	  AND (e.creator_id = ? OR er.user_id = ?)
 	ORDER BY e.event_datetime DESC
 	`
 
-	rows, err := database.DB.Query(query, groupID)
+	rows, err := database.DB.Query(query, groupID, userID, userID)
 	if err != nil {
 		return nil, err
 	}

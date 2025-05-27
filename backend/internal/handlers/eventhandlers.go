@@ -151,6 +151,12 @@ func GetEventsByGroupID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, err := service.ValidateSession(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	groupStr := strings.TrimPrefix(r.URL.Path, "/api/events/group/")
 	groupID, err := strconv.Atoi(groupStr)
 	if err != nil {
@@ -158,7 +164,7 @@ func GetEventsByGroupID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	events, err := repository.GetEventsByGroup(groupID)
+	events, err := repository.GetEventsByGroup(groupID, userID)
 	if err != nil {
 		http.Error(w, "Failed to fetch events for group", http.StatusInternalServerError)
 		return
