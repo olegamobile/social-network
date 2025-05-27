@@ -4,6 +4,7 @@ import (
 	"backend/internal/repository"
 	"backend/internal/utils"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -43,7 +44,8 @@ func deleteUnusedImages() {
 	// map paths for fast lookups
 	usedPaths := map[string]bool{}
 	for _, path := range imgPaths {
-		usedPaths[path] = true
+		usedPaths[filepath.Base(path)] = true // remove folder from path; slashes flip in different OSs, filenames are unique enough
+		//fmt.Println(filepath.Base(path))
 	}
 
 	directories := []string{
@@ -53,15 +55,17 @@ func deleteUnusedImages() {
 	}
 
 	for _, dir := range directories {
-		err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
-			if info.IsDir() {
+
+			if d.IsDir() {
 				return nil
 			}
+
 			// delete if file in directory is not in used paths and is an image
-			if !usedPaths[path] && utils.IsAllowedImageExtension(filepath.Ext(path)) {
+			if !usedPaths[filepath.Base(path)] && utils.IsAllowedImageExtension(filepath.Ext(path)) {
 				fmt.Println("Deleting unused file:", path)
 
 				if err := os.Remove(path); err != nil {
