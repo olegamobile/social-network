@@ -1,20 +1,25 @@
 version: "3.8"
+
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     env_file:
       - ./backend/config/.env
     environment:
-      - PORT=8080
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
-      
+      PORT: 8080
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "5173:5173"
     env_file:
       - ./frontend/.env
     environment:
-      - VITE_API_URL=${API_URL:-http://localhost:8080}
+      VITE_API_URL: ${API_URL:-http://localhost:8080}
