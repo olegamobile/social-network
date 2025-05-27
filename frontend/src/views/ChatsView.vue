@@ -42,7 +42,7 @@
                         <li v-for="user in followedUsers" :key="user.id">
                             <button @click="startChat(user)"
                                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
-                                {{ user.name }}
+                                {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
                     </ul>
@@ -55,7 +55,7 @@
                         <li v-for="user in followers" :key="user.id">
                             <button @click="startChat(user)"
                                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
-                                {{ user.name }}
+                                {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
                     </ul>
@@ -146,9 +146,9 @@ const followers = ref([])
 const { logout } = useAuth()
 const router = useRouter()
 const errorStore = useErrorStore()
-const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
-const  userId  = user.id
+//const userStore = useUserStore()
+//const { user } = storeToRefs(userStore)
+//const  userId  = user.id
 const apiUrl = import.meta.env.VITE_API_URL
 //const errorStore = useErrorStore()
 
@@ -255,10 +255,10 @@ function formatTime(timestamp) {
 
 async function fetchFollowData() {
     try {
-        console.log(userId)
+        
         const [res1, res2] = await Promise.all([
-            fetch(`${apiUrl}/api/followed/${userId.value}`, { credentials: 'include' }),
-            fetch(`${apiUrl}/api/followers/${userId.value}`, { credentials: 'include' })
+            fetch(`${apiUrl}/api/followed/0`, { credentials: 'include' }),
+            fetch(`${apiUrl}/api/followers/0`, { credentials: 'include' })
         ])
 
         if (res1.status === 401 || res2.status === 401) {
