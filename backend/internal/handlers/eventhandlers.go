@@ -164,6 +164,17 @@ func GetEventsByGroupID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if the user is a member of the group
+	isMember, err := repository.CheckUserGroupMembership(userID, groupID)
+	if err != nil {
+		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
+		return
+	}
+	if !isMember {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
+
 	events, err := repository.GetEventsByGroup(groupID, userID)
 	if err != nil {
 		http.Error(w, "Failed to fetch events for group", http.StatusInternalServerError)
