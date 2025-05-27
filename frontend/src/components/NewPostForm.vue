@@ -100,8 +100,7 @@ function toggleUserSelection(userId) {
   } else {
     selectedViewers.value.splice(index, 1)
   }
-
-  console.log("checked user ids:", selectedViewers.value)
+  //console.log("checked user ids:", selectedViewers.value)
 }
 
 const submitPost = async () => {
@@ -163,8 +162,10 @@ async function fetchFollowers() {
 }
 
 onMounted(async () => {
+  if (!user.value.is_public) privacy_level.value = 'almost_private'  // default post to almost_private for private profiles
   await fetchFollowers()
-  console.log("followers at new post:", followers.value)
+  //console.log("followers at new post:", followers.value)
+  //console.log("active user is public?", user.value.is_public)
 })
 
 </script>

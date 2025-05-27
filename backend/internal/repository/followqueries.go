@@ -51,10 +51,6 @@ func StartToFollow(followerID, followedID int) error {
 	return err
 }
 
-/* 		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public
-FROM users
-WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ? */
-
 func GetFollowersByUserID(userID int) ([]model.User, error) {
 	query := `
         SELECT u.id, u.first_name, u.last_name, u.nickname, u.avatar_path

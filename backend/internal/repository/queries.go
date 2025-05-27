@@ -376,13 +376,45 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
 	return posts, nil
 }
 
-func GetPostsByUserId(targetId int) ([]model.Post, error) {
+func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
-	FROM posts
-	JOIN users ON posts.user_id = users.id
-	WHERE posts.user_id = ?
-	ORDER BY posts.id DESC;`, targetId)
+	SELECT p.id, p.user_id, u.first_name, u.last_name, u.avatar_path, p.content, p.created_at
+	FROM posts p
+	JOIN users u ON p.user_id = u.id
+	WHERE p.status = 'enable' AND p.user_id = ?
+	      AND (
+		  -- posts on own profile
+		    p.user_id = ?
+
+		  -- public posts
+		  OR
+		    p.privacy_level = 'public'	
+
+		  -- almost private posts from followed users
+          OR (
+		      p.privacy_level = 'almost_private'
+		      AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+              )
+            )
+		  
+		  -- private posts
+          OR (
+              p.privacy_level = 'private'
+			  AND p.user_id IN (
+                SELECT followed_id FROM follow_requests
+                WHERE follower_id = ? AND approval_status = 'accepted'
+                )
+              AND EXISTS (
+                  SELECT 1 FROM post_privacy pp
+                  WHERE pp.post_id = p.id
+                    AND pp.user_id = ?
+                    AND pp.status = 'enable'
+                )
+            )
+        )
+	ORDER BY p.id DESC;`, targetId, userId, userId, userId, userId)
 
 	if err != nil {
 		fmt.Println("rows error at GetPostsByUserId", err)

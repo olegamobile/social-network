@@ -283,20 +283,11 @@ func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	viewProfile, err := repository.ViewFullProfileOrNot(userId, targetId)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-
 	var posts []model.Post
-
-	if viewProfile {
-		posts, err = repository.GetPostsByUserId(targetId)
-		if err != nil {
-			http.Error(w, "Failed to get posts", http.StatusInternalServerError)
-			return
-		}
+	posts, err = repository.GetPostsByUserId(userId, targetId)
+	if err != nil {
+		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
