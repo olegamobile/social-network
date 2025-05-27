@@ -164,7 +164,7 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		fmt.Println("No avatar file found at updating profile:", err)
+		//fmt.Println("No avatar file found at updating profile:", err)
 	}
 
 	// Handle delete_avatar flag
@@ -328,7 +328,7 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid viewers list", http.StatusBadRequest)
 			return
 		}
-		fmt.Println("viewers:", viewers)
+		//fmt.Println("viewers:", viewers)
 	}
 
 	var imagePath *string
