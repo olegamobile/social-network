@@ -51,9 +51,13 @@ func StartToFollow(followerID, followedID int) error {
 	return err
 }
 
+/* 		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public
+FROM users
+WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ? */
+
 func GetFollowersByUserID(userID int) ([]model.User, error) {
 	query := `
-        SELECT u.id, u.first_name, u.last_name, u.nickname
+        SELECT u.id, u.first_name, u.last_name, u.nickname, u.avatar_path
         FROM follow_requests fr
         JOIN users u ON fr.follower_id = u.id
         WHERE fr.followed_id = ? AND fr.approval_status = 'accepted'
@@ -68,13 +72,22 @@ func GetFollowersByUserID(userID int) ([]model.User, error) {
 	for rows.Next() {
 		var u model.User
 		var nickname sql.NullString
-		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &nickname); err != nil {
+		var avatarUrl sql.NullString
+
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &nickname, &avatarUrl); err != nil {
 			return nil, err
 		}
 		u.Username = ""
 		if nickname.Valid {
 			u.Username = nickname.String
 		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
+		}
+
 		users = append(users, u)
 	}
 	return users, nil
