@@ -438,7 +438,6 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 		var p model.Post
 		var firstname, lastname string
 		var avatarUrl sql.NullString
-		// var content sql.NullString
 		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.NumberOfComments)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
@@ -453,9 +452,7 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 
 		p.Username = firstname + " " + lastname
 		posts = append(posts, p)
-		//fmt.Println("content is: ", content.String)
 	}
-	fmt.Println("number of comments:", posts[0].NumberOfComments)
 	return posts, nil
 }
 
