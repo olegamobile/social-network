@@ -4,8 +4,12 @@
         <h2 class="text-2xl font-semibold text-nordic-dark mb-4">{{ event.title }}</h2>
 
         <div class="space-y-2">
-          
+
         <p>
+           <span class="font-semibold text-nordic-dark">Creator:</span>
+           <span class="text-nordic-light ml-1">{{ event.creator?.nickname || (event.creator?.first_name + ' ' + event.creator?.last_name) }}</span> 
+        </p>
+          <p>
            <span class="font-semibold text-nordic-dark">Group:</span>
            <span class="text-nordic-light ml-1">{{ event.group }}</span> 
         </p>
