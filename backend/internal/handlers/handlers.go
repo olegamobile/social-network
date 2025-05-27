@@ -164,7 +164,7 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		fmt.Println("No avatar file found at updating profile:", err)
+		//fmt.Println("No avatar file found at updating profile:", err)
 	}
 
 	// Handle delete_avatar flag
@@ -283,20 +283,11 @@ func HandlePostsByUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	viewProfile, err := repository.ViewFullProfileOrNot(userId, targetId)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-
 	var posts []model.Post
-
-	if viewProfile {
-		posts, err = repository.GetPostsByUserId(targetId)
-		if err != nil {
-			http.Error(w, "Failed to get posts", http.StatusInternalServerError)
-			return
-		}
+	posts, err = repository.GetPostsByUserId(userId, targetId)
+	if err != nil {
+		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -330,6 +321,16 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var viewers []int
+	if privacyLvl == "private" {
+		err := json.Unmarshal([]byte(r.FormValue("selected_viewers")), &viewers)
+		if err != nil {
+			http.Error(w, "Invalid viewers list", http.StatusBadRequest)
+			return
+		}
+		//fmt.Println("viewers:", viewers)
+	}
+
 	var imagePath *string
 	file, header, err := r.FormFile("image")
 	if err == nil {
@@ -346,7 +347,7 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, statusCode := service.CreatePost(content, privacyLvl, imagePath, userID)
+	post, statusCode := service.CreatePost(content, privacyLvl, imagePath, userID, viewers)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		http.Error(w, http.StatusText(statusCode), statusCode)
 		return

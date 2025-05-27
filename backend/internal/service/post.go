@@ -14,12 +14,19 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreatePost(content, privacyLvl string, imagePath *string, userID int) (model.Post, int) {
+func CreatePost(content, privacyLvl string, imagePath *string, userID int, viewerIDs []int) (model.Post, int) {
 
 	var post model.Post
 	id, createdAt, err := repository.InsertPost(userID, content, privacyLvl, imagePath)
 	if err != nil {
 		return post, http.StatusInternalServerError
+	}
+
+	if privacyLvl == "private" {
+		err := repository.AddViewersToPrivatePost(id, viewerIDs)
+		if err != nil {
+			return post, http.StatusInternalServerError
+		}
 	}
 
 	usr, err := repository.GetUserById(userID, true)
