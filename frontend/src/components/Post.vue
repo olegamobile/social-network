@@ -126,7 +126,7 @@ const toggleComments = async () => {
 const loadComments = async () => {
     loadingComments.value = true;
     try {
-        const res = await fetch(`${apiUrl}/api/comments/show?post_id=${post.id}&user_id=${user.value.id}&type=${post.postType}`, {
+        const res = await fetch(`${apiUrl}/api/comments/show?post_id=${post.id}&type=${post.postType}`, {
             credentials: 'include',
         });
         comments.value = await res.json();
@@ -145,7 +145,7 @@ const submitComment = async () => {
     
     newComment.value = false;
     try {
-        const res = await fetch(`${apiUrl}/api/comments/create?post_id=${post.id}&user_id=${user.value.id}`, {
+        const res = await fetch(`${apiUrl}/api/comments/create?post_id=${post.id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

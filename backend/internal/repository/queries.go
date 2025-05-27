@@ -379,10 +379,20 @@ LIMIT ?;`
 
 func GetPostsByUserId(targetId int) ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT posts.id, posts.user_id, users.first_name, users.last_name, users.avatar_path, posts.content, posts.created_at
+	SELECT 
+		posts.id, 
+		posts.user_id, 
+		users.first_name, 
+		users.last_name, 
+		users.avatar_path, 
+		posts.content, 
+		posts.created_at, 
+		COUNT(c.id) AS comment_count
 	FROM posts
 	JOIN users ON posts.user_id = users.id
-	WHERE posts.user_id = ?
+	LEFT JOIN comments c ON c.post_id = posts.id AND c.status != 'delete'
+	WHERE posts.user_id = ? AND posts.status = 'enable'
+	GROUP BY posts.id, users.id
 	ORDER BY posts.id DESC;`, targetId)
 
 	if err != nil {
@@ -396,8 +406,8 @@ func GetPostsByUserId(targetId int) ([]model.Post, error) {
 		var p model.Post
 		var firstname, lastname string
 		var avatarUrl sql.NullString
-
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt)
+		// var content sql.NullString
+		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.NumberOfComments)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
@@ -411,8 +421,9 @@ func GetPostsByUserId(targetId int) ([]model.Post, error) {
 
 		p.Username = firstname + " " + lastname
 		posts = append(posts, p)
+		//fmt.Println("content is: ", content.String)
 	}
-
+	fmt.Println("number of comments:", posts[0].NumberOfComments)
 	return posts, nil
 }
 

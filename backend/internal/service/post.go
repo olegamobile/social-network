@@ -38,6 +38,6 @@ func CreatePost(r *http.Request, userID int) (model.Post, int) {
 	post.AvatarPath = usr.AvatarPath
 	post.Content = payload.Content
 	post.CreatedAt = createdAt
-
+	post.PostType = "regular"
 	return post, http.StatusOK
 }

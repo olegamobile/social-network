@@ -320,6 +320,7 @@ func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("userId:", userID)
 	fmt.Println("postid:", PostID)
 	fmt.Println(comments)
+	fmt.Println(len(comments))
 	if err != nil {
 		fmt.Println(err)
 		return
