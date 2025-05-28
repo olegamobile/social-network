@@ -26,7 +26,7 @@
                 </RouterLink>
             </span>
 
-            on {{ formattedDate }}
+            on {{ formattedPostDate }}
         </small>
         
         <button 
@@ -51,6 +51,15 @@
                 class="w-full p-3 border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 
                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
             ></textarea>
+                <!-- upload image -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-[var(--nordic-text-light)]">Image (Optional):</label>
+                <input type="file" @change="handleFileUpload" accept="image/*" class="block w-full text-sm text-[var(--nordic-text-light)]
+                    file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
+                    file:text-sm file:font-semibold 
+                    file:bg-[var(--nordic-secondary-bg)] file:text-[var(--nordic-text-dark)] 
+                    hover:file:bg-[var(--nordic-border-light)]" />
+            </div>
             <button
                 @click="submitComment"
                 :disabled="!content.trim()"
@@ -62,13 +71,27 @@
                 submit comment
             </button>
         </div>
-        
         <div v-if="showComments" class="mt-2">
             <div v-if="loadingComments">Loading comments...</div>
             <div v-else-if="commentCount === 0">No comments yet.</div>
             <ul v-else>
                 <li v-for="comment in comments" :key="comment.id" class="mt-1 border-t pt-1">
-                    <strong>{{ comment.user.first_name }} {{ comment.user.last_name }}</strong>: {{ comment.content }}
+                    <img v-if="comment.image_path" :src="`${apiUrl}/${comment.image_path}`" alt=""
+                        class="w-full rounded-md border border-[var(--nordic-border-light)]" />
+                    <p class="post-content text-[var(--nordic-text-dark)] text-base">
+                      {{ comment.content }}
+                    </p>
+                    <small class="post-date flex items-center text-sm text-[var(--nordic-text-light)]">
+                      <RouterLink :to="`/profile/${post.user_id}`"
+                          class="post-user flex items-center mr-1 hover:underline text-[var(--nordic-text-dark)]">
+                          <div v-if="comment.user.avatar_url"
+                              class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1 border border-[var(--nordic-border-light)]">
+                              <img :src="`${apiUrl}/${comment.user.avatar_url}`" alt="User Avatar" class="w-full h-full object-cover" />
+                          </div>
+                          {{ comment.user.first_name }} {{ comment.user.last_name }}
+                      </RouterLink>
+                      on {{ formattedCommentDate(comment.created_at) }}
+                    </small>  
                 </li>
             </ul>
         </div>
@@ -97,9 +120,16 @@ const loadingComments = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL || '/api';
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
-
+const image = ref(null);
+const imageInput = ref(null); // Add ref for file inpu
+import { useImageProcessor } from '@/composables/useImageProcessor';
 // Track comment count separately
 const commentCount = ref(post.numberOfComments || 0);
+
+const handleFileUpload = (event) => {
+    image.value = event.target.files[0];
+};
+
 
 // Update comment count when comments are loaded
 watch(comments, (newComments) => {
@@ -115,13 +145,21 @@ const commentLabel = computed(() => {
         : `Show Comments (${commentCount.value})`;
 });
 
-const formattedDate = computed(() => {
+const formattedPostDate = computed(() => {
     const date = new Date(post.created_at)
     return date.toLocaleString("fi-FI", {
         dateStyle: 'medium',
         timeStyle: 'medium'
     }).replace("klo ", "")
 })
+
+const formattedCommentDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleString("fi-FI", {
+        dateStyle: 'medium',
+        timeStyle: 'medium'
+    }).replace("klo ", "")
+}
 
 const showNewCommentForm = async() => {
     newComment.value = !newComment.value; 
@@ -145,6 +183,7 @@ const loadComments = async () => {
         comments.value = await res.json();
         // Update the count after loading
         commentCount.value = comments.value.length;
+        //console.log("Image is: ", comments.)
     } catch (error) {
         comments.value = [];
         console.error("Failed to load comments", error);
@@ -154,29 +193,50 @@ const loadComments = async () => {
 };
 
 const submitComment = async () => {
-    if (!content.value.trim()) return;
-    
-    newComment.value = false;
-    try {
-        const res = await fetch(`${apiUrl}/api/comments/create?post_id=${post.id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ content: content.value, type: post.postType })
-        });
-        const result = await res.json();
-        if (result.success) {
-            content.value = '';
-            // Increment comment count
-            commentCount.value++;
-            // Reload comments if they're shown
-            if (showComments.value) {
-                await loadComments();
-            }
-        }
-    } catch (error) {
-        console.log("error: ", error);
+  const { processPostImage } = useImageProcessor();
+
+  try {
+
+    const payload = {
+      content: content.value,
+      type: post.postType,
+    };
+
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(payload)) {
+      formData.append(key, value);
     }
+
+    if (image.value) {
+      const processedImg = await processPostImage(image.value);
+      formData.append('image', processedImg);
+    }
+
+    const res = await fetch(`${apiUrl}/api/comments/create?post_id=${post.id}`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    })
+    const result = await res.json();
+    if (result.success) {
+        content.value = '';
+            image.value = null;
+            if (imageInput.value) {
+                imageInput.value.value = ''; // Clear file input
+            }
+            showNewCommentForm()
+            // Increment comment count
+          commentCount.value++;
+            // Reload comments if they're shown
+          if (showComments.value) {
+                await loadComments();
+          }
+    } else {
+      alert('Failed to comment. Are you logged in?')
+    }
+  } catch (error) {
+    console.error(error)
+  }
 };
 </script>
 
