@@ -2,9 +2,10 @@ package model
 
 import (
 	"database/sql"
-	"github.com/gorilla/websocket"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type User struct {
@@ -74,10 +75,10 @@ type Comment struct {
 	IsDislikedByUser bool       `json:"disliked"`
 	NumberOfLikes    int        `json:"number_of_likes"`
 	NumberOfDislikes int        `json:"number_of_dislikes"`
-	// //Post             Post                      `json:"post"`
-	User          User `json:"user"`
-	RepliesCount  int  `json:"repliesCount"`
-	ISCreatedByMe bool `json:"isCreatedByMe"`
+	ImagePath        *string    `json:"image_path,omitempty"`
+	User             User       `json:"user"`
+	RepliesCount     int        `json:"repliesCount"`
+	ISCreatedByMe    bool       `json:"isCreatedByMe"`
 }
 
 type FollowRequest struct {

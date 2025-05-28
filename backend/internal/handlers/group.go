@@ -197,7 +197,7 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 	file, header, err := r.FormFile("image")
 	if err == nil {
 		defer file.Close()
-		savedPath, saveErr := service.SaveUploadedFile(file, header)
+		savedPath, saveErr := service.SaveUploadedFile(file, header, "posts")
 		if saveErr != nil {
 			http.Error(w, "Failed to save image", http.StatusInternalServerError)
 			return

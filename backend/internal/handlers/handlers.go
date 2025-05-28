@@ -335,7 +335,7 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	file, header, err := r.FormFile("image")
 	if err == nil {
 		defer file.Close()
-		savedPath, saveErr := service.SaveUploadedFile(file, header)
+		savedPath, saveErr := service.SaveUploadedFile(file, header, "posts")
 		if saveErr != nil {
 			http.Error(w, "Failed to save image", http.StatusInternalServerError)
 			return
@@ -426,24 +426,49 @@ func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = r.ParseMultipartForm(10 << 20) // 10MB
+	if err != nil {
+		http.Error(w, "Failed to parse multipart form", http.StatusBadRequest)
+		return
+	}
+
 	var payload struct {
 		Content string `json:"content"`
 		Type    string `json:"type"`
 	}
-	err = json.NewDecoder(r.Body).Decode(&payload)
+	// Get form values
+	payload.Content = r.FormValue("content")
+	payload.Type = r.FormValue("type")
 
-	if err != nil || payload.Content == "" || payload.Type == "" {
-		fmt.Println("type is:", payload.Type)
-		fmt.Println("content is:", payload.Content)
-		fmt.Println("error in Create comment:", err)
-		http.Error(w, "BadRequestError", http.StatusBadRequest)
+	// if err != nil || payload.Content == "" || payload.Type == "" {
+	// 	fmt.Println("type is:", payload.Type)
+	// 	fmt.Println("content is:", payload.Content)
+	// 	fmt.Println("error in Create comment:", err)
+	// 	http.Error(w, "BadRequestError", http.StatusBadRequest)
+	// 	return
+	// }
+	fmt.Println("Received comment:", payload.Content, "Type:", payload.Type, "Post ID:", PostID)
+
+	var imagePath *string
+	file, header, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		savedPath, saveErr := service.SaveUploadedFile(file, header, "comments")
+		if saveErr != nil {
+			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			return
+		}
+		imagePath = &savedPath
+	} else if err != http.ErrMissingFile {
+		fmt.Println("Error reading file at CreateGroupPostHandler", err)
+		http.Error(w, "Error reading file", http.StatusBadRequest)
 		return
 	}
 
 	if payload.Type == "regular" {
-		err = repository.InsertComment(payload.Content, UserID, PostID)
+		err = repository.InsertComment(payload.Content, UserID, PostID, imagePath)
 	} else if payload.Type == "group" {
-		err = repository.InsertGroupComment(payload.Content, UserID, PostID)
+		err = repository.InsertGroupComment(payload.Content, UserID, PostID, imagePath)
 	}
 	if err != nil {
 		fmt.Println(err)
