@@ -274,8 +274,8 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
         NULL AS group_id,
         NULL AS group_name,
         p.created_at AS created_at_sort,
-    COUNT(c.id) AS comment_count,
-    'regular' AS post_type
+    	COUNT(c.id) AS comment_count,
+    	'regular' AS post_type
     FROM posts p
     JOIN users u ON p.user_id = u.id
 	LEFT JOIN comments c ON c.post_id = p.id AND c.status != 'delete'
@@ -386,8 +386,19 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
 
 func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT p.id, p.user_id, u.first_name, u.last_name, u.avatar_path, p.content, p.created_at, 
-		COUNT(c.id) AS comment_count
+	SELECT
+		p.id,
+		p.user_id,
+		u.first_name,
+		u.last_name,
+		u.avatar_path,
+		p.content,
+		p.created_at AS created_at_sort,
+		p.image_path,
+		COUNT(c.id) AS comment_count,
+		'regular' AS post_type,
+		NULL AS group_id,
+        NULL AS group_name
 	FROM posts p
 	JOIN users u ON p.user_id = u.id
 	LEFT JOIN comments c ON c.post_id = p.id AND c.status != 'delete'
@@ -425,7 +436,31 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
             )
         )
 	GROUP BY p.id, u.id		
-	ORDER BY p.id DESC;`, targetId, userId, userId, userId, userId)
+	UNION ALL
+    
+    -- Group posts
+    SELECT DISTINCT
+        gp.id,
+        gp.user_id,
+        u.first_name,
+        u.last_name,
+        u.avatar_path,
+        gp.content,
+        gp.created_at AS created_at_sort,
+        gp.image_path,
+    	COUNT(gc.id) AS comment_count,
+    	'group' AS post_type,
+        gp.group_id,
+        g.title AS group_name
+    FROM group_posts gp
+    JOIN group_members gm ON gp.group_id = gm.group_id
+        AND gm.user_id = ? AND gm.approval_status = 'accepted'
+    JOIN groups g ON gp.group_id = g.id
+    JOIN users u ON gp.user_id = u.id
+	LEFT JOIN group_comments gc ON gc.group_post_id = gp.id AND gc.status != 'delete'
+    WHERE gp.status = 'enable'  AND gp.user_id = ?
+    GROUP BY gp.id, u.id
+    ORDER BY created_at_sort DESC`, targetId, userId, userId, userId, userId, userId, targetId)
 
 	if err != nil {
 		fmt.Println("rows error at GetPostsByUserId", err)
@@ -438,12 +473,12 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 		var p model.Post
 		var firstname, lastname string
 		var avatarUrl sql.NullString
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.NumberOfComments)
+		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.ImagePath, &p.NumberOfComments, &p.PostType, &p.GroupID, &p.GroupName)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
 		}
-		p.PostType = "regular"
+		//p.PostType = "regular"
 		if avatarUrl.Valid {
 			p.AvatarPath = avatarUrl.String
 		} else {

@@ -101,12 +101,21 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if userId == 0 {
+		userId, err = service.ValidateSession(r)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+	}
+
 	users, err := repository.GetFollowersByUserID(userId)
 	if err != nil {
 		http.Error(w, "Error getting followers", http.StatusInternalServerError)
 		return
 	}
-
+	
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -123,12 +132,21 @@ func GetFollowedUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if userId == 0 {
+		userId, err = service.ValidateSession(r)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+	}
+
 	users, err := repository.GetFollowedUsersByUserID(userId)
 	if err != nil {
 		http.Error(w, "Error getting followed users", http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -145,6 +163,7 @@ func GetSentFollowRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -161,6 +180,7 @@ func GetReceivedFollowRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
 

@@ -38,11 +38,11 @@
                 <div class="mb-8">
                          <h4 class="text-xl font-semibold text-nordic-dark">Start a conversation: </h4>
                     <h4 class="text-lg font-medium text-nordic-dark mb-2">Following</h4>
-                    <ul v-if="followed.length > 0" class="space-y-2">
-                        <li v-for="user in followed" :key="user.id">
+                    <ul v-if="followedUsers.length > 0" class="space-y-2">
+                        <li v-for="user in followedUsers" :key="user.id">
                             <button @click="startChat(user)"
                                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
-                                {{ user.name }}
+                                {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
                     </ul>
@@ -55,7 +55,7 @@
                         <li v-for="user in followers" :key="user.id">
                             <button @click="startChat(user)"
                                 class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
-                                {{ user.name }}
+                                {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
                     </ul>
@@ -85,12 +85,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, toRefs} from 'vue'
 import { useWebSocketStore } from '@/stores/websocket'
 import TopBar from '@/components/TopBar.vue'
 import ChatBox from '@/components/ChatBox.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia';
+import { useAuth } from '@/composables/useAuth'
+import { useErrorStore } from '@/stores/error'
+import { useRouter } from 'vue-router'
 
+/*
+import { useErrorStore } from '@/stores/error'
+
+
+export const useErrorStore = defineStore('error', {
+  state: () => ({
+    message: ''
+  }),
+  actions: {
+    setError(msg) {
+      this.message = msg
+    }
+  }
+})
+*/
 const websocketStore = useWebSocketStore()
 const isConnected = computed(() => websocketStore.isConnected)
 const wsUrl = import.meta.env.VITE_WS_URL
@@ -108,10 +128,29 @@ const chats = ref([
     }
 ])
 
+// const props = defineProps({
+//     userId: {
+//         type: [String, Number], // we're using Number for now at least
+//         required: true
+//     }
+// })
+
 //temporary data for testing
 const selectedChat = ref(null)
-const followed = ref([{ id: 2, name: 'Dolgorsürengiin', userId: '102' }])
-const followers = ref([{ id: 3, name: 'Alex', userId: '103' }])
+//const following = ref([{ id: 2, name: 'Dolgorsürengiin', userId: '102' }])
+//const followers = ref([{ id: 3, name: 'Alex', userId: '103' }])
+const followedUsers = ref([])
+const followers = ref([])
+//const { userId} = toRefs(props)
+
+const { logout } = useAuth()
+const router = useRouter()
+const errorStore = useErrorStore()
+//const userStore = useUserStore()
+//const { user } = storeToRefs(userStore)
+//const  userId  = user.id
+const apiUrl = import.meta.env.VITE_API_URL
+//const errorStore = useErrorStore()
 
 
 onMounted(() => {
@@ -125,7 +164,7 @@ onMounted(() => {
     if (chats.value.length > 0) {
         selectedChat.value = chats.value[0]
     }
-
+    fetchFollowData()
     connectWebSocket()
     listenForNewChats()
 })
@@ -212,6 +251,37 @@ function formatTime(timestamp) {
 
     const date = new Date(timestamp)
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+async function fetchFollowData() {
+    try {
+        
+        const [res1, res2] = await Promise.all([
+            fetch(`${apiUrl}/api/followed/0`, { credentials: 'include' }),
+            fetch(`${apiUrl}/api/followers/0`, { credentials: 'include' })
+        ])
+
+        if (res1.status === 401 || res2.status === 401) {
+            logout()
+            router.push('/login')
+            return
+        }
+
+        if (!res1.ok || !res2.ok) throw new Error('Failed to fetch follow data')
+
+        const [followedJson, followersJson] = await Promise.all([
+            await res1.json(),
+            await res2.json()
+        ])
+
+        if (followedJson) followedUsers.value = followedJson
+        if (followersJson) followers.value = followersJson
+
+    } catch (err) {
+       errorStore.setError('Error', 'Failed to load follow data.')
+       router.push('/error')
+     console.log('error fetching in chatsVue')
+    }
 }
 </script>
 
