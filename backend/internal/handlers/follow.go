@@ -57,8 +57,6 @@ func HandleFollowAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Follow action:", req.Action)
-
 	var statusCode, frID int
 	switch req.Action {
 	case "request":
