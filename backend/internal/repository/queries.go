@@ -386,7 +386,7 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
 
 func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 	rows, err := database.DB.Query(`
-	SELECT p.id, p.user_id, u.first_name, u.last_name, u.avatar_path, p.content, p.created_at, 
+	SELECT p.id, p.user_id, u.first_name, u.last_name, u.avatar_path, p.content, p.created_at, p.image_path,
 		COUNT(c.id) AS comment_count
 	FROM posts p
 	JOIN users u ON p.user_id = u.id
@@ -438,7 +438,7 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 		var p model.Post
 		var firstname, lastname string
 		var avatarUrl sql.NullString
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.NumberOfComments)
+		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.ImagePath, &p.NumberOfComments)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
