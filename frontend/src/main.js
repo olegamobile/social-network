@@ -1,18 +1,28 @@
 import './assets/main.css'
 
-import { createApp } from 'vue'
+import { createApp, watchEffect } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
+import { useWebSocketStore } from './stores/websocket'
 
-const app = createApp(App)    
+const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
-const userStore = useUserStore()
+const userStore = useUserStore(pinia)
+const websocketStore = useWebSocketStore(pinia)
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
+
+watchEffect(() => {
+    if (userStore.isLoggedIn) {
+        websocketStore.initWebSocket()
+    } else {
+        websocketStore.disconnect()
+    }
+})
 
 try {
     const res = await fetch(`${apiUrl}/api/me`, {

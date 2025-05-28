@@ -62,7 +62,7 @@ func HandleFollowAction(w http.ResponseWriter, r *http.Request) {
 	case "request":
 		frID, statusCode = service.FollowRequest(userID, req.TargetID)
 		if statusCode == http.StatusOK {
-			err = repository.InsertNotification(userID, req.TargetID, "follow_request", frID)
+			_, err = repository.InsertNotification(userID, req.TargetID, "follow_request", frID)
 			if err != nil {
 				http.Error(w, "error inserting notification in HandleGroupMembership", http.StatusBadRequest)
 				return

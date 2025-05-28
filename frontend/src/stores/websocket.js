@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useUserStore } from '../stores/user'
+import { useNotificationStore } from './notifications' // Added import
 
 export const useWebSocketStore = defineStore('websocket', () => {
     const socket = ref(null)
@@ -10,7 +12,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
     const reconnectTimeout = ref(null)
 
     function connect(url) {
-        if (socket.value) return // already connected or connectingß
+        if (socket.value) return // already connected or connecting
 
         clearTimeout(reconnectTimeout.value)
         socket.value = new WebSocket(url)
@@ -33,15 +35,41 @@ export const useWebSocketStore = defineStore('websocket', () => {
             try {
                 // Parse the incoming message
                 message.value = JSON.parse(event.data)
+                console.log('WebSocket message received:', message.value); // Generic log
 
-                // Handle ping response if needed
-                if (message.value.type === 'pong') {
-                    console.log('Received pong from server')
+                // Handle 'new_notification'
+                if (message.value.type === 'new_notification') {
+                    console.log('Received new_notification message content:', message.value.content);
+                    const notificationStore = useNotificationStore(); // Get store instance
+                    let newNotificationData;
+                    try {
+                        if (typeof message.value.content === 'string') {
+                            newNotificationData = JSON.parse(message.value.content);
+                        } else {
+                            // If content is already an object
+                            newNotificationData = message.value.content; 
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing new_notification content:', parseError, "Raw content:", message.value.content);
+                        return; // Skip if content is not valid JSON
+                    }
+
+                    if (newNotificationData) {
+                        notificationStore.addNotification(newNotificationData);
+                    }
+                } 
+                // Handle ping response (existing logic)
+                else if (message.value.type === 'pong') {
+                    console.log('Received pong from server');
                 }
+                // Potentially other message types here
+                // else {
+                //    console.log('Unhandled message type:', message.value.type);
+                // }
 
             } catch (error) {
-                console.error('Error parsing message:', error)
-                message.value = event.data
+                console.error('Error parsing message envelope:', error, "Raw data:", event.data);
+                // message.value = event.data; // Avoid setting message.value to raw on envelope parse error
             }
         }
 
@@ -103,5 +131,13 @@ export const useWebSocketStore = defineStore('websocket', () => {
         reconnectAttempts.value = maxReconnectAttempts // Prevent further reconnects
     }
 
-    return { connect, send, disconnect, isConnected, message }
+    function initWebSocket() {
+        const userStore = useUserStore()
+        if (userStore.isLoggedIn) {
+            const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080/ws'
+            connect(websocketUrl)
+        }
+    }
+
+    return { connect, send, disconnect, isConnected, message, initWebSocket }
 })
