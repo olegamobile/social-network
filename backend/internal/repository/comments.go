@@ -17,13 +17,15 @@ SELECT
     u.created_at AS user_created_at,
     u.updated_at AS user_updated_at,
     u.updated_by AS user_updated_by,
+	u.avatar_path,
     c.id AS comment_id,
     c.post_id AS comment_post_id,
     c.user_id AS comment_user_id,
     c.content AS comment_description, 
     c.status AS comment_status,
     c.created_at AS comment_created_at, 
-    c.updated_by AS comment_updated_by
+    c.updated_by AS comment_updated_by,
+	c.image_path
 FROM comments c
 INNER JOIN users u ON c.user_id = u.id
 WHERE 
@@ -50,6 +52,7 @@ ORDER BY c.created_at DESC;
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.UpdatedBy,
+			&user.AvatarPath,
 
 			&comment.ID,
 			&comment.PostId,
@@ -58,6 +61,7 @@ ORDER BY c.created_at DESC;
 			&comment.Status,
 			&comment.CreatedAt,
 			&comment.UpdatedBy,
+			&comment.ImagePath,
 		)
 		if err != nil {
 			return nil, err
@@ -76,14 +80,23 @@ ORDER BY c.created_at DESC;
 	return comments, nil
 }
 
-func InsertComment(content string, userID int, postID int) error {
+func InsertComment(content string, userID int, postID int, imagePath *string) error {
 
-	insertQuery := `INSERT INTO comments (post_id, content, user_id) VALUES (?, ?, ?);`
-	_, insertErr := database.DB.Exec(insertQuery, postID, content, userID)
+	var query string
+	var args []any
 
-	if insertErr != nil {
-		fmt.Println("Error inserting the comment", insertErr)
-		return insertErr
+	if imagePath != nil {
+		query = "INSERT INTO comments (user_id, content, post_id, image_path) VALUES (?, ?, ?, ?)"
+		args = []any{userID, content, postID, *imagePath}
+	} else {
+		query = "INSERT INTO comments (user_id, content,  post_id) VALUES (?, ?, ?)"
+		args = []any{userID, content, postID}
+	}
+
+	_, err := database.DB.Exec(query, args...)
+	if err != nil {
+		fmt.Println("error 1 at insert comment", err)
+		return err
 	}
 
 	return nil
@@ -100,13 +113,15 @@ SELECT
     u.created_at AS user_created_at,
     u.updated_at AS user_updated_at,
     u.updated_by AS user_updated_by,
+	u.avatar_path,
     c.id AS comment_id,
     c.group_post_id AS comment_post_id,
     c.user_id AS comment_user_id,
     c.content AS comment_description, 
     c.status AS comment_status,
     c.created_at AS comment_created_at, 
-    c.updated_by AS comment_updated_by
+    c.updated_by AS comment_updated_by,
+	c.image_path
 FROM group_comments c
 INNER JOIN users u ON c.user_id = u.id
 WHERE 
@@ -133,6 +148,7 @@ ORDER BY c.created_at DESC;
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.UpdatedBy,
+			&user.AvatarPath,
 
 			&comment.ID,
 			&comment.PostId,
@@ -141,6 +157,7 @@ ORDER BY c.created_at DESC;
 			&comment.Status,
 			&comment.CreatedAt,
 			&comment.UpdatedBy,
+			&comment.ImagePath,
 		)
 		if err != nil {
 			return nil, err
@@ -155,18 +172,27 @@ ORDER BY c.created_at DESC;
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-
+	fmt.Println("image path: ", comments[0].User.AvatarPath)
 	return comments, nil
 }
 
-func InsertGroupComment(content string, userID int, postID int) error {
+func InsertGroupComment(content string, userID int, postID int, imagePath *string) error {
 
-	insertQuery := `INSERT INTO group_comments (group_post_id, content, user_id) VALUES (?, ?, ?);`
-	_, insertErr := database.DB.Exec(insertQuery, postID, content, userID)
+	var query string
+	var args []any
 
-	if insertErr != nil {
-		fmt.Println("Error inserting the comment", insertErr)
-		return insertErr
+	if imagePath != nil {
+		query = "INSERT INTO group_comments (user_id, content, group_post_id, image_path) VALUES (?, ?, ?, ?)"
+		args = []any{userID, content, postID, *imagePath}
+	} else {
+		query = "INSERT INTO group_comments (user_id, content, group_post_id) VALUES (?, ?, ?)"
+		args = []any{userID, content, postID}
+	}
+
+	_, err := database.DB.Exec(query, args...)
+	if err != nil {
+		fmt.Println("error 1 at insert group_comment", err)
+		return err
 	}
 
 	return nil
