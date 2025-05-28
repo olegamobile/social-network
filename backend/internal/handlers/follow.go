@@ -73,7 +73,10 @@ func HandleFollowAction(w http.ResponseWriter, r *http.Request) {
 	case "unfollow":
 		statusCode = repository.RemoveFollow(userID, req.TargetID)
 	case "cancel":
-		statusCode = repository.RemoveFollow(userID, req.TargetID)
+		statusCode = repository.RemoveFollowRequestNotification(userID, req.TargetID) // this first, other is hard delete
+		if statusCode == http.StatusOK {
+			statusCode = repository.RemoveFollow(userID, req.TargetID)
+		}
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
 		return
@@ -114,7 +117,7 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error getting followers", http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }

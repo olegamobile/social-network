@@ -14,18 +14,13 @@
                         <!-- chat button -->
                         <br>
                         <RouterLink :to="`/chats/${group.id}`" class="my-4">Go to Chat</RouterLink>
-
                         <!-- events -->
                         <EventList :events="events" small class="my-4" />
-
                         <!-- members -->
                         <MembersList :members="members" small class="my-4" />
                     </div>
-
-
+                    
                     <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'" @update-members='getMembers(route.params.id)' />
-
-
                 </div>
             </template>
 

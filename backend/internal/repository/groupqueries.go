@@ -314,14 +314,11 @@ func LeaveGroup(userID, groupID int) int {
 	return http.StatusOK
 }
 
-func DeleteGroup(userID, groupID int) int {
-	query := `
-	UPDATE groups
-	SET status = 'delete', updated_by = ?
-	WHERE id = ? AND creator_id = ?
-	`
+/* func DeleteGroup(userID, groupID int) int {
+	query := `UPDATE groups SET status = 'delete', updated_by = ? WHERE id = ? AND creator_id = ?`
 	res, err := database.DB.Exec(query, userID, groupID, userID)
 	if err != nil {
+		fmt.Println("query error at DeleteGroup:", err)
 		return http.StatusInternalServerError
 	}
 	rows, _ := res.RowsAffected()
@@ -329,6 +326,97 @@ func DeleteGroup(userID, groupID int) int {
 		return http.StatusForbidden // Not allowed or group doesn't exist
 	}
 	return http.StatusOK
+} */
+
+func DeleteGroupWithDependencies(userID, groupID int) error {
+
+	// Start transaction
+	tx, err := database.DB.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin tx: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	// Soft delete related group_members
+	_, err = tx.Exec(`UPDATE group_members SET status = 'delete', updated_by = ? WHERE group_id = ?`, userID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete group_members: %w", err)
+	}
+
+	// Soft delete related group_invitations
+	_, err = tx.Exec(`UPDATE group_invitations SET status = 'delete', updated_by = ? WHERE group_id = ?`, userID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete group_invitations: %w", err)
+	}
+
+	// Soft delete related group_posts
+	_, err = tx.Exec(`UPDATE group_posts SET status = 'delete', updated_by = ? WHERE group_id = ?`, userID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete group_posts: %w", err)
+	}
+
+	// Soft delete related group_comments (via posts)
+	_, err = tx.Exec(`
+		UPDATE group_comments 
+		SET status = 'delete', updated_by = ? 
+		WHERE group_post_id IN (SELECT id FROM group_posts WHERE group_id = ?)`, userID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete group_comments: %w", err)
+	}
+
+	// Soft delete related events
+	_, err = tx.Exec(`UPDATE events SET status = 'delete', updated_by = ? WHERE group_id = ?`, userID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete events: %w", err)
+	}
+
+	// Soft delete event_responses for those events
+	_, err = tx.Exec(`
+		UPDATE event_responses 
+		SET status = 'delete', updated_by = ? 
+		WHERE event_id IN (SELECT id FROM events WHERE group_id = ?)`, userID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete event_responses: %w", err)
+	}
+
+	// Soft delete group_messages
+	_, err = tx.Exec(`UPDATE group_messages SET status = 'delete', updated_by = ? WHERE group_id = ?`, userID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete group_messages: %w", err)
+	}
+
+	// Soft delete relevant notifications
+	_, err = tx.Exec(`
+		UPDATE notifications 
+		SET status = 'delete', updated_by = ? 
+		WHERE 
+			(type = 'group_invitation' AND group_invite_id IN (
+				SELECT id FROM group_invitations WHERE group_id = ?
+			))
+			OR 
+			(type = 'group_join_request' AND group_members_id IN (
+				SELECT id FROM group_members WHERE group_id = ?
+			))`, userID, groupID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to delete notifications: %w", err)
+	}
+
+	// Soft delete the group itself
+	_, err = tx.Exec(`UPDATE groups SET status = 'delete', updated_by = ? WHERE id = ? AND creator_id = ?`, userID, groupID, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete group: %w", err)
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit failed: %w", err)
+	}
+
+	return nil
 }
 
 func GetAdminIdByGroupId(groupId int) (int, error) {
@@ -492,6 +580,27 @@ func UpdateGroupInviteStatus(inviteID, userID int, action string) int {
 	`
 	_, err := database.DB.Exec(query, action, userID, inviteID)
 	if err != nil {
+		return http.StatusInternalServerError
+	}
+
+	return http.StatusOK
+}
+
+func RemoveGroupRequestNotification(userID, groupID int) int {
+	query := `
+	UPDATE notifications
+	SET updated_by = ?, status = 'delete'
+	WHERE type = 'group_join_request'
+		AND status != 'delete'
+		AND ref_id IN (
+			SELECT id FROM group_members
+			WHERE user_id = ? AND group_id = ?
+		)
+`
+	_, err := database.DB.Exec(query, userID, userID, groupID)
+
+	if err != nil {
+		fmt.Println("error removing notification at RemoveGroupRequestNotification", err)
 		return http.StatusInternalServerError
 	}
 

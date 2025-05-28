@@ -454,11 +454,11 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
         g.title AS group_name
     FROM group_posts gp
     JOIN group_members gm ON gp.group_id = gm.group_id
-        AND gm.user_id = ? AND gm.approval_status = 'accepted'
+        AND gm.user_id = ? AND gm.approval_status = 'accepted'		-- from groups where active user is member
     JOIN groups g ON gp.group_id = g.id
     JOIN users u ON gp.user_id = u.id
 	LEFT JOIN group_comments gc ON gc.group_post_id = gp.id AND gc.status != 'delete'
-    WHERE gp.status = 'enable'  AND gp.user_id = ?
+    WHERE gp.status = 'enable'  AND gp.user_id = ?      			-- posts made by target user
     GROUP BY gp.id, u.id
     ORDER BY created_at_sort DESC`, targetId, userId, userId, userId, userId, userId, targetId)
 

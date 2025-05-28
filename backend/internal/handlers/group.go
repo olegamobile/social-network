@@ -293,9 +293,12 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
 	case "cancel":
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
+		if statusCode == http.StatusOK {
+			statusCode = repository.RemoveGroupRequestNotification(userID, req.TargetID)
+		}
 		// todo: remove notification
 	case "delete":
-		statusCode = repository.DeleteGroup(userID, req.TargetID) // group 'status' to delete
+		statusCode = service.DeleteGroup(userID, req.TargetID)
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
 	}

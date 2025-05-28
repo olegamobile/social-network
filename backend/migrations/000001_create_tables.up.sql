@@ -164,6 +164,8 @@ CREATE TABLE IF NOT EXISTS event_responses (
     user_id INTEGER NOT NULL,
     response TEXT NOT NULL CHECK (response IN ('going', 'not_going', 'pending')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER,
+    status TEXT NOT NULL CHECK (status IN ('enable', 'disable', 'delete')) DEFAULT 'enable',
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(event_id, user_id)
