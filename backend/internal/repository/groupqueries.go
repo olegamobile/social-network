@@ -374,10 +374,11 @@ func DeleteGroupWithDependencies(userID, groupID int) error {
 		return fmt.Errorf("failed to delete events: %w", err)
 	}
 
-	// Hard delete event_responses for those events
+	// Soft delete event_responses for those events
 	_, err = tx.Exec(`
-		DELETE FROM event_responses 
-		WHERE event_id IN (SELECT id FROM events WHERE group_id = ?)`, groupID)
+		UPDATE event_responses 
+		SET status = 'delete', updated_by = ? 
+		WHERE event_id IN (SELECT id FROM events WHERE group_id = ?)`, userID, groupID)
 	if err != nil {
 		return fmt.Errorf("failed to delete event_responses: %w", err)
 	}
