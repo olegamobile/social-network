@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useUserStore } from '../stores/user'
 
 export const useWebSocketStore = defineStore('websocket', () => {
     const socket = ref(null)
@@ -10,7 +11,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
     const reconnectTimeout = ref(null)
 
     function connect(url) {
-        if (socket.value) return // already connected or connectingß
+        if (socket.value) return // already connected or connecting
 
         clearTimeout(reconnectTimeout.value)
         socket.value = new WebSocket(url)
@@ -103,5 +104,15 @@ export const useWebSocketStore = defineStore('websocket', () => {
         reconnectAttempts.value = maxReconnectAttempts // Prevent further reconnects
     }
 
-    return { connect, send, disconnect, isConnected, message }
+    function initWebSocket() {
+        const userStore = useUserStore()
+        if (userStore.isLoggedIn) {
+            const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080/ws'
+            connect(websocketUrl)
+        }
+    }
+
+    return { connect, send, disconnect, isConnected, message, initWebSocket }
 })
+
+
