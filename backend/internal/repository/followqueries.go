@@ -233,8 +233,6 @@ func DeclineFollowRequest(userId, followRequestId int) int {
 }
 
 func RemoveFollowRequestNotification(userID, followedID int) int {
-	fmt.Println("trying to remove 'follow_request' notification between", userID, followedID)
-
 	query := `
 	UPDATE notifications
 	SET updated_by = ?, status = 'delete'
