@@ -586,15 +586,12 @@ func UpdateGroupInviteStatus(inviteID, userID int, action string) int {
 }
 
 func RemoveGroupRequestNotification(userID, groupID int) int {
-
-	fmt.Println("trying to delete notification regarding user", userID, "at group", groupID)
-
 	query := `
 	UPDATE notifications
 	SET updated_by = ?, status = 'delete'
 	WHERE type = 'group_join_request'
 		AND status != 'delete'
-		AND group_members_id IN (
+		AND ref_id IN (
 			SELECT id FROM group_members
 			WHERE user_id = ? AND group_id = ?
 		)
@@ -602,7 +599,7 @@ func RemoveGroupRequestNotification(userID, groupID int) int {
 	_, err := database.DB.Exec(query, userID, userID, groupID)
 
 	if err != nil {
-		fmt.Println("error removing nitification at RemoveGroupRequestNotification", err)
+		fmt.Println("error removing notification at RemoveGroupRequestNotification", err)
 		return http.StatusInternalServerError
 	}
 

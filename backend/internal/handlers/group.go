@@ -266,8 +266,6 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Group action!", req.Action)
-
 	var statusCode int
 	switch req.Action {
 	case "request":
@@ -294,10 +292,8 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 	case "leave":
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
 	case "cancel":
-		fmt.Println("cancel!")
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
 		if statusCode == http.StatusOK {
-			fmt.Println("cancel 2!")
 			statusCode = repository.RemoveGroupRequestNotification(userID, req.TargetID)
 		}
 		// todo: remove notification
