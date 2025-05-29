@@ -32,7 +32,7 @@ func CreateEvent(event model.Event) (int, error) {
 			return 0, err
 		}
 		// send notifications
-		err = InsertNotification(event.CreatorID, member.ID, "event_creation", *event.ID)
+		_, err = InsertNotification(event.CreatorID, member.ID, "event_creation", *event.ID)
 		if err != nil {
 			return 0, err
 		}

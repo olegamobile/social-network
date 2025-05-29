@@ -56,9 +56,9 @@
                         aria-label="Notifications">
                         <span class="sr-only">View notifications</span>
                         <i class="fas fa-bell bell"></i>
-                        <span v-if="newNotificationsCount > 0"
+                        <span v-if="unreadCount > 0"
                             class="absolute top-0 right-0 block h-4 w-4 rounded-full ring-1 ring-white bg-red-500 text-white text-xs flex items-center justify-center">
-                            {{ newNotificationsCount }}
+                            {{ unreadCount }}
                         </span>
                     </router-link>
 
@@ -132,9 +132,9 @@
                     :class="{ 'active': $route.path === '/notifications' }" @click="toggleMobileMenu"
                     data-title="Notifications" aria-label="Notifications">
                     <i class="fas fa-bell bell"></i>View notifications
-                    <span v-if="newNotificationsCount > 0"
+                    <span v-if="unreadCount > 0"
                         class="absolute top-0 left-6 block h-5 w-5 rounded-full ring-1 ring-white bg-red-500 text-white text-xs flex items-center justify-center">
-                        {{ newNotificationsCount }}
+                        {{ unreadCount }}
                     </span>
                 </router-link>
 
@@ -178,43 +178,33 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
 import { useErrorStore } from '@/stores/error';
 import { useAuth } from '@/composables/useAuth';
+import { useNotificationStore } from '@/stores/notifications'; // Added
 
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
-const errorStore = useErrorStore();
-const isMobileMenuOpen = ref(false); // Controls mobile menu visibility
-const newNotificationsCount = ref(0); // Reactive state for notification count
+const errorStore = useErrorStore(); // Keep if used
+const { user } = storeToRefs(userStore);
+const { logout } = useAuth(); // Keep if used
+
+const notificationStore = useNotificationStore(); // Added
+const { unreadCount, notifications } = storeToRefs(notificationStore); // Added, 'notifications' can be used later
+
+const isMobileMenuOpen = ref(false);
+const apiUrl = import.meta.env.VITE_API_URL;
+const isLoginPage = computed(() => route.path === '/login');
+const isRegisterPage = computed(() => route.path === '/register');
 
 const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
-const { user } = storeToRefs(userStore); // storeToRefs() ensures user is reactive when destructured
-const apiUrl = import.meta.env.VITE_API_URL;
-const isLoginPage = computed(() => route.path === '/login');
-const isRegisterPage = computed(() => route.path === '/register');
-const { logout } = useAuth();
-
-// Fetch new notifications count on component mount
-async function fetchNewNotificationsCount() {
-    try {
-        const response = await fetch(`${apiUrl}/api/notifications/new`, {
-            credentials: 'include'
-        });
-        if (response.ok) {
-            const data = await response.json();
-            newNotificationsCount.value = data.count || 0; // Assuming API returns { count: number }
-        } else {
-            errorStore.setError('Error', 'Failed to load new notifications count.');
-        }
-    } catch (error) {
-        errorStore.setError('Error', 'Failed to load new notifications count.');
-    }
-}
 
 onMounted(() => {
-    fetchNewNotificationsCount()
-})
+    if (userStore.isLoggedIn) { // Good practice to only fetch if logged in
+        notificationStore.fetchNotifications(); // Added
+    }
+    // Any other onMounted logic that was there
+});
 
 
 // Placeholder for WebSocket setup

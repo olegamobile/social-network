@@ -7,7 +7,7 @@ import { createPinia } from 'pinia'
 import { useUserStore } from './stores/user'
 import { useWebSocketStore } from './stores/websocket'
 
-const app = createApp(App)    
+const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)

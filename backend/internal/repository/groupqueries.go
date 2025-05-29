@@ -586,23 +586,37 @@ func UpdateGroupInviteStatus(inviteID, userID int, action string) int {
 	return http.StatusOK
 }
 
-func RemoveGroupRequestNotification(userID, groupID int) int {
-	query := `
-	UPDATE notifications
-	SET updated_by = ?, status = 'delete'
-	WHERE type = 'group_join_request'
-		AND status != 'delete'
-		AND ref_id IN (
+func RemoveGroupRequestNotification(userID, groupID int) (int64, error) {
+	var notificationID int64
+	err := database.DB.QueryRow(`
+		SELECT id FROM notifications
+		WHERE type = 'group_join_request'
+		AND ref_id = (
 			SELECT id FROM group_members
 			WHERE user_id = ? AND group_id = ?
 		)
-`
-	_, err := database.DB.Exec(query, userID, userID, groupID)
+		AND status != 'delete'
+	`, userID, groupID).Scan(&notificationID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("notification not found: %w", err)
+		}
+		fmt.Println("Error retrieving notification ID:", err)
+		return 0, err
+	}
+
+	query := `
+	UPDATE notifications
+	SET updated_by = ?, status = 'delete'
+	WHERE id = ?
+	`
+	_, err = database.DB.Exec(query, userID, notificationID)
 
 	if err != nil {
 		fmt.Println("error removing notification at RemoveGroupRequestNotification", err)
-		return http.StatusInternalServerError
+		return 0, err
 	}
 
-	return http.StatusOK
+	return notificationID, nil
 }

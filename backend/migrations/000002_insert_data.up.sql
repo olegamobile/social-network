@@ -62,7 +62,7 @@ INSERT INTO follow_requests (follower_id, followed_id, approval_status, created_
 (13, 5, 'accepted', CURRENT_TIMESTAMP),
 (1, 9, 'pending', CURRENT_TIMESTAMP),
 (11, 13, 'accepted', CURRENT_TIMESTAMP),
-(3, 11, 'accepted', CURRENT_TIMESTAMP);
+(3, 11, 'pending', CURRENT_TIMESTAMP);
 
 -- Insert 15 groups (7 columns)
 INSERT INTO groups (creator_id, title, description, created_at, updated_by, status) VALUES
@@ -135,17 +135,17 @@ INSERT INTO group_invitations (group_id, user_id, inviter_id, approval_status, c
 (1, 3, 1, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (2, 6, 5, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
 (3, 11, 9, 'declined', CURRENT_TIMESTAMP, NULL, 'enable'),
-(4, 13, 2, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
+(4, 13, 2, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (5, 1, 7, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
-(6, 8, 11, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
-(7, 5, 4, 'accepted', CURRENT_TIMESTAMP, NULL, 'delete'),
+(6, 8, 11, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
+(7, 5, 4, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (8, 9, 8, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
-(9, 2, 13, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
-(10, 3, 6, 'declined', CURRENT_TIMESTAMP, NULL, 'enable'),
-(11, 4, 10, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
+(9, 2, 13, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
+(10, 3, 6, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
+(11, 4, 10, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (12, 7, 14, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
-(13, 11, 3, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
-(14, 1, 12, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
+(13, 11, 3, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
+(14, 1, 12, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (14, 11, 12, 'pending', CURRENT_TIMESTAMP, NULL, 'enable'),
 (15, 8, 1, 'pending', CURRENT_TIMESTAMP, NULL, 'enable');
 
@@ -597,17 +597,17 @@ INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_
 (1, 'follow_request', 5, NULL, NULL, NULL, 'Luca wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (1, 'follow_request', 6, NULL, NULL, NULL, 'Mia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (1, 'follow_request', 7, NULL, NULL, NULL, 'Elias wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 'follow_request', 8, NULL, NULL, NULL, 'Mia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 'follow_request', 9, NULL, NULL, NULL, 'Lena wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(4, 'follow_request', 8, NULL, NULL, NULL, 'Mia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
+(6, 'follow_request', 9, NULL, NULL, NULL, 'Lena wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'),    -- declined
 (8, 'follow_request', 10, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'follow_request', 11, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(5, 'follow_request', 11, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
 (9, 'follow_request', 12, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(13, 'follow_request', 13, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(13, 'follow_request', 13, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
 (11, 'follow_request', 14, NULL, NULL, NULL, 'Sofia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 -- Group invitation notifications (corrected to use group_invite_id)
 (3, 'group_invitation', NULL, 1, 1, NULL, 'You’ve been invited to Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 'group_invitation', NULL, 2, 2, NULL, 'You’ve been invited to Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(11, 'group_invitation', NULL, 3, 3, NULL, 'You’ve been invited to Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(6, 'group_invitation', NULL, 2, 2, NULL, 'You’ve been invited to Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
+(11, 'group_invitation', NULL, 3, 3, NULL, 'You’ve been invited to Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'),      -- declined
 (13, 'group_invitation', NULL, 4, 4, NULL, 'You’ve been invited to Photography Hub.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (1, 'group_invitation', NULL, 5, 5, NULL, 'You’ve been invited to Fitness Fanatics.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (8, 'group_invitation', NULL, 6, 6, NULL, 'You’ve been invited to Baking Buddies.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
@@ -619,16 +619,17 @@ INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_
 (7, 'group_invitation', NULL, 12, 12, NULL, 'You’ve been invited to Plant Parents.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (11, 'group_invitation', NULL, 13, 13, NULL, 'You’ve been invited to History Buffs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (1, 'group_invitation', NULL, 14, 14, NULL, 'You’ve been invited to Code Crafters.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(8, 'group_invitation', NULL, 15, 15, NULL, 'You’ve been invited to Coffee Connoisseurs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(11, 'group_invitation', NULL, 15, 15, NULL, 'You’ve been invited to group 14.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(8, 'group_invitation', NULL, 16, 16, NULL, 'You’ve been invited to Coffee Connoisseurs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 -- Group join request notifications (aligned with group_members pending requests)
-(1, 'group_join_request', NULL, NULL, 1, NULL, 'Amina wants to join Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'group_join_request', NULL, NULL, 2, NULL, 'Mia wants to join Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(9, 'group_join_request', NULL, NULL, 3, NULL, 'Amina wants to join Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(7, 'group_join_request', NULL, NULL, 5, NULL, 'Sofia wants to join Fitness Fanatics.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 'group_join_request', NULL, NULL, 7, NULL, 'Liam wants to join Travel Explorers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(13, 'group_join_request', NULL, NULL, 9, NULL, 'Mia wants to join Tech Talk.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(10, 'group_join_request', NULL, NULL, 11, NULL, 'Elias wants to join Gamers Guild.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(3, 'group_join_request', NULL, NULL, 13, NULL, 'Emma wants to join History Buffs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 'group_join_request', NULL, NULL, 3, NULL, 'Amina wants to join Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+-- (5, 'group_join_request', NULL, NULL, 2, NULL, 'Mia wants to join Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'), -- cant find match to this
+(9, 'group_join_request', NULL, NULL, 9, NULL, 'Amina wants to join Book Club.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(7, 'group_join_request', NULL, NULL, 15, NULL, 'Sofia wants to join Fitness Fanatics.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(4, 'group_join_request', NULL, NULL, 21, NULL, 'Liam wants to join Travel Explorers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(13, 'group_join_request', NULL, NULL, 27, NULL, 'Mia wants to join Tech Talk.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(10, 'group_join_request', NULL, NULL, 33, NULL, 'Elias wants to join Gamers Guild.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(3, 'group_join_request', NULL, NULL, 39, NULL, 'Emma wants to join History Buffs.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 -- Event creation notifications (sent to group creators)
 (1, 'event_creation', NULL, NULL, 1, 1, 'New event: Group Hike in Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (5, 'event_creation', NULL, NULL, 2, 2, 'New event: Art Workshop in Art Enthusiasts.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
