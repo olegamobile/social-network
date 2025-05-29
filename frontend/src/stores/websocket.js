@@ -141,3 +141,5 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
     return { connect, send, disconnect, isConnected, message, initWebSocket }
 })
+
+
