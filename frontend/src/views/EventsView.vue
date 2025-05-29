@@ -80,7 +80,13 @@ function printStuff() {
 
 const upcoming = computed(() => allEvents.value.filter(e => new Date(e.event_datetime) > now))
 const past = computed(() => allEvents.value.filter(e => new Date(e.event_datetime) < now))
-const invited = computed(() => allEvents.value.filter(e => e.no_response.some(invited => invited.id === user.id)))
+const invited = computed(() => allEvents.value.filter(e => {
+  if (e.no_response && e.no_response.length > 0) {
+    return e.no_response.some(invited => invited.id === user.id)
+  } else {
+    return false
+  }
+}))
 
 async function getEvents() {
   try {
