@@ -62,7 +62,7 @@ INSERT INTO follow_requests (follower_id, followed_id, approval_status, created_
 (13, 5, 'accepted', CURRENT_TIMESTAMP),
 (1, 9, 'pending', CURRENT_TIMESTAMP),
 (11, 13, 'accepted', CURRENT_TIMESTAMP),
-(3, 11, 'accepted', CURRENT_TIMESTAMP);
+(3, 11, 'pending', CURRENT_TIMESTAMP);
 
 -- Insert 15 groups (7 columns)
 INSERT INTO groups (creator_id, title, description, created_at, updated_by, status) VALUES
@@ -597,12 +597,8 @@ INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_
 (1, 'follow_request', 5, NULL, NULL, NULL, 'Luca wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (1, 'follow_request', 6, NULL, NULL, NULL, 'Mia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (1, 'follow_request', 7, NULL, NULL, NULL, 'Elias wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 'follow_request', 8, NULL, NULL, NULL, 'Mia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 'follow_request', 9, NULL, NULL, NULL, 'Lena wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (8, 'follow_request', 10, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'follow_request', 11, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (9, 'follow_request', 12, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(13, 'follow_request', 13, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (11, 'follow_request', 14, NULL, NULL, NULL, 'Sofia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 -- Group invitation notifications (corrected to use group_invite_id)
 (3, 'group_invitation', NULL, 1, 1, NULL, 'You’ve been invited to Nature Lovers.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
