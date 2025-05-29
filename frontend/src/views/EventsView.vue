@@ -3,6 +3,7 @@
     <TopBar />
 
     <TwoColumnLayout>
+
       <template #sidebar>
         <div class="mb-8">
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Upcoming Events</h3>
@@ -41,9 +42,10 @@
       </template>
 
       <template #main>
-        <h2 class="text-3xl font-bold text-nordic-dark mb-6">Event Details</h2>
+        <h2 v-if="selectedEvent" class="text-3xl font-bold text-nordic-dark mb-6">Event Details</h2>
         <EventCard v-if="selectedEvent" :event="selectedEvent" />
       </template>
+
     </TwoColumnLayout>
   </div>
 </template>
@@ -54,12 +56,13 @@ import TopBar from '@/components/TopBar.vue'
 import EventCard from '@/components/EventCard.vue'
 import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useErrorStore } from '@/stores/error'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia';
 
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const errorStore = useErrorStore()
+const route = useRoute()
 const router = useRouter()
 const now = new Date()
 const allEvents = ref([])
@@ -70,12 +73,7 @@ const selectedEvent = ref(null)
 
 function select(event) {
   selectedEvent.value = event
-}
-
-function printStuff() {
-  console.log("ups", upcoming.value)
-  //console.log("inv", invited.value)
-  console.log("pss", past.value)
+  router.push({ name: 'events', params: { id: event.id } })
 }
 
 const upcoming = computed(() => allEvents.value.filter(e => new Date(e.event_datetime) > now))
@@ -119,10 +117,26 @@ async function getEvents() {
   }
 }
 
+/* function printStuff() {
+  console.log("ups", upcoming.value)
+  console.log("inv", invited.value)
+  console.log("pss", past.value)
+} */
 
 onMounted(async () => {
   await getEvents()
-  printStuff()
+  //printStuff()
+
+  const idFromRoute = route.params.id
+  if (idFromRoute) {
+    const found = allEvents.value.find(e => e.id === parseInt(idFromRoute))
+    if (found) {
+      selectedEvent.value = found
+    } else {
+      errorStore.setError('Event Not Found', 'The event you are looking for does not exist or you do not have access.')
+      router.push('/error')
+    }
+  }
 })
 </script>
 
