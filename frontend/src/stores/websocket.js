@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useUserStore } from '../stores/user'
+import { useNotificationStore } from './notifications' // Added import
 
 export const useWebSocketStore = defineStore('websocket', () => {
     const socket = ref(null)
@@ -9,6 +10,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
     const reconnectAttempts = ref(0)
     const maxReconnectAttempts = 5
     const reconnectTimeout = ref(null)
+    const userStore = useUserStore()
 
     function connect(url) {
         if (socket.value) return // already connected or connecting
@@ -25,7 +27,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
             send({
                 type: 'ping',
                 content: 'ping',
-                sender_id: localStorage.getItem('userId') || '0',
+                sender_id: userStore.userId || '0',
                 receiver_id: '0'
             })
         }
@@ -34,15 +36,73 @@ export const useWebSocketStore = defineStore('websocket', () => {
             try {
                 // Parse the incoming message
                 message.value = JSON.parse(event.data)
+                console.log('WebSocket message received:', message.value); // Generic log
 
-                // Handle ping response if needed
-                if (message.value.type === 'pong') {
-                    console.log('Received pong from server')
+                // Handle 'new_notification'
+                if (message.value.type === 'new_notification') {
+                    console.log('Received new_notification message content:', message.value.content);
+                    const notificationStore = useNotificationStore(); // Get store instance
+                    let newNotificationData;
+                    try {
+                        if (typeof message.value.content === 'string') {
+                            newNotificationData = JSON.parse(message.value.content);
+                        } else {
+                            // If content is already an object
+                            newNotificationData = message.value.content; 
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing new_notification content:', parseError, "Raw content:", message.value.content);
+                        return; // Skip if content is not valid JSON
+                    }
+
+                    if (newNotificationData) {
+                        notificationStore.addNotification(newNotificationData);
+                    }
+                } 
+                // Handle ping response (existing logic)
+                else if (message.value.type === 'pong') {
+                    console.log('Received pong from server');
                 }
+                // Handle 'notification_deleted'
+                else if (message.value.type === 'notification_deleted') {
+                    console.log('Received notification_deleted message content:', message.value.content);
+                    const notificationStore = useNotificationStore(); // Get store instance
+
+                    let deletedNotificationData;
+                    try {
+                        // Assuming message.value.content is a JSON string like '{"id":"123"}'
+                        if (typeof message.value.content === 'string') {
+                            deletedNotificationData = JSON.parse(message.value.content);
+                        } else {
+                            // If content is already an object (less likely based on backend plan but good to handle)
+                            deletedNotificationData = message.value.content;
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing notification_deleted content:', parseError, "Raw content:", message.value.content);
+                        return; // Skip if content is not valid JSON
+                    }
+
+                    if (deletedNotificationData && deletedNotificationData.id) {
+                        // The removeNotification function in notifications.js expects a number or a string that can be coerced to a number.
+                        // Ensure the ID is passed correctly.
+                        const notificationIdToRemove = Number(deletedNotificationData.id);
+                        if (!isNaN(notificationIdToRemove)) {
+                            notificationStore.removeNotification(notificationIdToRemove);
+                        } else {
+                            console.error('Invalid notification ID received for deletion:', deletedNotificationData.id);
+                        }
+                    } else {
+                        console.warn('Notification ID missing in notification_deleted message content:', deletedNotificationData);
+                    }
+                }
+                // Potentially other message types here
+                // else {
+                //    console.log('Unhandled message type:', message.value.type);
+                // }
 
             } catch (error) {
-                console.error('Error parsing message:', error)
-                message.value = event.data
+                console.error('Error parsing message envelope:', error, "Raw data:", event.data);
+                // message.value = event.data; // Avoid setting message.value to raw on envelope parse error
             }
         }
 
@@ -114,5 +174,3 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
     return { connect, send, disconnect, isConnected, message, initWebSocket }
 })
-
-

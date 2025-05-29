@@ -6,10 +6,10 @@
             <template #sidebar>
                 <h3 class="text-lg font-semibold">Notifications</h3>
                 <button @click="showCurrent = true" :class="{ active: showCurrent }">
-                    Current ({{fetchedNotifications ? fetchedNotifications.filter(n => !n.is_read).length : 0}})
+                    Current ({{ unreadCount }})
                 </button>
                 <button @click="showCurrent = false" :class="{ active: !showCurrent }">
-                    Old ({{fetchedNotifications ? fetchedNotifications.filter(n => n.is_read).length : 0}})
+                    Old ({{ notifications.length - unreadCount }})
                 </button>
             </template>
 
@@ -30,6 +30,8 @@ import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import NotificationsList from '@/components/NotificationsList.vue'
 import { useErrorStore } from '@/stores/error'
 import { useAuth } from '@/composables/useAuth'
+import { useNotificationStore } from '@/stores/notifications'; // Added
+import { storeToRefs } from 'pinia'; // Added
 
 const showCurrent = ref(true)
 const apiUrl = import.meta.env.VITE_API_URL
@@ -37,54 +39,14 @@ const errorStore = useErrorStore()
 const router = useRouter()
 const { logout } = useAuth()
 
-const fetchedNotifications = ref([])
+const notificationStore = useNotificationStore(); // Added
+const { notifications, unreadCount } = storeToRefs(notificationStore); // Added
 
 const filteredNotifications = computed(() =>
-    (fetchedNotifications.value || []).filter(n => n.is_read !== showCurrent.value)
-)
+    (notifications.value || []).filter(n => n.is_read !== showCurrent.value)
+);
 
-async function fetchNotifications() {
-    try {
-        const res = await fetch(`${apiUrl}/api/notifications`, {
-            credentials: 'include'
-        })
-
-        if (res.status === 401) {
-            logout();
-            router.push('/login');
-            return;
-        }
-
-        if (!res.ok) throw new Error(`Failed to fetch notifications: ${res.status}`)
-
-        fetchedNotifications.value = await res.json()
-
-    } catch (err) {
-        console.log("notifications fetch error:", err)
-        errorStore.setError('Error', 'Something went wrong while fetching notifications.')
-        router.push('/error')
-    }
-}
-
-async function readNotification(id) {
-    try {
-        const res = await fetch(`${apiUrl}/api/notifications/${id}/read`, {
-            credentials: 'include'
-        })
-
-        if (res.status === 401) {
-            logout();
-            router.push('/login');
-            return;
-        }
-
-        if (!res.ok) throw new Error(`Failed to mark notification ${id} as read: ${res.status}`)
-
-    } catch (err) {
-        errorStore.setError('Error', `Error while marking notification ${id} as read`)
-        router.push('/error')
-    }
-}
+// Old fetchNotifications and readNotification functions are removed.
 
 async function approveFollowRequest(id, action) {
     try {
@@ -160,62 +122,69 @@ async function approveGroupInvite(groupInviteID, action) {
 }
 
 onMounted(() => {
-    fetchNotifications()
-})
+    // Fetch notifications only if the store is empty, assuming TopBar might have loaded them
+    if (notifications.value.length === 0) {
+        notificationStore.fetchNotifications();
+    }
+});
 
-
-function handleClose(id) {
-    const n = fetchedNotifications.value.find(n => n.id === id)
-    if (n) n.is_read = true
-    readNotification(n.id)
+async function handleClose(id) { // Made async to align with potential async operations in store
+    const n = notifications.value.find(n => n.id === id);
+    if (!n) return;
+    await notificationStore.markAsRead(id); // Use store action
 }
 
 async function handleAccept(id) {
-    const n = fetchedNotifications.value.find(n => n.id === id)
-    if (!n.is_read) n.is_read = true
-    readNotification(n.id)
+    const n = notifications.value.find(n => n.id === id); // Use store's notifications
+    if (!n) return;
 
-    switch (n.type) {
-        case 'follow_request':
-            await approveFollowRequest(n.follow_req_id, 'accept');
-            readNotification(n.id)
-            fetchNotifications();
-            break;
-        case 'group_join_request':
-            await approveGroupRequest(n.group_id, n.sender_id, 'accepted');
-            readNotification(n.id)
-            fetchNotifications();
-            break;
-        case 'group_invitation':
-            await approveGroupInvite(n.group_invite_id, 'accepted');
-            readNotification(n.id)
-            fetchNotifications();
-            break;
+    await notificationStore.markAsRead(id); // Mark as read via store
+
+    try {
+        switch (n.type) {
+            case 'follow_request':
+                await approveFollowRequest(n.follow_req_id, 'accept'); // Existing API call
+                break;
+            case 'group_join_request':
+                await approveGroupRequest(n.group_id, n.sender_id, 'accepted'); // Existing API call
+                break;
+            case 'group_invitation':
+                await approveGroupInvite(n.group_invite_id, 'accepted'); // Existing API call
+                break;
+        }
+        // After successful action, refresh the list from the store to get latest state
+        await notificationStore.fetchNotifications();
+    } catch (err) {
+        // errorStore.setError is already called by approveFollowRequest etc.
+        // or add specific error handling here if needed
+        console.error(`Error handling accept for notification ${id}:`, err);
     }
-
 }
 
 async function handleDecline(id) {
-    const n = fetchedNotifications.value.find(n => n.id === id)
-    if (!n.is_read) n.is_read = true
-    readNotification(n.id)
+    const n = notifications.value.find(n => n.id === id); // Use store's notifications
+    if (!n) return;
 
-    switch (n.type) {
-        case 'follow_request':
-            approveFollowRequest(n.follow_req_id, 'decline');
-            readNotification(n.id)
-            fetchNotifications();
-            break;
-        case 'group_join_request':
-            await approveGroupRequest(n.group_id, n.sender_id, 'declined');
-            readNotification(n.id)
-            fetchNotifications();
-            break;
-        case 'group_invitation':
-            await approveGroupInvite(n.group_invite_id, 'declined');
-            readNotification(n.id)
-            fetchNotifications();
-            break;
+    await notificationStore.markAsRead(id); // Mark as read via store
+
+    try {
+        switch (n.type) {
+            case 'follow_request':
+                await approveFollowRequest(n.follow_req_id, 'decline'); // Existing API call
+                break;
+            case 'group_join_request':
+                await approveGroupRequest(n.group_id, n.sender_id, 'declined'); // Existing API call
+                break;
+            case 'group_invitation':
+                await approveGroupInvite(n.group_invite_id, 'declined'); // Existing API call
+                break;
+        }
+        // After successful action, refresh the list from the store to get latest state
+        await notificationStore.fetchNotifications();
+    } catch (err) {
+        // errorStore.setError is already called by approveFollowRequest etc.
+        // or add specific error handling here if needed
+        console.error(`Error handling decline for notification ${id}:`, err);
     }
 }
 

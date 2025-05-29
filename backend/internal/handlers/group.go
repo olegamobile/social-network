@@ -4,8 +4,10 @@ import (
 	"backend/internal/model"
 	"backend/internal/repository"
 	"backend/internal/service"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -284,19 +286,48 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = repository.InsertNotification(userID, adminID, "group_join_request", gmId) // last id needs to be id at group members table
+		_, err = repository.InsertNotification(userID, adminID, "group_join_request", gmId) // last id needs to be id at group members table
 		if err != nil {
 			http.Error(w, "error inserting notification in HandleGroupMembership", http.StatusBadRequest)
 			return
 		}
 	case "leave":
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
-	case "cancel":
-		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
-		if statusCode == http.StatusOK {
-			statusCode = repository.RemoveGroupRequestNotification(userID, req.TargetID)
+	case "cancel": // User (userID) cancels their join request to group (req.TargetID)
+		notificationID, err := repository.RemoveGroupRequestNotification(userID, req.TargetID)
+		if err != nil && err != sql.ErrNoRows {
+			log.Printf("Error removing group join request notification: %v", err)
+			http.Error(w, "Failed to remove group join request notification", http.StatusInternalServerError)
+			return
 		}
-		// todo: remove notification
+
+		if err == sql.ErrNoRows {
+			log.Printf("No active group join request notification found for user %d to group %d.", userID, req.TargetID)
+		}
+
+		// Proceed to remove the group join request (leave group)
+		statusCode = repository.LeaveGroup(userID, req.TargetID) // req.TargetID is groupID
+		if statusCode != http.StatusOK {
+			log.Printf("Error leaving group (cancelling request): status code %d for user %d, group %d", statusCode, userID, req.TargetID)
+			http.Error(w, http.StatusText(statusCode), statusCode)
+			return
+		}
+
+		// If notification was successfully marked as deleted, send WS message to group admin
+		if err == nil { // sql.ErrNoRows would mean err != nil
+			adminID, adminErr := repository.GetAdminIdByGroupId(req.TargetID)
+			if adminErr != nil {
+				log.Printf("Error getting admin ID for group %d: %v", req.TargetID, adminErr)
+				// Not sending HTTP error here as the main operation (LeaveGroup) succeeded.
+				// But important to log for observability.
+			} else {
+				wsErr := service.SendNotificationDeletedWS(notificationID, adminID)
+				if wsErr != nil {
+					log.Printf("Error sending group join request deleted WebSocket message for notification %d to admin %d of group %d: %v", notificationID, adminID, req.TargetID, wsErr)
+					// Do not typically send HTTP error for WebSocket issues
+				}
+			}
+		}
 	case "delete":
 		statusCode = service.DeleteGroup(userID, req.TargetID)
 	default:
@@ -537,7 +568,7 @@ func HandleGroupInvitation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = repository.InsertNotification(groupInvite.Inviter, groupInvite.UserId, "group_invitation", groupInvite.ID)
+	_, err = repository.InsertNotification(groupInvite.Inviter, groupInvite.UserId, "group_invitation", groupInvite.ID)
 	if err != nil {
 		http.Error(w, "error inserting notification in HandleGroupInvitation", http.StatusBadRequest)
 		return
