@@ -63,6 +63,38 @@ export const useWebSocketStore = defineStore('websocket', () => {
                 else if (message.value.type === 'pong') {
                     console.log('Received pong from server');
                 }
+                // Handle 'notification_deleted'
+                else if (message.value.type === 'notification_deleted') {
+                    console.log('Received notification_deleted message content:', message.value.content);
+                    const notificationStore = useNotificationStore(); // Get store instance
+
+                    let deletedNotificationData;
+                    try {
+                        // Assuming message.value.content is a JSON string like '{"id":"123"}'
+                        if (typeof message.value.content === 'string') {
+                            deletedNotificationData = JSON.parse(message.value.content);
+                        } else {
+                            // If content is already an object (less likely based on backend plan but good to handle)
+                            deletedNotificationData = message.value.content;
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing notification_deleted content:', parseError, "Raw content:", message.value.content);
+                        return; // Skip if content is not valid JSON
+                    }
+
+                    if (deletedNotificationData && deletedNotificationData.id) {
+                        // The removeNotification function in notifications.js expects a number or a string that can be coerced to a number.
+                        // Ensure the ID is passed correctly.
+                        const notificationIdToRemove = Number(deletedNotificationData.id);
+                        if (!isNaN(notificationIdToRemove)) {
+                            notificationStore.removeNotification(notificationIdToRemove);
+                        } else {
+                            console.error('Invalid notification ID received for deletion:', deletedNotificationData.id);
+                        }
+                    } else {
+                        console.warn('Notification ID missing in notification_deleted message content:', deletedNotificationData);
+                    }
+                }
                 // Potentially other message types here
                 // else {
                 //    console.log('Unhandled message type:', message.value.type);
