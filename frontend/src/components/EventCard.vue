@@ -81,21 +81,48 @@
                 </p>
             </div>
 
+            <!-- buttons to attend or not -->
             <div class="flex flex-row gap-4 mt-4">
-                <button type="button" @click="$emit('edit', event.id)"
-                    class="bg-nordic-primary-accent text-white font-medium px-5 py-2 rounded-md hover:bg-nordic-secondary-accent transition">Going</button>
-                <button type="button" @click="$emit('notGoing', event.id)"
-                    class="bg-nordic-secondary-bg text-nordic-dark font-medium px-5 py-2 rounded-md hover:bg-nordic-secondary-accent transition">Not
-                    Going</button>
+                <button type="button" @click="$emit('going', event.id)" :class="[
+                    'font-medium px-5 py-2 rounded-md transition',
+                    userStatus === 'going'
+                        ? 'bg-nordic-primary-accent text-white hover:bg-nordic-secondary-accent'
+                        : 'bg-nordic-secondary-bg text-nordic-dark hover:bg-nordic-secondary-accent'
+                ]">
+                    Going
+                </button>
+
+                <button type="button" @click="$emit('notGoing', event.id)" :class="[
+                    'font-medium px-5 py-2 rounded-md transition',
+                    userStatus === 'not_going'
+                        ? 'bg-nordic-primary-accent text-white hover:bg-nordic-secondary-accent'
+                        : 'bg-nordic-secondary-bg text-nordic-dark hover:bg-nordic-secondary-accent'
+                ]">
+                    Not Going
+                </button>
             </div>
+
         </div>
     </div>
 </template>
 
 <script setup>
-const apiUrl = import.meta.env.VITE_API_URL || '/api'
+import { computed } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia';
 
-defineProps({ event: Object })
+const apiUrl = import.meta.env.VITE_API_URL || '/api'
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
+
+const props = defineProps({ event: Object })
+
+const userStatus = computed(() => {
+    const userId = user.value.id
+    if (props.event.going?.some(p => p.id === userId)) return 'going'
+    if (props.event.not_going?.some(p => p.id === userId)) return 'not_going'
+    return 'pending'
+})
 
 const formatDate = (isoString) => {
     const date = new Date(isoString)

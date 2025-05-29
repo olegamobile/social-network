@@ -43,7 +43,7 @@
 
       <template #main>
         <h2 v-if="selectedEvent" class="text-3xl font-bold text-nordic-dark mb-6">Event Details</h2>
-        <EventCard v-if="selectedEvent" :event="selectedEvent" />
+        <EventCard v-if="selectedEvent" :event="selectedEvent" @going="handleGoing" @notGoing="handleNotGoing" />
       </template>
 
     </TwoColumnLayout>
@@ -58,6 +58,7 @@ import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 import { useErrorStore } from '@/stores/error'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useAuth } from '@/composables/useAuth'
 import { storeToRefs } from 'pinia';
 
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
@@ -68,7 +69,7 @@ const now = new Date()
 const allEvents = ref([])
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
-
+const { logout } = useAuth()
 const selectedEvent = ref(null)
 
 function select(event) {
@@ -109,7 +110,7 @@ async function getEvents() {
     }
 
     allEvents.value = await res.json()
-    console.log("user events:", allEvents.value)
+    //console.log("user events:", allEvents.value)
   } catch (error) {
     errorStore.setError('Error Loading Events', error.message || 'An unexpected error occurred while trying to load events. Please try again later.');
     router.push('/error')
@@ -117,15 +118,57 @@ async function getEvents() {
   }
 }
 
-/* function printStuff() {
-  console.log("ups", upcoming.value)
-  console.log("inv", invited.value)
-  console.log("pss", past.value)
-} */
+async function respondToEvent(event_id, user_id, response) {
+  try {
+    const res = await fetch(`${apiUrl}/api/events/respond`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ event_id, user_id, response }),
+    })
+
+    if (res.status === 401) { // Session is invalid — logout and redirect
+      console.log("events for user returned 401 status")
+      errorStore.setError('Session Expired', 'Your session has expired. Please log in again.');
+      logout();
+      router.push('/login')
+      return;
+    }
+
+    if (!res.ok) {
+      // Handle other non-successful HTTP statuses (e.g., 400, 404, 500)
+      console.log("error getting user events")
+      const errorData = await res.json().catch(() => ({ message: 'Failed to get events and parse error.' }));
+      throw new Error(errorData.message || `HTTP error ${res.status}`)
+    }
+
+    // update selectedEvent
+    await getEvents()
+    const updated = allEvents.value.find(e => e.id === event_id)
+    if (updated) {
+      selectedEvent.value = updated
+    }
+
+    console.log("response changed succesfully")
+  } catch (error) {
+    errorStore.setError('Error Loading Events', error.message || 'An unexpected error occurred while trying to load events. Please try again later.');
+    router.push('/error')
+    return
+  }
+}
+
+
+function handleGoing(event_id) {
+  respondToEvent(event_id, user.id, "going")
+}
+
+function handleNotGoing(event_id) {
+  respondToEvent(event_id, user.id, "not_going")
+}
+
 
 onMounted(async () => {
   await getEvents()
-  //printStuff()
 
   const idFromRoute = route.params.id
   if (idFromRoute) {

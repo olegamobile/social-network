@@ -43,12 +43,27 @@ func CreateEvent(event model.Event) (int, error) {
 
 func SaveEventResponse(eventID, userID int, response string) error {
 	query := `
-INSERT INTO event_responses (event_id, user_id, response)
-VALUES (?, ?, ?)
-ON CONFLICT(event_id, user_id) DO UPDATE SET response = ?
-	`
-	_, err := database.DB.Exec(query, eventID, userID, response)
+	INSERT INTO event_responses (event_id, user_id, response)
+	VALUES (?, ?, ?)
+	ON CONFLICT(event_id, user_id) DO UPDATE SET response = ?`
+
+	_, err := database.DB.Exec(query, eventID, userID, response, response)
 	return err
+}
+
+func GetEventResponse(eventID, userID int) (string, error) {
+	query := `
+	SELECT er.response
+	FROM event_responses er
+	WHERE er.event_id = ? AND er.user_id = ?`
+
+	var response string
+	err := database.DB.QueryRow(query, eventID, userID).Scan(&response)
+
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+	return response, err
 }
 
 func GetEventByID(eventID int) (model.Event, error) {

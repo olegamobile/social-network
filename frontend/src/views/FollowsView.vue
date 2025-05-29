@@ -4,7 +4,7 @@
 
     <TwoColumnLayout>
       <template #sidebar>
-        <FollowsInSidebar :userId="user.id" />
+        <FollowsInSidebar v-if="user" :userId="user.id" />
         <RequestsInSidebar />
       </template>
 
