@@ -81,7 +81,7 @@ export const useNotificationStore = defineStore('notifications', () => {
      */
     async function markAsRead(notificationId) {
         try {
-            const response = await fetch(`${apiUrl}/api/notifications/${notificationId}/read`, {
+            const response = await fetch(`${apiUrl}/api/notifications/${notificationId}/read`, { // Corrected API URL
                 method: 'POST',
                 credentials: 'include',
             });
@@ -150,5 +150,32 @@ export const useNotificationStore = defineStore('notifications', () => {
         setUnreadCount,
         markAsRead,
         markAllAsRead,
+        updateNotification, // Added
+        removeNotification, // Added
     };
+
+    function updateNotification(updatedNotificationData) {
+        const index = notifications.value.findIndex(n => n.id === updatedNotificationData.id);
+        if (index !== -1) {
+            notifications.value[index] = updatedNotificationData;
+            unreadCount.value = notifications.value.filter(n => !n.is_read).length;
+            console.log('Notification updated:', updatedNotificationData.id, 'Unread count:', unreadCount.value);
+        } else {
+            console.warn('Notification to update not found:', updatedNotificationData.id);
+            // Optionally, if an update for a non-existent notification should add it:
+            // addNotification(updatedNotificationData); 
+            // However, current requirement is to log a warning.
+        }
+    }
+
+    function removeNotification(notificationId) {
+        const initialLength = notifications.value.length;
+        notifications.value = notifications.value.filter(n => n.id !== notificationId);
+        if (notifications.value.length < initialLength) {
+            unreadCount.value = notifications.value.filter(n => !n.is_read).length;
+            console.log('Notification removed:', notificationId, 'Unread count:', unreadCount.value);
+        } else {
+            console.warn('Notification to remove not found:', notificationId);
+        }
+    }
 });

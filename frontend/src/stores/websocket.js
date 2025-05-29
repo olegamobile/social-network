@@ -10,6 +10,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
     const reconnectAttempts = ref(0)
     const maxReconnectAttempts = 5
     const reconnectTimeout = ref(null)
+    const userStore = useUserStore()
 
     function connect(url) {
         if (socket.value) return // already connected or connecting
@@ -26,7 +27,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
             send({
                 type: 'ping',
                 content: 'ping',
-                sender_id: localStorage.getItem('userId') || '0',
+                sender_id: userStore.userId || '0',
                 receiver_id: '0'
             })
         }
@@ -141,5 +142,3 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
     return { connect, send, disconnect, isConnected, message, initWebSocket }
 })
-
-
