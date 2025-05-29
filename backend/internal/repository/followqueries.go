@@ -231,3 +231,24 @@ func DeclineFollowRequest(userId, followRequestId int) int {
 	}
 	return http.StatusOK
 }
+
+func RemoveFollowRequestNotification(userID, followedID int) int {
+	query := `
+	UPDATE notifications
+	SET updated_by = ?, status = 'delete'
+	WHERE type = 'follow_request'
+		AND status != 'delete'
+		AND ref_id IN (
+			SELECT id FROM follow_requests
+			WHERE follower_id = ? AND followed_id = ?
+		)
+	`
+	_, err := database.DB.Exec(query, userID, userID, followedID)
+
+	if err != nil {
+		fmt.Println("error removing notification at RemoveFollowRequestNotification", err)
+		return http.StatusInternalServerError
+	}
+
+	return http.StatusOK
+}

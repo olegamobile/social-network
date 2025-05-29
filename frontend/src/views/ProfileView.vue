@@ -29,8 +29,8 @@
                 <p v-if="!user?.is_public" class="mt-3 mb-7"><strong>Private profile</strong></p>
 
                 <!-- birthday exists = allowed to view -->
-                <FollowsInSidebar v-if="formattedBirthday" :userId="user.id" />
-                <GroupsInSidebar v-if="formattedBirthday" :userId="user.id" />
+                <FollowsInSidebar v-if="formattedBirthday" :userId="route.params.id" :key="route.params.id" />  <!-- 'key' to make it reload on profile change -->
+                <GroupsInSidebar v-if="formattedBirthday" :userId="route.params.id" :key="route.params.id" />
             </template>
 
             <template #main>
@@ -63,8 +63,8 @@
         </TwoColumnLayout>
 
         <ConfirmDialog :visible="showStopFollowingConfirmation" title="Stop Following"
-            :message="`Are you sure you want to stop following ${user?.first_name}?`"
-            @confirm="handleFollowAction" @cancel="showStopFollowingConfirmation = false" />
+            :message="`Are you sure you want to stop following ${user?.first_name}?`" @confirm="handleFollowAction"
+            @cancel="showStopFollowingConfirmation = false" />
     </div>
 </template>
 

@@ -45,7 +45,7 @@ func CreatePost(content, privacyLvl string, imagePath *string, userID int, viewe
 	return post, http.StatusOK
 }
 
-func SaveUploadedFile(file multipart.File, header *multipart.FileHeader) (string, error) {
+func SaveUploadedFile(file multipart.File, header *multipart.FileHeader, filePath string) (string, error) {
 
 	ext := filepath.Ext(header.Filename)
 
@@ -55,7 +55,7 @@ func SaveUploadedFile(file multipart.File, header *multipart.FileHeader) (string
 	}
 
 	filename := uuid.New().String() + filepath.Ext(header.Filename)
-	dst := filepath.Join("data/uploads/posts", filename)
+	dst := filepath.Join("data/uploads/", filePath, filename)
 
 	out, err := os.Create(dst)
 	if err != nil {

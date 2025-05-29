@@ -88,3 +88,12 @@ func GetUsersMembership(invitables []model.InvitableUser, users []model.User, gr
 	}
 	return invitables, nil
 }
+
+func DeleteGroup(userID, targetID int) int {
+	err := repository.DeleteGroupWithDependencies(userID, targetID)
+	if err != nil {
+		fmt.Println("Error deleting group and dependencies:", err)
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
+}

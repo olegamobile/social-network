@@ -197,7 +197,7 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 	file, header, err := r.FormFile("image")
 	if err == nil {
 		defer file.Close()
-		savedPath, saveErr := service.SaveUploadedFile(file, header)
+		savedPath, saveErr := service.SaveUploadedFile(file, header, "posts")
 		if saveErr != nil {
 			http.Error(w, "Failed to save image", http.StatusInternalServerError)
 			return
@@ -293,9 +293,12 @@ func HandleGroupMembership(w http.ResponseWriter, r *http.Request) {
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
 	case "cancel":
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // 'status' to delete
+		if statusCode == http.StatusOK {
+			statusCode = repository.RemoveGroupRequestNotification(userID, req.TargetID)
+		}
 		// todo: remove notification
 	case "delete":
-		statusCode = repository.DeleteGroup(userID, req.TargetID) // group 'status' to delete
+		statusCode = service.DeleteGroup(userID, req.TargetID)
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
 	}
