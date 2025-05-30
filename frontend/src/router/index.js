@@ -24,6 +24,7 @@ const routes = [
     { path: '/groups', name: 'groups', component: GroupsView },
     { path: '/group/:id', name: 'group', component: GroupView },
     { path: '/events', name: 'events', component: EventsView },
+    { path: '/events/:id?', name: 'events', component: EventsView },    // optional id parameter
     { path: '/chats', name: 'chats', component: ChatsView },
     { path: '/error', name: 'Error', component: ErrorView },
     { path: '/:pathMatch(.*)*', name: 'notfound', component: NotFound } // Catch-all route if nothin before matches

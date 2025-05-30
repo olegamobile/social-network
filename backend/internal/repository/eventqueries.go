@@ -3,6 +3,8 @@ package repository
 import (
 	"backend/internal/database"
 	"backend/internal/model"
+	"database/sql"
+	"fmt"
 	// "database/sql"
 	// "fmt"
 	// "net/http"
@@ -41,12 +43,27 @@ func CreateEvent(event model.Event) (int, error) {
 
 func SaveEventResponse(eventID, userID int, response string) error {
 	query := `
-INSERT INTO event_responses (event_id, user_id, response)
-VALUES (?, ?, ?)
-ON CONFLICT(event_id, user_id) DO UPDATE SET response = ?
-	`
-	_, err := database.DB.Exec(query, eventID, userID, response)
+	INSERT INTO event_responses (event_id, user_id, response)
+	VALUES (?, ?, ?)
+	ON CONFLICT(event_id, user_id) DO UPDATE SET response = ?`
+
+	_, err := database.DB.Exec(query, eventID, userID, response, response)
 	return err
+}
+
+func GetEventResponse(eventID, userID int) (string, error) {
+	query := `
+	SELECT er.response
+	FROM event_responses er
+	WHERE er.event_id = ? AND er.user_id = ?`
+
+	var response string
+	err := database.DB.QueryRow(query, eventID, userID).Scan(&response)
+
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+	return response, err
 }
 
 func GetEventByID(eventID int) (model.Event, error) {
@@ -73,17 +90,55 @@ func CheckUserGroupMembership(userID, groupID int) (bool, error) {
 	return exists, err
 }
 
+func getUsersByResponse(eventID int, response string) ([]model.User, error) {
+	query := `
+	SELECT u.id, u.first_name, u.last_name, u.avatar_path
+	FROM event_responses er
+	JOIN users u ON er.user_id = u.id
+	WHERE er.event_id = ? AND er.response = ? AND er.status = 'enable' AND u.status = 'enable'
+	`
+
+	rows, err := database.DB.Query(query, eventID, response)
+	if err != nil {
+		fmt.Println("query err at getUsersByResponse:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+	for rows.Next() {
+		var u model.User
+		var avatarUrl sql.NullString
+
+		err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &avatarUrl)
+		if err != nil {
+			return nil, err
+		}
+
+		if avatarUrl.Valid {
+			u.AvatarPath = avatarUrl.String
+		} else {
+			u.AvatarPath = ""
+		}
+		users = append(users, u)
+	}
+	//fmt.Println(len(users), "users at event", eventID, "that are", response)
+	return users, nil
+}
+
 func GetEventsByUser(userID int) ([]model.Event, error) {
 	query := `
-	SELECT DISTINCT e.id, g.title, e.group_id, e.creator_id, e.title, e.description, e.event_datetime
+	SELECT DISTINCT e.id, g.title, e.group_id, e.creator_id, u.first_name, u.last_name, u.avatar_path, e.title, e.description, e.event_datetime
 	FROM events e
 	JOIN groups g ON e.group_id = g.id
+	JOIN users u ON e.creator_id = u.id
 	LEFT JOIN event_responses er ON er.event_id = e.id
 	WHERE e.creator_id = ? OR er.user_id = ?
 	ORDER BY e.event_datetime DESC
 	`
 	rows, err := database.DB.Query(query, userID, userID)
 	if err != nil {
+		fmt.Println("query error at GetEventsByUser:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -91,10 +146,44 @@ func GetEventsByUser(userID int) ([]model.Event, error) {
 	var events []model.Event
 	for rows.Next() {
 		var e model.Event
-		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.CreatorID, &e.Title, &e.Description, &e.EventDate)
+		var avatarUrl sql.NullString
+		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.CreatorID, &e.Creator.FirstName, &e.Creator.LastName, &avatarUrl, &e.Title, &e.Description, &e.EventDate)
 		if err != nil {
+			fmt.Println("scan error at GetEventsByUser:", err)
 			return nil, err
 		}
+
+		if avatarUrl.Valid {
+			e.Creator.AvatarPath = avatarUrl.String
+		} else {
+			e.Creator.AvatarPath = ""
+		}
+
+		if e.ID == nil {
+			continue
+		}
+
+		// Query responses and attach users
+		goings, err := getUsersByResponse(*e.ID, "going")
+		if err != nil {
+			fmt.Println("error getting going users at GetEventsByUser:", err)
+			return nil, err
+		}
+		notGoings, err := getUsersByResponse(*e.ID, "not_going")
+		if err != nil {
+			fmt.Println("error getting not going users at GetEventsByUser:", err)
+			return nil, err
+		}
+		noResponses, err := getUsersByResponse(*e.ID, "pending")
+		if err != nil {
+			fmt.Println("error getting not responded users at GetEventsByUser:", err)
+			return nil, err
+		}
+
+		e.Going = goings
+		e.NotGoing = notGoings
+		e.NoResponse = noResponses
+
 		events = append(events, e)
 	}
 	return events, nil
@@ -102,9 +191,10 @@ func GetEventsByUser(userID int) ([]model.Event, error) {
 
 func GetEventsByGroup(groupID, userID int) ([]model.Event, error) {
 	query := `
-	SELECT DISTINCT e.id, g.title, e.group_id, e.creator_id, e.title, e.description, e.event_datetime
+	SELECT DISTINCT e.id, g.title, e.group_id, e.creator_id, u.first_name, u.last_name, u.avatar_path, e.title, e.description, e.event_datetime
 	FROM events e
 	JOIN groups g ON e.group_id = g.id
+	JOIN users u ON e.creator_id = u.id
 	LEFT JOIN event_responses er ON er.event_id = e.id
 	WHERE e.group_id = ?
 	  AND e.status = 'enable'
@@ -121,10 +211,40 @@ func GetEventsByGroup(groupID, userID int) ([]model.Event, error) {
 	var events []model.Event
 	for rows.Next() {
 		var e model.Event
-		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.CreatorID, &e.Title, &e.Description, &e.EventDate)
+		var avatarUrl sql.NullString
+		err := rows.Scan(&e.ID, &e.Group, &e.GroupID, &e.CreatorID, &e.Creator.FirstName, &e.Creator.LastName, &avatarUrl, &e.Title, &e.Description, &e.EventDate)
 		if err != nil {
 			return nil, err
 		}
+
+		if avatarUrl.Valid {
+			e.Creator.AvatarPath = avatarUrl.String
+		} else {
+			e.Creator.AvatarPath = ""
+		}
+
+		if e.ID == nil {
+			continue
+		}
+
+		// Query responses and attach users
+		goings, err := getUsersByResponse(*e.ID, "going")
+		if err != nil {
+			return nil, err
+		}
+		notGoings, err := getUsersByResponse(*e.ID, "not_going")
+		if err != nil {
+			return nil, err
+		}
+		noResponses, err := getUsersByResponse(*e.ID, "pending")
+		if err != nil {
+			return nil, err
+		}
+
+		e.Going = goings
+		e.NotGoing = notGoings
+		e.NoResponse = noResponses
+
 		events = append(events, e)
 	}
 	return events, nil

@@ -5,6 +5,7 @@ import (
 	"backend/internal/repository"
 	"backend/internal/service"
 	"encoding/json"
+	"fmt"
 
 	// "fmt"
 	"net/http"
@@ -66,8 +67,19 @@ func HandleEventResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	oldResponse, err := repository.GetEventResponse(resp.EventID, resp.UserID)
+	if err != nil {
+		http.Error(w, "Could not get previous response", http.StatusInternalServerError)
+		return
+	}
+
+	if oldResponse == resp.Response { // remove old response when clicking same button
+		resp.Response = "pending"
+	}
+
 	err = repository.SaveEventResponse(resp.EventID, resp.UserID, resp.Response)
 	if err != nil {
+		fmt.Println("Saving event response failed:", err)
 		http.Error(w, "Could not save response", http.StatusInternalServerError)
 		return
 	}

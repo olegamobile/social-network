@@ -91,9 +91,13 @@ type Event struct {
 	Group       string `json:"group"`
 	GroupID     int    `json:"group_id"`
 	CreatorID   int    `json:"creator_id"`
+	Creator     User   `json:"creator"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	EventDate   string `json:"event_datetime"`
+	Going       []User `json:"going"`
+	NotGoing    []User `json:"not_going"`
+	NoResponse  []User `json:"no_response"`
 }
 
 type EventResponse struct {
