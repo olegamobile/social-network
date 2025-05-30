@@ -81,7 +81,7 @@ const upcoming = computed(() => allEvents.value.filter(e => new Date(e.event_dat
 const past = computed(() => allEvents.value.filter(e => new Date(e.event_datetime) < now))
 const invited = computed(() => allEvents.value.filter(e => {
   if (e.no_response && e.no_response.length > 0) {
-    return e.no_response.some(invited => invited.id === user.id)
+    return e.no_response.some(invited => invited.id === user.value.id)
   } else {
     return false
   }
@@ -110,7 +110,6 @@ async function getEvents() {
     }
 
     allEvents.value = await res.json()
-    //console.log("user events:", allEvents.value)
   } catch (error) {
     errorStore.setError('Error Loading Events', error.message || 'An unexpected error occurred while trying to load events. Please try again later.');
     router.push('/error')
