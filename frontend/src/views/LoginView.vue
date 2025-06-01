@@ -28,6 +28,7 @@ import { useUserStore } from '@/stores/user'
 import TopBar from '@/components/TopBar.vue'
 import { useErrorStore } from '@/stores/error'
 import { useWebSocketStore } from '@/stores/websocket'
+import { storeToRefs } from 'pinia';
 
 const email = ref('')
 const password = ref('')
@@ -39,6 +40,7 @@ const apiUrl = import.meta.env.VITE_API_URL
 const errorStore = useErrorStore()
 const wsUrl = import.meta.env.VITE_WS_URL
 const wsStore = useWebSocketStore()
+const { user } = storeToRefs(userStore)
 
 
 async function login() {
@@ -56,12 +58,28 @@ async function login() {
             //console.log("data to store at login:", data.user)
             userStore.setUser(data.user)
 
-            wsStore.connect(`${wsUrl}/ws`)
-            watch(() => wsStore.message, (newMessage) => {
-                if (newMessage?.type === 'welcome') {
-                    console.log('WebSocket authenticated successfully')
-                }
-            })
+            /*             wsStore.connect(`${wsUrl}/ws`)
+                        watch(() => wsStore.message, (newMessage) => {
+                            if (newMessage?.type === 'welcome') {
+                                console.log('WebSocket authenticated successfully')
+                            }
+                        }) */
+
+
+            /*             type WSMessage struct {
+                Type    string `json:"type"`
+                From    string `json:"from"`
+                To      string `json:"receiver_id,omitempty"`
+                Content string `json:"content,omitempty"`
+            } */
+
+
+            // Testing connection
+            const nuMsg = {
+                type: "ping",
+                from: user.value.id,                
+            }
+            wsStore.send(nuMsg)
 
             // Navigate to what the user wanted or home,
             let redirectTo = route.query.redirect || '/'

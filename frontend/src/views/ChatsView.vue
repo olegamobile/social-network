@@ -114,6 +114,8 @@ export const useErrorStore = defineStore('error', {
 const websocketStore = useWebSocketStore()
 const isConnected = computed(() => websocketStore.isConnected)
 const wsUrl = import.meta.env.VITE_WS_URL
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
 
 //temporary data for testing
 const chats = ref([
@@ -165,7 +167,7 @@ onMounted(() => {
         selectedChat.value = chats.value[0]
     }
     fetchFollowData()
-    connectWebSocket()
+    //connectWebSocket()    // Should be connected already by main.js
     listenForNewChats()
 })
 
@@ -175,8 +177,17 @@ function connectWebSocket() {
 
 //listens for new converasation starters by other users
 function listenForNewChats() {
+
+    // Test connection again
+    const nuMsg = {
+        type: "ping",
+        from: user.value.id,
+    }
+    websocketStore.send(nuMsg)
+
+
     // Store the current user ID for comparison
-    const currentUserId = localStorage.getItem('userId') || '0';
+    //const currentUserId = localStorage.getItem('userId') || '0';  // from userstore instead
 
     //listen for new webSocket chat_messages:
     websocketStore.$subscribe((mutation, state) => {

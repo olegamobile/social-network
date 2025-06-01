@@ -7,7 +7,22 @@ import (
 )
 
 func ReadPump(c *model.Client) {
-	defer c.Conn.Close()
+	//defer c.Conn.Close()
+
+	defer func() {
+		log.Println("closing connection for", c.UserID)
+
+		// Remove client from map
+		model.Mu.Lock()
+		delete(model.Clients, c.UserID)
+		model.Mu.Unlock()
+
+		// Close the WebSocket connection
+		c.Conn.Close()
+
+		// Close send channel to stop WritePump
+		close(c.Send)
+	}()
 
 	for {
 		var msg model.WSMessage
