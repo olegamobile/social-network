@@ -36,7 +36,7 @@
                 </div>
 
                 <div class="mb-8">
-                         <h4 class="text-xl font-semibold text-nordic-dark">Start a conversation: </h4>
+                    <h4 class="text-xl font-semibold text-nordic-dark">Start a conversation: </h4>
                     <h4 class="text-lg font-medium text-nordic-dark mb-2">Following</h4>
                     <ul v-if="followedUsers.length > 0" class="space-y-2">
                         <li v-for="user in followedUsers" :key="user.id">
@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, toRefs} from 'vue'
+import { ref, onMounted, computed, toRefs } from 'vue'
 import { useWebSocketStore } from '@/stores/websocket'
 import TopBar from '@/components/TopBar.vue'
 import ChatBox from '@/components/ChatBox.vue'
@@ -154,7 +154,7 @@ const apiUrl = import.meta.env.VITE_API_URL
 
 
 onMounted(() => {
-  
+
     // when this ChatsView.vue page is rendered /mounted:
     // fetch chats list from API
     // display chat list
@@ -178,7 +178,7 @@ function listenForNewChats() {
     // Store the current user ID for comparison
     const currentUserId = localStorage.getItem('userId') || '0';
 
-   //listen for new webSocket chat_messages:
+    //listen for new webSocket chat_messages:
     websocketStore.$subscribe((mutation, state) => {
         const message = state.message;
         if (!message || message.type !== 'chat_message') return;
@@ -193,31 +193,31 @@ function listenForNewChats() {
         if (!existingChat && message.sender_id) {
 
             //fetch sender info based on sender_id 
-          fetch(`/api/users/${message.sender_id}`)
-          .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch user info');
-            }
-            return response.json();
-        })
-        .then(senderData => {
-            const newChat = {
-                chatId: Date.now(),
-                chatPartnerName: senderData.name,
-                userId: message.sender_id,
-                messages: [{
-                    id: Date.now(),
-                    text: message.content,
-                    sender: senderData.name
-                }]
-            };
-            chats.value.push(newChat);
-        })
-        .catch(error => {
-            console.error('Error fetching user info:', error);
-        });
-    }
-});
+            fetch(`/api/users/${message.sender_id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user info');
+                    }
+                    return response.json();
+                })
+                .then(senderData => {
+                    const newChat = {
+                        chatId: Date.now(),
+                        chatPartnerName: senderData.name,
+                        userId: message.sender_id,
+                        messages: [{
+                            id: Date.now(),
+                            text: message.content,
+                            sender: senderData.name
+                        }]
+                    };
+                    chats.value.push(newChat);
+                })
+                .catch(error => {
+                    console.error('Error fetching user info:', error);
+                });
+        }
+    });
 }
 
 function select(chat) {
@@ -255,7 +255,7 @@ function formatTime(timestamp) {
 
 async function fetchFollowData() {
     try {
-        
+
         const [res1, res2] = await Promise.all([
             fetch(`${apiUrl}/api/followed/0`, { credentials: 'include' }),
             fetch(`${apiUrl}/api/followers/0`, { credentials: 'include' })
@@ -278,9 +278,9 @@ async function fetchFollowData() {
         if (followersJson) followers.value = followersJson
 
     } catch (err) {
-       errorStore.setError('Error', 'Failed to load follow data.')
-       router.push('/error')
-     console.log('error fetching in chatsVue')
+        errorStore.setError('Error', 'Failed to load follow data.')
+        router.push('/error')
+        console.log('error fetching in chatsVue')
     }
 }
 </script>
