@@ -2,14 +2,19 @@
     <div class="event-card">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-2xl font-semibold text-nordic-dark mb-4">{{ event.title }}</h2>
+        
 
             <div class="space-y-2">
 
-                <p>
+                <p v-if="event.creator">
                     <span class="font-semibold text-nordic-dark">Creator:</span>
-                    <span class="text-nordic-light ml-1">{{ event.creator?.first_name + ' ' + event.creator?.last_name
-                    }}</span>
+                    <RouterLink :to="`/profile/${event.creator.id}`"
+                 class="text-nordic-light ml-1">
+                 {{ event.creator?.first_name + ' ' + event.creator?.last_name
+                    }}
+                    </RouterLink>
                 </p>
+
                 <p>
                     <span class="font-semibold text-nordic-dark">Group:</span>
                     <span class="text-nordic-light ml-1">{{ event.group }}</span>
