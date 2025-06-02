@@ -2,7 +2,8 @@
     <div class="chat-box">
 
         <!-- Listing messages -->
-        <div v-if="chat" class="messages-container mb-4 p-4 bg-gray-50 rounded-lg h-96 overflow-y-auto">
+        <div v-if="chat" ref="messagesContainer"
+            class="messages-container mb-4 p-4 bg-gray-50 rounded-lg h-96 overflow-y-auto">
             <div v-if="chat.messages && chat.messages.length > 0">
                 <div v-for="msg in chat.messages" :key="msg.id" :class="[
                     'mb-3 p-3 rounded-lg max-w-xs',
@@ -36,7 +37,8 @@
         </div>
 
         <div v-else-if="chat" class="flex items-center justify-center">
-            <p class="text-nordic-light italic">Follow or be followed by {{ chat.name }} to send and receive messages</p>
+            <p class="text-nordic-light italic">Follow or be followed by {{ chat.name }} to send and receive messages
+            </p>
         </div>
 
         <div v-else class="h-64 flex items-center justify-center">
@@ -46,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useWebSocketStore } from '@/stores/websocket'
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
@@ -63,6 +65,7 @@ const websocketStore = useWebSocketStore()
 const { isConnected } = storeToRefs(websocketStore)
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
+const messagesContainer = ref(null);
 
 watch(() => websocketStore.message, (newMessage) => {
     if (newMessage && newMessage.type === 'chat_message' && props.chat) {
@@ -125,4 +128,26 @@ function formatTime(isoString) {
         timeStyle: 'short'
     }).replace("klo ", "")
 }
+
+// Watch for changes in chat.messages
+watch(
+    () => props.chat?.messages,
+    () => {
+        nextTick(() => {
+            if (messagesContainer.value) {
+                messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+            }
+        })
+    },
+    { deep: true }
+)
+
+// Scroll to bottom on mount (in case there are already messages)
+onMounted(() => {
+    nextTick(() => {
+        if (messagesContainer.value) {
+            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+        }
+    })
+})
 </script>
