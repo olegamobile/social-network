@@ -129,17 +129,17 @@ function formatTime(isoString) {
     }).replace("klo ", "")
 }
 
-// Watch for changes in chat.messages
+// Watch for changes in chat.messages. Syntax: watch(source, callback, options?)
 watch(
     () => props.chat?.messages,
     () => {
-        nextTick(() => {
+        nextTick(() => {    // nextTick ensures the DOM is updated before scrolling
             if (messagesContainer.value) {
                 messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
             }
         })
     },
-    { deep: true }
+    { deep: true }  // detects changes inside the messages array
 )
 
 // Scroll to bottom on mount (in case there are already messages)
