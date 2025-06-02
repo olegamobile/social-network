@@ -2,7 +2,6 @@ package service
 
 import (
 	"backend/internal/model"
-	"backend/internal/repository"
 	"fmt"
 	"log"
 )
@@ -38,7 +37,7 @@ func ReadPump(c *model.Client) {
 		// Route message
 		switch msg.Type {
 		case "chat_message", "notification":
-			err := repository.SaveMessage(msg)
+			err := SaveMessage(msg)
 			if err != nil {
 				log.Println("failed to save message:", err)
 				continue // Don't broadcast if saving failed

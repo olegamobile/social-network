@@ -19,10 +19,10 @@
         </div>
 
         <!-- New message form -->
-        <div v-if="chat" class="message-input-container">
+        <div v-if="chat && chat.is_active" class="message-input-container">
             <form @submit.prevent="sendMessage" class="flex gap-2">
                 <input id="message-input" v-model="newMessage" type="text" placeholder="Type a message..."
-                    class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent"
+                    class="flex-grow p-3 bg-[var(--nordic-secondary-bg)] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent"
                     :disabled="!isConnected" />
                 <button type="submit"
                     class="px-4 py-2 bg-nordic-primary-accent text-white rounded-lg hover:bg-nordic-dark transition-colors"
@@ -33,6 +33,10 @@
             <div v-if="!isConnected" class="text-red-500 text-sm mt-2">
                 Not connected to chat server. Please reconnect. {{ isConnected }}
             </div>
+        </div>
+
+        <div v-else-if="chat" class="flex items-center justify-center">
+            <p class="text-nordic-light italic">Follow or be followed by {{ chat.name }} to send and receive messages</p>
         </div>
 
         <div v-else class="h-64 flex items-center justify-center">
@@ -56,7 +60,6 @@ const props = defineProps({
 
 const newMessage = ref('')
 const websocketStore = useWebSocketStore()
-//const isConnected = ref(websocketStore.isConnected)
 const { isConnected } = storeToRefs(websocketStore)
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
@@ -100,8 +103,7 @@ function sendMessage() {
         created_at: Date.now(),
         content: newMessage.value,
         sender_name: user.value.first_name,
-        sender_id: user.value.id,
-        //timestamp: new Date()
+        sender_id: user.value.id
     }
     props.chat.messages.push(message)
 

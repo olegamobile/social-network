@@ -41,7 +41,7 @@
                 </div>
 
 
-                <!-- Start a new chat -->
+                <!-- Start a new chat title -->
                 <h4 class="text-xl font-semibold text-nordic-dark mb-3">Start a new chat</h4>
 
                 <!-- Following -->
@@ -50,7 +50,7 @@
                     <ul v-if="followedUsers.length > 0" class="space-y-2">
                         <li v-for="user in followedUsers" :key="user.id">
                             <button @click="startChat(user)"
-                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
+                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                                 {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
@@ -64,7 +64,7 @@
                     <ul v-if="followers.length > 0" class="space-y-2">
                         <li v-for="user in followers" :key="user.id">
                             <button @click="startChat(user)"
-                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
+                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
                                 {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
@@ -156,10 +156,8 @@ function testConnection() {
     websocketStore.send(nuMsg)
 }
 
-//listen for new webSocket chat_messages:
+// listen for new webSocket chat_messages:
 watch(() => websocketStore.message, (message) => {
-
-    //console.log("New message gotten:", message)
 
     if (!message || message.type !== 'chat_message') return;
 
@@ -210,15 +208,17 @@ function select(chat) {
 }
 
 function startChat(user) {
-    const existingChat = chats.value.find(chat => chat.userId === user.userId)
+    const existingChat = chats.value.find(chat => chat.user_id == user.id)  // soft equal, one is string other is number
 
     if (existingChat) {
-        selectedChat.value = existingChat
+        //console.log("selecting existing chat:", existingChat)
+        select(existingChat)
     } else {
+        //console.log("creating new chat")
         const newChat = {
-            id: Date.now(),
-            chatPartnerName: user.name,
-            userId: user.userId,
+            is_active: true,
+            name: user.first_name + " " + user.last_name,
+            user_id: user.id,
             messages: []
         }
         chats.value.push(newChat)
@@ -287,9 +287,7 @@ async function getAllUserChats() {
         }
 
         chats.value = await chatResp.json()
-
-        console.log("user chats gotten:", chats.value)
-
+        //console.log("user chats gotten:", chats.value)
     } catch (error) {
         errorStore.setError('Error Loading Posts', error.message || 'An unexpected error occurred while trying to load posts. Please try again later.');
         router.push('/error')
