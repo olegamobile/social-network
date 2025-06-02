@@ -46,6 +46,19 @@ func HandleWSConnections(w http.ResponseWriter, r *http.Request) {
 	go service.ReadPump(client)
 	go service.WritePump(client) // safe to run as goroutine when deleting client happens elsewhere
 
+	// send pong to test connection
+	msg := model.WSMessage{
+		Type:    "pong",
+		From:    "system_pong",
+		To:      client.UserID,
+		Content: "ensuring connection works",
+	}
+
+	err = client.Conn.WriteJSON(msg)
+	if err != nil {
+		fmt.Println("error at pong:", err)
+	}
+
 	/* model.Mu.Lock()						// moved into ReadPump
 	delete(model.Clients, client.UserID)
 	model.Mu.Unlock() */

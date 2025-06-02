@@ -61,7 +61,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
                 } 
                 // Handle ping response (existing logic)
                 else if (message.value.type === 'pong') {
-                    console.log('Received pong from server');
+                    console.log('Received pong from server:', message.value.content);
                 }
                 // Handle 'notification_deleted'
                 else if (message.value.type === 'notification_deleted') {

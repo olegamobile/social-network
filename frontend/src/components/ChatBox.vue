@@ -4,11 +4,11 @@
             <div v-if="chat.messages && chat.messages.length > 0">
                 <div v-for="msg in chat.messages" :key="msg.id" :class="[
                     'mb-3 p-3 rounded-lg max-w-xs',
-                    msg.sender === 'You' ? 'ml-auto bg-nordic-primary-accent text-white' : 'bg-gray-200'
+                    msg.sender_id === user.id ? 'ml-auto bg-nordic-primary-accent text-white' : 'bg-gray-200'
                 ]">
-                    <p class="text-xs font-semibold mb-1">{{ msg.sender }}</p>
-                    <p>{{ msg.text }}</p>
-                    <span class="text-xs opacity-70 block text-right">{{ formatTime(msg.timestamp) }}</span>
+                    <p class="text-xs font-semibold mb-1">{{ msg.sender_name }}</p>
+                    <p>{{ msg.content }}</p>
+                    <span class="text-xs opacity-70 block text-right">{{ formatTime(msg.created_at) }}</span>
                 </div>
             </div>
             <div v-else class="h-full flex items-center justify-center">
@@ -65,14 +65,19 @@ watch(() => websocketStore.message, (newMessage) => {
         // - We're the receiver and the sender is the chat partner
         if ((newMessage.sender_id === user.id && newMessage.receiver_id === props.chat.userId) ||
             (newMessage.receiver_id === user.id && newMessage.sender_id === props.chat.userId)) {
+            
 
             // Add the message to the current chat
-            props.chat.messages.push({
+/*             props.chat.messages.push({
                 id: Date.now(),
                 text: newMessage.content,
-                sender: newMessage.sender_id === user.id ? 'You' : props.chat.name,
-                timestamp: new Date()
-            })
+                //sender_name: newMessage.sender_id === user.id ? user.value.first_name : props.chat.name,
+                sender_name: newMessage.sender_name,
+                created_at: newMessage.created_at
+            }) */
+
+            // Add the message to the current chat
+            props.chat.messages.push(newMessage)
         }
     }
 })
@@ -82,18 +87,18 @@ function sendMessage() {
 
     // Add message to local chat first
     const message = {
-        id: Date.now(),
-        text: newMessage.value,
-        sender: 'You',
-        timestamp: new Date()
+        created_at: Date.now(),
+        content: newMessage.value,
+        sender_name: user.value.first_name,
+        sender_id: user.value.id,
+        //timestamp: new Date()
     }
     props.chat.messages.push(message)
 
     // Send via websocket - using string values for all fields to avoid numeric parsing issues
     websocketStore.send({
         type: 'chat_message',
-        sender_id: user.id,
-        receiver_id: props.chat.userId || '0', // Use the user ID from the chat object
+        receiver_id: props.chat.user_id || '0', // Use the user ID from the chat object
         content: newMessage.value
     })
 
@@ -101,10 +106,11 @@ function sendMessage() {
     newMessage.value = ''
 }
 
-function formatTime(timestamp) {
-    if (!timestamp) return ''
-
-    const date = new Date(timestamp)
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+function formatTime(isoString) {
+    const date = new Date(isoString)
+    return date.toLocaleString("fi-FI", {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    }).replace("klo ", "")
 }
 </script>

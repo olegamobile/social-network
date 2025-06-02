@@ -159,6 +159,23 @@ type Client struct {
 	Send   chan WSMessage // individual send channel
 }
 
+type ChatMessage struct {
+	ID         int    `json:"id"`
+	SenderName string `json:"sender_name"`
+	SenderID   int    `json:"sender_id"`
+	ReceiverID int    `json:"receiver_id"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at,omitempty"`
+}
+
+type Chat struct {
+	IsActive bool          `json:"is_active"` // is there a follow relation between the users
+	Name     string        `json:"name"`
+	UserID   string        `json:"user_id"` // in case there are no messages
+	Messages []ChatMessage `json:"messages"`
+}
+
 var (
 	Broadcast = make(chan WSMessage)     // for global broadcast
 	Clients   = make(map[string]*Client) // userID -> client
