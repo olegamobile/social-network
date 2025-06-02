@@ -3,6 +3,7 @@ package service
 import (
 	"backend/internal/model"
 	"backend/internal/repository"
+	"fmt"
 	"log"
 )
 
@@ -57,6 +58,9 @@ func WritePump(c *model.Client) {
 	defer c.Conn.Close()
 
 	for msg := range c.Send {
+
+		fmt.Println("message at write pump:", msg)
+
 		err := c.Conn.WriteJSON(msg)
 		if err != nil {
 			log.Println("write error:", err)

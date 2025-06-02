@@ -159,7 +159,7 @@ function testConnection() {
 //listen for new webSocket chat_messages:
 watch(() => websocketStore.message, (message) => {
 
-    console.log("New message gotten:", message)
+    //console.log("New message gotten:", message)
 
     if (!message || message.type !== 'chat_message') return;
 

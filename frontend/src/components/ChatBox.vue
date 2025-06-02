@@ -1,5 +1,7 @@
 <template>
     <div class="chat-box">
+
+        <!-- Listing messages -->
         <div v-if="chat" class="messages-container mb-4 p-4 bg-gray-50 rounded-lg h-96 overflow-y-auto">
             <div v-if="chat.messages && chat.messages.length > 0">
                 <div v-for="msg in chat.messages" :key="msg.id" :class="[
@@ -16,6 +18,7 @@
             </div>
         </div>
 
+        <!-- New message form -->
         <div v-if="chat" class="message-input-container">
             <form @submit.prevent="sendMessage" class="flex gap-2">
                 <input id="message-input" v-model="newMessage" type="text" placeholder="Type a message..."
@@ -60,25 +63,32 @@ const { user } = storeToRefs(userStore)
 
 watch(() => websocketStore.message, (newMessage) => {
     if (newMessage && newMessage.type === 'chat_message' && props.chat) {
+
+        console.log("New message detected in chat box:", newMessage)
+        console.log("Fields to compare:", user.value.id, props.chat.user_id)
+
         // Message belongs to this chat if:
         // - We're the sender and the receiver is the chat partner, OR
         // - We're the receiver and the sender is the chat partner
-        if ((newMessage.sender_id === user.id && newMessage.receiver_id === props.chat.userId) ||
-            (newMessage.receiver_id === user.id && newMessage.sender_id === props.chat.userId)) {
-            
 
+        if (newMessage.from == user.value.id && newMessage.receiver_id == props.chat.user_id) { // soft equal, one is string other is number
             // Add the message to the current chat
-/*             props.chat.messages.push({
-                id: Date.now(),
-                text: newMessage.content,
-                //sender_name: newMessage.sender_id === user.id ? user.value.first_name : props.chat.name,
-                sender_name: newMessage.sender_name,
-                created_at: newMessage.created_at
-            }) */
-
-            // Add the message to the current chat
-            props.chat.messages.push(newMessage)
+            props.chat.messages.push({
+                content: newMessage.content,
+                sender_name: user.value.first_name,
+                created_at: new Date()
+            })
         }
+
+        if (newMessage.receiver_id == user.value.id && newMessage.from == props.chat.user_id) { // soft equal, one is string other is number
+            // Add the message to the current chat
+            props.chat.messages.push({
+                content: newMessage.content,
+                sender_name: String(props.chat.name).split(" ")[0],
+                created_at: new Date()
+            })
+        }
+
     }
 })
 
