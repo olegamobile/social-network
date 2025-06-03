@@ -118,10 +118,7 @@ const router = useRouter()
 const errorStore = useErrorStore()
 const apiUrl = import.meta.env.VITE_API_URL
 
-//temporary data for testing
 const selectedChat = ref(null)
-
-//temporary data for testing
 const chats = ref([])
 
 
