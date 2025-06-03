@@ -42,12 +42,16 @@ func StartBroadcastListener() {
 				continue
 			}
 			for _, member := range members {
-				if client, ok := model.Clients[fmt.Sprint(member.ID)]; ok {
-					sendToClient(client, msg)
+				if fmt.Sprint(member.ID) != msg.From { // don't send to self
+					if client, ok := model.Clients[fmt.Sprint(member.ID)]; ok {
+						sendToClient(client, msg)
+					}
 				}
 			}
 			continue
 		}
+
+		// handle type "new_notification" explicitly?
 
 		// if recipient still specified, assume it's user id
 		if msg.To != "" {

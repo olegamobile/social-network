@@ -81,9 +81,10 @@ watch(() => websocketStore.message, (newMessage) => {
         // - We're the sender and the receiver is the chat partner, OR
         // - We're the receiver and the sender is the chat partner
 
+        // Add the message to the current chat
+
         // own messages
-        if ( newMessage.from == user.value.id && newMessage.receiver_id == props.chat.user_id) { // soft equal, one is string other is number
-            // Add the message to the current chat
+        if (newMessage.from == user.value.id && newMessage.receiver_id == props.chat.user_id) { // soft equal, string and number
             props.chat.messages.push({
                 content: newMessage.content,
                 sender_name: user.value.first_name,
@@ -92,21 +93,22 @@ watch(() => websocketStore.message, (newMessage) => {
         }
 
         // in private chat
-        if (newMessage.type === 'chat_message' && props.groupString === '' && newMessage.receiver_id == user.value.id && newMessage.from == props.chat.user_id) { // soft equal, one is string other is number
-            // Add the message to the current chat
+        if (newMessage.type === 'chat_message' && props.groupString === '' && newMessage.receiver_id == user.value.id && newMessage.from == props.chat.user_id) {
             props.chat.messages.push({
                 content: newMessage.content,
-                sender_name: String(props.chat.name).split(" ")[0],
+                //sender_name: String(props.chat.name).split(" ")[0],
+                sender_name: newMessage.from_name,
                 created_at: new Date()
             })
         }
 
         // in group chat
         if (newMessage.type === 'groupchat_message' && props.groupString === 'group' && newMessage.receiver_id == props.chat.user_id) {
-            // Add the message to the current chat
+            console.log("adding message to group chat")
+
             props.chat.messages.push({
                 content: newMessage.content,
-                sender_name: String(props.chat.name).split(" ")[0],
+                sender_name: newMessage.from_name,
                 created_at: new Date()
             })
         }
@@ -129,6 +131,7 @@ function sendMessage() {
     // Send via websocket - using string values for all fields to avoid numeric parsing issues
     websocketStore.send({
         type: `${props.groupString}chat_message`,
+        from_name: user.value.first_name,
         receiver_id: props.chat.user_id || '0', // Use the user ID from the chat object, means group id when group chat
         content: newMessage.value
     })

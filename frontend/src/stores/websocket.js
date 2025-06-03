@@ -147,6 +147,9 @@ export const useWebSocketStore = defineStore('websocket', () => {
             }, {})
 
             socket.value.send(JSON.stringify(processedData))
+
+            console.log("sending processed data:", JSON.stringify(processedData))
+
             return true
         } catch (error) {
             console.error('Error sending message:', error)

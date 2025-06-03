@@ -77,7 +77,8 @@ async function login() {
             // Testing connection
             const nuMsg = {
                 type: "ping",
-                from: user.value.id,                
+                from: user.value.id,
+                from_name: user.value.first_name + ' ' + user.value.last_name          
             }
             wsStore.send(nuMsg)
 

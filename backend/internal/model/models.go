@@ -147,10 +147,11 @@ type Notification struct {
 }
 
 type WSMessage struct {
-	Type    string `json:"type"`
-	From    string `json:"from"`
-	To      string `json:"receiver_id,omitempty"`
-	Content string `json:"content,omitempty"`
+	Type     string `json:"type"`
+	From     string `json:"from"`
+	FromName string `json:"from_name,omitempty"`
+	To       string `json:"receiver_id,omitempty"`
+	Content  string `json:"content,omitempty"`
 }
 
 type Client struct {

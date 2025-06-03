@@ -7,7 +7,6 @@ import (
 )
 
 func ReadPump(c *model.Client) {
-	//defer c.Conn.Close()
 
 	defer func() {
 		log.Println("closing connection for", c.UserID)
@@ -17,11 +16,8 @@ func ReadPump(c *model.Client) {
 		delete(model.Clients, c.UserID)
 		model.Mu.Unlock()
 
-		// Close the WebSocket connection
-		c.Conn.Close()
-
-		// Close send channel to stop WritePump
-		close(c.Send)
+		c.Conn.Close() // Close the WebSocket connection
+		close(c.Send)  // Close send channel to stop WritePump
 	}()
 
 	for {
