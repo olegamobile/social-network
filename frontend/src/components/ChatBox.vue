@@ -58,7 +58,7 @@ const props = defineProps({
         type: Object,
         default: null
     },
-    groupString: {
+    groupString: {      // put "group" in front of message type when in group chat
         type: String,
         default: ''
     }
@@ -72,7 +72,7 @@ const { user } = storeToRefs(userStore)
 const messagesContainer = ref(null);
 
 watch(() => websocketStore.message, (newMessage) => {
-    if (newMessage && newMessage.type === 'chat_message' && props.chat) {
+    if (newMessage && newMessage.type === `${props.groupString}chat_message` && props.chat) {
 
         console.log("New message detected in chat box:", newMessage)
         console.log("Fields to compare:", user.value.id, props.chat.user_id)
@@ -81,7 +81,8 @@ watch(() => websocketStore.message, (newMessage) => {
         // - We're the sender and the receiver is the chat partner, OR
         // - We're the receiver and the sender is the chat partner
 
-        if (newMessage.from == user.value.id && newMessage.receiver_id == props.chat.user_id) { // soft equal, one is string other is number
+        // own messages
+        if ( newMessage.from == user.value.id && newMessage.receiver_id == props.chat.user_id) { // soft equal, one is string other is number
             // Add the message to the current chat
             props.chat.messages.push({
                 content: newMessage.content,
@@ -90,7 +91,18 @@ watch(() => websocketStore.message, (newMessage) => {
             })
         }
 
-        if (newMessage.receiver_id == user.value.id && newMessage.from == props.chat.user_id) { // soft equal, one is string other is number
+        // in private chat
+        if (newMessage.type === 'chat_message' && props.groupString === '' && newMessage.receiver_id == user.value.id && newMessage.from == props.chat.user_id) { // soft equal, one is string other is number
+            // Add the message to the current chat
+            props.chat.messages.push({
+                content: newMessage.content,
+                sender_name: String(props.chat.name).split(" ")[0],
+                created_at: new Date()
+            })
+        }
+
+        // in group chat
+        if (newMessage.type === 'groupchat_message' && props.groupString === 'group' && newMessage.receiver_id == props.chat.user_id) {
             // Add the message to the current chat
             props.chat.messages.push({
                 content: newMessage.content,
@@ -153,5 +165,7 @@ onMounted(() => {
             messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
         }
     })
+
+    console.log("props chat:", props.chat)
 })
 </script>

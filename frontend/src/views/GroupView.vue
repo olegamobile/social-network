@@ -79,7 +79,7 @@
                         <PostsList :posts="posts" />
                     </div>
                     <div v-else>
-                        <ChatBox :chat="groupChat" :group-string="group"/>
+                        <ChatBox :chat="groupChat" group-string="group"/> <!-- literal string passed without : -->
                     </div>
 
                 </div>
