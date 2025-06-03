@@ -2,15 +2,17 @@
     <div class="event-card">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-2xl font-semibold text-nordic-dark mb-4">{{ event.title }}</h2>
-        
+        <!-- <pre class="text-xs text-gray-500 bg-gray-100 p-2 rounded overflow-auto max-h-60">
+        {{ event }}
+      </pre> -->
 
             <div class="space-y-2">
 
                 <p v-if="event.creator">
                     <span class="font-semibold text-nordic-dark">Creator:</span>
-                    <RouterLink :to="`/profile/${event.creator.id}`"
+                    <RouterLink :to="`/profile/${event.creator_id}`"
                  class="text-nordic-light ml-1">
-                 {{ event.creator?.first_name + ' ' + event.creator?.last_name
+                 {{ event.creator.first_name + ' ' + event.creator.last_name
                     }}
                     </RouterLink>
                 </p>
@@ -112,7 +114,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia';
 
@@ -136,4 +138,8 @@ const formatDate = (isoString) => {
         timeStyle: 'short'
     }).replace("klo ", "")
 }
+
+onMounted(() => {
+    console.log("event prop in event card:", props.event);
+});
 </script>

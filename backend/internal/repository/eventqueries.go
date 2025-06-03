@@ -67,15 +67,58 @@ func GetEventResponse(eventID, userID int) (string, error) {
 }
 
 func GetEventByID(eventID int) (model.Event, error) {
-	var e model.Event
-	query := `
-		SELECT e.id, e.group_id, g.title, e.creator_id, e.title, e.description, e.event_datetime
-		FROM events e
-		LEFT JOIN groups g ON e.group_id = g.id
-		WHERE e.id = ? AND e.status = 'enable'
-	`
-	err := database.DB.QueryRow(query, eventID).Scan(&e.ID, &e.GroupID, &e.Group, &e.CreatorID, &e.Title, &e.Description, &e.EventDate)
-	return e, err
+    var e model.Event
+    
+  
+    query := `
+        SELECT 
+            e.id, e.group_id, g.title as group_title, 
+            e.creator_id, u.first_name, u.last_name,
+            e.title, e.description, e.event_datetime
+        FROM events e
+        LEFT JOIN groups g ON e.group_id = g.id
+        LEFT JOIN users u ON e.creator_id = u.id
+        WHERE e.id = ? AND e.status = 'enable'
+    `
+    err := database.DB.QueryRow(query, eventID).Scan(
+        &e.ID, &e.GroupID, &e.Group,
+        &e.CreatorID, &e.Creator.FirstName, &e.Creator.LastName,
+        &e.Title, &e.Description, &e.EventDate)
+    if err != nil {
+        return e, err
+    }
+
+    
+    responses, err := database.DB.Query(`
+        SELECT 
+            u.id, u.first_name, u.last_name, er.response
+        FROM event_responses er
+        JOIN users u ON er.user_id = u.id
+        WHERE er.event_id = ?`, eventID)
+    if err != nil {
+        return e, err
+    }
+    defer responses.Close()
+
+    for responses.Next() {
+        var user model.User
+        var response string
+        err := responses.Scan(&user.ID, &user.FirstName, &user.LastName, &response)
+        if err != nil {
+            return e, err
+        }
+
+        switch response {
+        case "going":
+            e.Going = append(e.Going, user)
+        case "not_going":
+            e.NotGoing = append(e.NotGoing, user)
+        case "pending":
+            e.NoResponse = append(e.NoResponse, user)
+        }
+    }
+
+    return e, nil
 }
 
 func CheckUserGroupMembership(userID, groupID int) (bool, error) {
