@@ -82,6 +82,9 @@ watch(() => websocketStore.message, (newMessage) => {
         // - We're the receiver and the sender is the chat partner
 
         // Add the message to the current chat
+        if (!props.chat.messages) {
+            props.chat.messages = []
+        }
 
         // own messages
         if (newMessage.from == user.value.id && newMessage.receiver_id == props.chat.user_id) { // soft equal, string and number
@@ -126,7 +129,12 @@ function sendMessage() {
         sender_name: user.value.first_name,
         sender_id: user.value.id
     }
-    props.chat.messages.push(message)
+
+    if (props.chat.messages) {
+        props.chat.messages.push(message)
+    } else {
+        props.chat.messages = [message]
+    }
 
     // Send via websocket - using string values for all fields to avoid numeric parsing issues
     websocketStore.send({
@@ -146,6 +154,15 @@ function formatTime(isoString) {
         dateStyle: 'medium',
         timeStyle: 'short'
     }).replace("klo ", "")
+}
+
+function defaultChat() {
+    return {
+        "is_active": true,
+        "name": "",
+        "user_id": route.params.id,
+        "messages": []
+    }
 }
 
 // Watch for changes in chat.messages. Syntax: watch(source, callback, options?)
@@ -168,7 +185,9 @@ onMounted(() => {
             messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
         }
     })
-
+    if (!props.chat) {
+        props.chat = defaultChat()
+    }
     console.log("props chat:", props.chat)
 })
 </script>

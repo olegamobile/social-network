@@ -34,8 +34,16 @@ func GetGroupChat(groupID int) (model.Chat, error) {
 		chat.Messages = append(chat.Messages, msg)
 	}
 
+	grName := ""
+	err = database.DB.QueryRow(`SELECT title FROM groups WHERE id = ?`, groupID).Scan(&grName)
+	if err != nil {
+		fmt.Println("scan error 2 in GetGroupChat", err)
+		return chat, err
+	}
+
 	chat.IsActive = true
 	chat.UserID = fmt.Sprint(groupID)
+	chat.Name = grName
 
 	return chat, nil
 }
@@ -51,13 +59,3 @@ func SaveGroupMessage(msg model.WSMessage) error {
 
 	return err
 }
-
-/*
-   id INTEGER PRIMARY KEY AUTOINCREMENT,
-   group_id INTEGER NOT NULL,
-   sender_id INTEGER NOT NULL,
-   content TEXT NOT NULL,
-   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   updated_at DATETIME,
-   updated_by INTEGER,
-   status TEXT NOT NULL CHECK (status IN ('enable', 'disable', 'delete')) DEFAULT 'enable', */
