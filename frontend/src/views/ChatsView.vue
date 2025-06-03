@@ -42,7 +42,7 @@
 
 
                 <!-- Start a new chat title -->
-                <h4 class="text-xl font-semibold text-nordic-dark mb-3">Start a new chat</h4>
+                <h4 class="text-xl font-semibold text-nordic-dark mb-3">Connections</h4>
 
                 <!-- Following -->
                 <div class="mb-4">
