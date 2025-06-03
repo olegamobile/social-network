@@ -336,8 +336,6 @@ onMounted(() => {
     getMembers(route.params.id)
     getEvents(route.params.id)
     getChat(route.params.id)
-
-    //console.log("Chat open:", chatOpen.value)
 })
 
 watch(() => membershipStatus, () => {

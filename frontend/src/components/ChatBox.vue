@@ -74,12 +74,7 @@ const messagesContainer = ref(null);
 watch(() => websocketStore.message, (newMessage) => {
     if (newMessage && newMessage.type === `${props.groupString}chat_message` && props.chat) {
 
-        console.log("New message detected in chat box:", newMessage)
-        console.log("Fields to compare:", user.value.id, props.chat.user_id)
-
-        // Message belongs to this chat if:
-        // - We're the sender and the receiver is the chat partner, OR
-        // - We're the receiver and the sender is the chat partner
+        //console.log("New message detected in chat box:", newMessage)
 
         // Add the message to the current chat
         if (!props.chat.messages) {
@@ -107,8 +102,6 @@ watch(() => websocketStore.message, (newMessage) => {
 
         // in group chat
         if (newMessage.type === 'groupchat_message' && props.groupString === 'group' && newMessage.receiver_id == props.chat.user_id) {
-            console.log("adding message to group chat")
-
             props.chat.messages.push({
                 content: newMessage.content,
                 sender_name: newMessage.from_name,
@@ -188,6 +181,5 @@ onMounted(() => {
     if (!props.chat) {
         props.chat = defaultChat()
     }
-    console.log("props chat:", props.chat)
 })
 </script>
