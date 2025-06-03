@@ -20,7 +20,7 @@ func SaveMessage(msg model.WSMessage) error {
 	return err
 }
 
-// IsFollow return an error if no active follow relation exists between the users
+// IsFollow returns an error if no active follow relation exists between the users
 func IsFollow(msg model.WSMessage) error {
 	var exists int
 	return database.DB.QueryRow(`
@@ -32,7 +32,7 @@ func IsFollow(msg model.WSMessage) error {
             (follower_id = ? AND followed_id = ?)
           )
         LIMIT 1;
-    `, msg.From, msg.To, msg.From, msg.To).Scan(&exists)
+    `, msg.From, msg.To, msg.To, msg.From).Scan(&exists)
 }
 
 func GetUserChats(userId int) ([]model.Chat, error) {

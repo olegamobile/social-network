@@ -79,7 +79,7 @@
                         <PostsList :posts="posts" />
                     </div>
                     <div v-else>
-                        <ChatBox :chat="groupChat" />
+                        <ChatBox :chat="groupChat" :group-string="group"/>
                     </div>
 
                 </div>
@@ -151,7 +151,29 @@ const groupButtonClass = computed(() => {
 
 function toggleChat(){
     chatOpen.value = !chatOpen.value
-    console.log("Chat open:", chatOpen.value)
+    getChat(route.params.id)
+    //console.log("Chat open:", chatOpen.value)
+}
+
+
+async function getChat(groupId) {        // Fetch and filter posts
+    try {
+        const postsRes = await fetch(`${apiUrl}/api/group/chat/messages/${groupId}`, {     //
+            credentials: 'include'
+        })
+
+        if (!postsRes.ok) {
+            throw new Error(`Failed to fetch posts: ${postsRes.status}`)
+        }
+
+        groupChat.value = await postsRes.json()
+        //console.log("chat call succeeded")
+    } catch (error) {
+        console.log("error fetching group chat:", error)
+        errorStore.setError('Error', 'Something went wrong while loading group chat data.')
+        router.push('/error')
+        return
+    }
 }
 
 function prepareGroupAction() {
@@ -313,7 +335,9 @@ onMounted(() => {
     getPosts(route.params.id)
     getMembers(route.params.id)
     getEvents(route.params.id)
-    console.log("Chat open:", chatOpen.value)
+    getChat(route.params.id)
+
+    //console.log("Chat open:", chatOpen.value)
 })
 
 watch(() => membershipStatus, () => {

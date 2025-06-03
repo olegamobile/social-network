@@ -57,6 +57,10 @@ const props = defineProps({
     chat: {
         type: Object,
         default: null
+    },
+    groupString: {
+        type: String,
+        default: ''
     }
 })
 
@@ -112,8 +116,8 @@ function sendMessage() {
 
     // Send via websocket - using string values for all fields to avoid numeric parsing issues
     websocketStore.send({
-        type: 'chat_message',
-        receiver_id: props.chat.user_id || '0', // Use the user ID from the chat object
+        type: `${props.groupString}chat_message`,
+        receiver_id: props.chat.user_id || '0', // Use the user ID from the chat object, means group id when group chat
         content: newMessage.value
     })
 

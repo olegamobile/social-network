@@ -37,10 +37,19 @@ func ReadPump(c *model.Client) {
 		// Route message
 		switch msg.Type {
 		case "chat_message", "notification":
+			fmt.Println("normal chat message received:", msg)
 			err := SaveMessage(msg)
 			if err != nil {
 				log.Println("failed to save message:", err)
 				continue // Don't broadcast if saving failed
+			}
+			model.Broadcast <- msg // Send to central dispatcher
+		case "groupchat_message":
+			fmt.Println("groupchat message received:", msg)
+			err := SaveGroupMessage(msg)
+			if err != nil {
+				log.Println("failed to save group message:", err)
+				continue
 			}
 			model.Broadcast <- msg // Send to central dispatcher
 		case "typing":
