@@ -532,8 +532,8 @@ INSERT INTO event_responses (event_id, user_id, response, created_at) VALUES
 -- Insert messages (8 columns, 20-message dialogue between Emma and Yusuf, plus 15 more)
 INSERT INTO messages (sender_id, receiver_id, content, created_at, updated_at, updated_by, status) VALUES
 -- Dialogue: Planning a group hike (Emma: user_id 5, Yusuf: user_id 2)
-(5, 2, 'Hey Yusuf, saw your post about the group hike. I’m interested! Any details yet?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(2, 5, 'Hi Emma! Awesome, glad you’re in. Thinking about the Blue Ridge Trail, maybe 10am Saturday?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(5, 2, 'Hey Liam, saw your post about the group hike. I’m interested! Any details yet?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(2, 5, 'Hi Olivia! Awesome, glad you’re in. Thinking about the Blue Ridge Trail, maybe 10am Saturday?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (5, 2, 'Blue Ridge sounds great! How long is the trail?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (2, 5, 'It’s about 6 miles round trip, moderate difficulty. Should take 3-4 hours.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (5, 2, 'Perfect, I can handle that. Should we bring lunch or snacks?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
@@ -553,21 +553,21 @@ INSERT INTO messages (sender_id, receiver_id, content, created_at, updated_at, u
 (5, 2, 'See ya then! Thanks for organizing.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (2, 5, 'No prob, it’s gonna be a blast!', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 -- Additional messages
-(9, 4, 'Hey Zara, loved your cafe post! What’s the name of that place?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(11, 8, 'Mia, your photography post was amazing. Any editing tips?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(7, 10, 'Luca, what game are you playing? Saw your gaming post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(13, 1, 'Amina, your sunset post was beautiful! Where was that?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(3, 5, 'Emma, how’s the painting going? Saw your art post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(6, 12, 'Finn, your coding project looks cool. What’s it do?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(4, 9, 'Olivia, read "1984" yet? Saw your book club post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(8, 2, 'Yusuf, that recipe looked tasty! Can you share it?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(1, 7, 'Sofia, which trail are you hiking? Saw your post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(10, 11, 'Lena, your bread looks perfect. Sourdough tips?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(12, 6, 'Noah, saw your running post. Best shoes for trails?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(9, 4, 'Hey Noah, loved your cafe post! What’s the name of that place?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(11, 8, 'Elias, your photography post was amazing. Any editing tips?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(7, 10, 'Finn, what game are you playing? Saw your gaming post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(13, 1, 'Emma, your sunset post was beautiful! Where was that?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(3, 5, 'Olivia, how’s the painting going? Saw your art post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(6, 12, 'Yusuf, your coding project looks cool. What’s it do?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(4, 9, 'Lena, read "1984" yet? Saw your book club post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(8, 2, 'Liam, that recipe looked tasty! Can you share it?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(1, 7, 'Mia, which trail are you hiking? Saw your post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(10, 11, 'Amina, your bread looks perfect. Sourdough tips?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(12, 6, 'Luca, saw your running post. Best shoes for trails?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (14, 13, 'Aziz, your getaway post got me thinking. Beach or mountains?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (2, 14, 'Zara, your plant post was cool. How do you care for it?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 3, 'Aziz, saw your reflection post. Deep thoughts! Wanna chat?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(9, 1, 'Amina, joining the coffee tasting? Saw your event post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable');
+(5, 3, 'Sofia, saw your reflection post. Deep thoughts! Wanna chat?', CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(9, 1, 'Emma, joining the coffee tasting? Saw your event post.', CURRENT_TIMESTAMP, NULL, NULL, 'enable');
 
 -- Insert group messages (8 columns)
 INSERT INTO group_messages (group_id, sender_id, content, created_at, updated_at, updated_by, status) VALUES
