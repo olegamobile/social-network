@@ -144,8 +144,9 @@ const handlePostSubmitted = (newPost) => {
 }
 
 const handleEventCreated = (newEvent) => {
-    console.log("new event:", newEvent)
-    events.value.unshift(newEvent)
+    //console.log("new event:", newEvent)
+    events.value.push(newEvent)
+    showEventForm.value = false
 }
 
 const groupButtonClass = computed(() => {
