@@ -190,6 +190,7 @@ watch(() => websocketStore.message, (message) => {
                                             }] */
                     messages: [message.content]
                 };
+                // does this fail if chats is null?
                 chats.value.push(newChat);
             })
             .catch(error => {
