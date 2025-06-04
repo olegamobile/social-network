@@ -1,7 +1,6 @@
 <template>
     <div class="chat-box">
 
-        <!-- Listing messages -->
         <div v-if="chat" ref="messagesContainer"
             class="messages-container mb-4 p-4 bg-gray-50 rounded-lg h-96 overflow-y-auto">
             <div v-if="chat.messages && chat.messages.length > 0">
@@ -10,7 +9,7 @@
                     msg.sender_id === user.id ? 'ml-auto bg-nordic-primary-accent text-white' : 'bg-gray-200'
                 ]">
                     <p class="text-xs font-semibold mb-1">{{ msg.sender_name }}</p>
-                    <p>{{ msg.content }}</p>
+                    <p class="break-words">{{ msg.content }}</p>
                     <span class="text-xs opacity-70 block text-right">{{ formatTime(msg.created_at) }}</span>
                 </div>
             </div>
@@ -19,7 +18,6 @@
             </div>
         </div>
 
-        <!-- New message form -->
         <div v-if="chat && chat.is_active" class="message-input-container">
             <form @submit.prevent="sendMessage" class="flex gap-2">
                 <input id="message-input" v-model="newMessage" type="text" placeholder="Type a message..."
@@ -48,6 +46,7 @@
 </template>
 
 <script setup>
+// (Your script section remains the same as the last corrected version)
 import { ref, watch, onMounted, nextTick } from 'vue'
 import { useWebSocketStore } from '@/stores/websocket'
 import { storeToRefs } from 'pinia';
@@ -71,74 +70,60 @@ const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 const messagesContainer = ref(null);
 
-watch(() => websocketStore.message, (newMessage) => {
-    if (newMessage && newMessage.type === `${props.groupString}chat_message` && props.chat) {
+// Note: Ensure this watch block is aligned with the latest ChatBox.vue changes for deduplication.
+// It should primarily handle echoes for the sender and not add received messages.
+watch(() => websocketStore.message, (newMsg) => {
+    if (newMsg && newMsg.type === `${props.groupString}chat_message` && props.chat) {
 
-        //console.log("New message detected in chat box:", newMessage)
+        // If this is an echo of the current user's message, perform deduplication
+        if (Number(newMsg.from) === Number(user.value.id) && Number(newMsg.receiver_id) === Number(props.chat.user_id)) {
+            const msgIdSent = newMsg.id; // Assuming server echoes back the client-generated ID
+            const messageAlreadyAdded = props.chat.messages?.some(msg => msg.id === msgIdSent);
 
-        // Add the message to the current chat
-        if (!props.chat.messages) {
-            props.chat.messages = []
+            if (messageAlreadyAdded) {
+                // console.log("Duplicate self-sent message from echo detected in ChatBox, skipping.");
+                return;
+            }
+            // If for some reason, the sent message wasn't added locally,
+            // or if the server provides a canonical ID you want to use for the existing message,
+            // you might have logic here to find and update/replace that local message.
+            // For now, if messageAlreadyAdded is true, we simply return.
         }
-
-        // own messages
-        if (newMessage.from == user.value.id && newMessage.receiver_id == props.chat.user_id) { // soft equal, string and number
-            props.chat.messages.push({
-                content: newMessage.content,
-                sender_name: user.value.first_name,
-                created_at: new Date()
-            })
-        }
-
-        // in private chat
-        if (newMessage.type === 'chat_message' && props.groupString === '' && newMessage.receiver_id == user.value.id && newMessage.from == props.chat.user_id) {
-            props.chat.messages.push({
-                content: newMessage.content,
-                //sender_name: String(props.chat.name).split(" ")[0],
-                sender_name: newMessage.from_name,
-                created_at: new Date()
-            })
-        }
-
-        // in group chat
-        if (newMessage.type === 'groupchat_message' && props.groupString === 'group' && newMessage.receiver_id == props.chat.user_id) {
-            props.chat.messages.push({
-                content: newMessage.content,
-                sender_name: newMessage.from_name,
-                created_at: new Date()
-            })
-        }
-
+        // Removed receiver-side message adding from ChatBox.vue
+        // This is handled by ChatsView.vue now.
     }
 })
 
 function sendMessage() {
-    if (!newMessage.value.trim() || !props.chat || !isConnected.value) return
+    if (!newMessage.value.trim() || !props.chat || !isConnected.value) return;
 
-    // Add message to local chat first
+    const msgId = `${user.value.id}_${props.chat.user_id}_${Date.now()}`;
+
     const message = {
-        created_at: Date.now(),
+        id: msgId,
+        created_at: new Date(),
         content: newMessage.value,
         sender_name: user.value.first_name,
         sender_id: user.value.id
-    }
+    };
 
     if (props.chat.messages) {
-        props.chat.messages.push(message)
+        props.chat.messages.push(message);
     } else {
-        props.chat.messages = [message]
+        props.chat.messages = [message];
     }
 
-    // Send via websocket - using string values for all fields to avoid numeric parsing issues
     websocketStore.send({
         type: `${props.groupString}chat_message`,
+        from: user.value.id,
         from_name: user.value.first_name,
-        receiver_id: props.chat.user_id || '0', // Use the user ID from the chat object, means group id when group chat
-        content: newMessage.value
-    })
+        receiver_id: props.chat.user_id || '0',
+        content: newMessage.value,
+        timestamp: Date.now(),
+        id: msgId // Send the client-generated ID
+    });
 
-    // Clear input
-    newMessage.value = ''
+    newMessage.value = '';
 }
 
 function formatTime(isoString) {
@@ -149,37 +134,39 @@ function formatTime(isoString) {
     }).replace("klo ", "")
 }
 
-function defaultChat() {
-    return {
-        "is_active": true,
-        "name": "",
-        "user_id": route.params.id,
-        "messages": []
-    }
-}
+// defaultChat function should likely be in ChatsView.vue if it's responsible for chat initialization.
+// If ChatBox needs to handle a null `chat` prop for display purposes only, keep it here.
+// For robust setup, better handled in parent.
+// function defaultChat() {
+//     return {
+//         "is_active": true,
+//         "name": "",
+//         "user_id": route.params.id, // Requires `import { useRoute } from 'vue-router'`
+//         "messages": []
+//     }
+// }
 
-// Watch for changes in chat.messages. Syntax: watch(source, callback, options?)
 watch(
     () => props.chat?.messages,
     () => {
-        nextTick(() => {    // nextTick ensures the DOM is updated before scrolling
+        nextTick(() => {
             if (messagesContainer.value) {
                 messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
             }
         })
     },
-    { deep: true }  // detects changes inside the messages array
+    { deep: true }
 )
 
-// Scroll to bottom on mount (in case there are already messages)
 onMounted(() => {
     nextTick(() => {
         if (messagesContainer.value) {
             messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
         }
     })
-    if (!props.chat) {
-        props.chat = defaultChat()
-    }
+    // Remove if ChatsView.vue ensures `props.chat` is never null or handles its initialization
+    // if (!props.chat) {
+    //     props.chat = defaultChat()
+    // }
 })
 </script>
