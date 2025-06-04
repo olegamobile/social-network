@@ -57,29 +57,30 @@
                 <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
 
                     <div v-if="!chatOpen">
+                        <!-- buttons for new post and invite user -->
                         <span class="flex gap-4">
-                            <!-- new post button and form -->
                             <button @click="showPostForm = !showPostForm; showInviteForm = false"
                                 class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                                 {{ showPostForm ? 'Cancel Post' : 'Create New Post' }}
                             </button>
-
-                            <!-- Invite users button -->
                             <button @click="showInviteForm = !showInviteForm; showPostForm = false"
                                 class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                                 {{ showInviteForm ? 'Close Invitation Form' : 'Invite Users' }}
                             </button>
                         </span>
 
+                        <!-- forms to create new post or invite user -->
                         <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
                             @post-submitted="handlePostSubmitted" class="mb-8" />
-
                         <InviteUsers v-if="showInviteForm" :members="members" class="mb-8" />
 
+                        <!-- group posts -->
                         <PostsList :posts="posts" />
                     </div>
+
+                    <!-- chat -->
                     <div v-else>
-                        <ChatBox :chat="groupChat" group-string="group"/> <!-- literal string passed without : -->
+                        <ChatBox :chat="groupChat" group-string="group"/> <!-- literal string passed to prop without : -->
                     </div>
 
                 </div>
