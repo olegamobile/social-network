@@ -19,8 +19,9 @@
                         <!-- members -->
                         <MembersList :members="members" small class="my-4" />
                     </div>
-                    
-                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'" @update-members='getMembers(route.params.id)' />
+
+                    <GroupReqNoticesForAdmin v-if="membershipStatus === 'admin'"
+                        @update-members='getMembers(route.params.id)' />
                 </div>
             </template>
 
@@ -51,24 +52,32 @@
 
                 <!-- members only content -->
                 <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
-                    <span class="flex gap-4">
+                    <span class="flex flex-wrap gap-4">
                         <!-- new post button and form -->
-                        <button @click="showPostForm = !showPostForm; showInviteForm = false"
+                        <button @click="showPostForm = !showPostForm; showInviteForm = false; showEventForm = false"
                             class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
-                            {{ showPostForm ? 'Cancel Post' : 'Create New Post' }}
+                            {{ showPostForm ? 'Cancel Post' : 'New Post' }}
                         </button>
 
                         <!-- Invite users button -->
-                        <button @click="showInviteForm = !showInviteForm; showPostForm = false"
+                        <button @click="showInviteForm = !showInviteForm; showPostForm = false; showEventForm = false"
                             class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                             {{ showInviteForm ? 'Close Invitation Form' : 'Invite Users' }}
+                        </button>
+
+                        <!-- New event button -->
+                        <button @click="showEventForm = !showEventForm; showPostForm = false; showInviteForm = false"
+                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                            {{ showEventForm ? 'Close Event Form' : 'New Event' }}
                         </button>
                     </span>
 
                     <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
                         @post-submitted="handlePostSubmitted" class="mb-8" />
 
-                    <InviteUsers v-if="showInviteForm" :members="members" class="mb-8"/>
+                    <InviteUsers v-if="showInviteForm" :members="members" class="mb-8" />
+
+                    <NewEventForm v-if="showEventForm" @event-created="handleEventCreated" class="mb-8" />
 
                     <PostsList :posts="posts" />
                 </div>
@@ -98,6 +107,7 @@ import NewGroupPostForm from '@/components/NewGroupPostForm.vue'
 import GroupReqNoticesForAdmin from '@/components/GroupReqNoticesForAdmin.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import InviteUsers from '@/components/InviteUsers.vue'
+import NewEventForm from '@/components/NewEventForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -109,12 +119,18 @@ const members = ref([])
 const events = ref([])
 const showPostForm = ref(false)
 const showInviteForm = ref(false)
+const showEventForm = ref(false)
 const showLeaveConfirmation = ref(false)
 const showDeleteConfirmation = ref(false)
 const membershipStatus = ref('')
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
+}
+
+const handleEventCreated = (newEvent) => {
+    console.log("new event:", newEvent)
+    events.value.unshift(newEvent)
 }
 
 const groupButtonClass = computed(() => {
