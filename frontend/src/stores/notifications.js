@@ -29,7 +29,7 @@ export const useNotificationStore = defineStore('notifications', () => {
             
             // Calculate unread count from the fetched notifications
             unreadCount.value = data.filter(n => !n.is_read).length; // Simplified unread count
-            console.log('Notifications fetched and store updated:', notifications.value.length, 'total,', unreadCount.value, 'unread');
+            //console.log('Notifications fetched and store updated:', notifications.value.length, 'total,', unreadCount.value, 'unread');
 
         } catch (error) {
             console.error('Error in fetchNotifications:', error);
@@ -97,7 +97,7 @@ export const useNotificationStore = defineStore('notifications', () => {
                     unreadCount.value--;
                 }
             }
-            console.log(`Notification ${notificationId} marked as read. Unread count:`, unreadCount.value);
+            //console.log(`Notification ${notificationId} marked as read. Unread count:`, unreadCount.value);
 
         } catch (error) {
             console.error(`Error in markAsRead for notification ${notificationId}:`, error);

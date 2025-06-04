@@ -79,11 +79,10 @@ func HandleEventResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-
 	resp.UserID = userID
 
 	if resp.Response != "going" && resp.Response != "not_going" && resp.Response != "pending" {
-		http.Error(w, "Invalid status", http.StatusBadRequest)
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 

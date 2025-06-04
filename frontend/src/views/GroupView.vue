@@ -10,7 +10,7 @@
                     <p>{{ group.description }}</p>
 
                     <!-- members only information -->
-                    <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">                        
+                    <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
                         <br>
                         <!-- chat button -->
                         <button @click="toggleChat()"
@@ -57,37 +57,38 @@
                 <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
 
                     <div v-if="!chatOpen">
-                        <!-- buttons for new post and invite user -->
+                        <!-- buttons for new post, invite user and new event -->
                         <span class="flex flex-wrap gap-4">
                             <button @click="showPostForm = !showPostForm; showInviteForm = false; showEventForm = false"
                                 class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                                 {{ showPostForm ? 'Cancel Post' : 'New Post' }}
                             </button>
-                            <button @click="showInviteForm = !showInviteForm; showPostForm = false; showEventForm = false"
+                            <button
+                                @click="showInviteForm = !showInviteForm; showPostForm = false; showEventForm = false"
                                 class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
                                 {{ showInviteForm ? 'Close Invitation Form' : 'Invite Users' }}
                             </button>
-    
-                        <!-- New event button -->
-                        <button @click="showEventForm = !showEventForm; showPostForm = false; showInviteForm = false"
-                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
-                            {{ showEventForm ? 'Close Event Form' : 'New Event' }}
-                        </button>
-                    </span>
+                            <button
+                                @click="showEventForm = !showEventForm; showPostForm = false; showInviteForm = false"
+                                class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                                {{ showEventForm ? 'Close Event Form' : 'New Event' }}
+                            </button>
+                        </span>
 
-                        <!-- forms to create new post or invite user -->
+                        <!-- forms to create new post, invite user or new event -->
                         <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
                             @post-submitted="handlePostSubmitted" class="mb-8" />
                         <InviteUsers v-if="showInviteForm" :members="members" class="mb-8" />
                         <NewEventForm v-if="showEventForm" @event-created="handleEventCreated" class="mb-8" />
-                        
+
                         <!-- group posts -->
                         <PostsList :posts="posts" />
                     </div>
 
                     <!-- chat -->
                     <div v-else>
-                        <ChatBox :chat="groupChat" group-string="group"/> <!-- literal string passed to prop without : -->
+                        <ChatBox :chat="groupChat" group-string="group" />
+                        <!-- literal string passed to prop without : -->
                     </div>
 
                 </div>
@@ -164,12 +165,11 @@ const groupButtonClass = computed(() => {
     return '';
 });
 
-function toggleChat(){
+function toggleChat() {
     chatOpen.value = !chatOpen.value
     getChat(route.params.id)
     //console.log("Chat open:", chatOpen.value)
 }
-
 
 async function getChat(groupId) {        // Fetch and filter posts
     try {

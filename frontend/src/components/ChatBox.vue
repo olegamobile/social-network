@@ -49,6 +49,7 @@
 
 <script setup>
 import { ref, watch, onMounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { useWebSocketStore } from '@/stores/websocket'
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
@@ -64,6 +65,7 @@ const props = defineProps({
     }
 })
 
+const route = useRoute()
 const newMessage = ref('')
 const websocketStore = useWebSocketStore()
 const { isConnected } = storeToRefs(websocketStore)
