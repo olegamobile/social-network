@@ -43,7 +43,7 @@ func setHandlers() {
 	http.HandleFunc("/api/group/invite", middleware.WithCORS(handlers.HandleGroupInvitation))
 	http.HandleFunc("/api/group/invite/{id}/{approval_status}", middleware.WithCORS(handlers.ApproveGroupInvitation))
 	http.HandleFunc("/api/group/invite/search", middleware.WithCORS(handlers.HandleGroupInvitationSearch))
-
+	http.HandleFunc("/api/group/chat/messages/", middleware.WithCORS(handlers.HandleGetGroupMessagesByGroupId))
 	http.HandleFunc("/api/group-posts/create", middleware.WithCORS(handlers.CreateGroupPostHandler))
 
 	http.HandleFunc("/api/login", middleware.WithCORS(handlers.HandleLogin))
@@ -66,6 +66,8 @@ func setHandlers() {
 	http.HandleFunc("/api/notifications/{id}/read", middleware.WithCORS(handlers.ReadNotification))
 	http.HandleFunc("/api/notifications/new", middleware.WithCORS(handlers.GetNewNotifications))
 	http.HandleFunc("/api/notifications/{id}/joingroup", middleware.WithCORS(handlers.HandleJoinReqsByGroupId))
+
+	http.HandleFunc("/api/chat/messages", middleware.WithCORS(handlers.HandleGetUserMessages))
 
 	http.HandleFunc("/ws", middleware.WithCORS(handlers.HandleWSConnections)) // Is CORS needed for websockets?
 	//http.HandleFunc("/ws", handlers.HandleWSConnections)

@@ -10,10 +10,13 @@
                     <p>{{ group.description }}</p>
 
                     <!-- members only information -->
-                    <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
-                        <!-- chat button -->
+                    <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">                        
                         <br>
-                        <RouterLink :to="`/chats/${group.id}`" class="my-4">Go to Chat</RouterLink>
+                        <!-- chat button -->
+                        <button @click="toggleChat()"
+                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                            {{ chatOpen ? 'Close Chat' : 'Open Chat' }}
+                        </button>
                         <!-- events -->
                         <EventList :events="events" small class="my-4" />
                         <!-- members -->
@@ -52,19 +55,19 @@
 
                 <!-- members only content -->
                 <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
-                    <span class="flex flex-wrap gap-4">
-                        <!-- new post button and form -->
-                        <button @click="showPostForm = !showPostForm; showInviteForm = false; showEventForm = false"
-                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
-                            {{ showPostForm ? 'Cancel Post' : 'New Post' }}
-                        </button>
 
-                        <!-- Invite users button -->
-                        <button @click="showInviteForm = !showInviteForm; showPostForm = false; showEventForm = false"
-                            class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
-                            {{ showInviteForm ? 'Close Invitation Form' : 'Invite Users' }}
-                        </button>
-
+                    <div v-if="!chatOpen">
+                        <!-- buttons for new post and invite user -->
+                        <span class="flex flex-wrap gap-4">
+                            <button @click="showPostForm = !showPostForm; showInviteForm = false; showEventForm = false"
+                                class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                                {{ showPostForm ? 'Cancel Post' : 'New Post' }}
+                            </button>
+                            <button @click="showInviteForm = !showInviteForm; showPostForm = false; showEventForm = false"
+                                class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
+                                {{ showInviteForm ? 'Close Invitation Form' : 'Invite Users' }}
+                            </button>
+    
                         <!-- New event button -->
                         <button @click="showEventForm = !showEventForm; showPostForm = false; showInviteForm = false"
                             class="mb-4 px-4 py-2 bg-nordic-primary-accent hover:bg-nordic-secondary-accent text-white rounded transition">
@@ -72,14 +75,21 @@
                         </button>
                     </span>
 
-                    <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
-                        @post-submitted="handlePostSubmitted" class="mb-8" />
+                        <!-- forms to create new post or invite user -->
+                        <NewGroupPostForm v-if="showPostForm" :group_id="Number(route.params.id)"
+                            @post-submitted="handlePostSubmitted" class="mb-8" />
+                        <InviteUsers v-if="showInviteForm" :members="members" class="mb-8" />
+                        <NewEventForm v-if="showEventForm" @event-created="handleEventCreated" class="mb-8" />
+                        
+                        <!-- group posts -->
+                        <PostsList :posts="posts" />
+                    </div>
 
-                    <InviteUsers v-if="showInviteForm" :members="members" class="mb-8" />
+                    <!-- chat -->
+                    <div v-else>
+                        <ChatBox :chat="groupChat" group-string="group"/> <!-- literal string passed to prop without : -->
+                    </div>
 
-                    <NewEventForm v-if="showEventForm" @event-created="handleEventCreated" class="mb-8" />
-
-                    <PostsList :posts="posts" />
                 </div>
             </template>
         </TwoColumnLayout>
@@ -107,6 +117,7 @@ import NewGroupPostForm from '@/components/NewGroupPostForm.vue'
 import GroupReqNoticesForAdmin from '@/components/GroupReqNoticesForAdmin.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import InviteUsers from '@/components/InviteUsers.vue'
+import ChatBox from '@/components/ChatBox.vue'
 import NewEventForm from '@/components/NewEventForm.vue'
 
 const route = useRoute()
@@ -123,6 +134,9 @@ const showEventForm = ref(false)
 const showLeaveConfirmation = ref(false)
 const showDeleteConfirmation = ref(false)
 const membershipStatus = ref('')
+
+const chatOpen = ref(false)
+const groupChat = ref(null)
 
 const handlePostSubmitted = (newPost) => {
     posts.value.unshift(newPost)
@@ -149,6 +163,33 @@ const groupButtonClass = computed(() => {
     }
     return '';
 });
+
+function toggleChat(){
+    chatOpen.value = !chatOpen.value
+    getChat(route.params.id)
+    //console.log("Chat open:", chatOpen.value)
+}
+
+
+async function getChat(groupId) {        // Fetch and filter posts
+    try {
+        const postsRes = await fetch(`${apiUrl}/api/group/chat/messages/${groupId}`, {     //
+            credentials: 'include'
+        })
+
+        if (!postsRes.ok) {
+            throw new Error(`Failed to fetch posts: ${postsRes.status}`)
+        }
+
+        groupChat.value = await postsRes.json()
+        //console.log("chat call succeeded")
+    } catch (error) {
+        console.log("error fetching group chat:", error)
+        errorStore.setError('Error', 'Something went wrong while loading group chat data.')
+        router.push('/error')
+        return
+    }
+}
 
 function prepareGroupAction() {
     if (!showLeaveConfirmation.value && membershipStatus.value === 'accepted') {
@@ -309,6 +350,7 @@ onMounted(() => {
     getPosts(route.params.id)
     getMembers(route.params.id)
     getEvents(route.params.id)
+    getChat(route.params.id)
 })
 
 watch(() => membershipStatus, () => {

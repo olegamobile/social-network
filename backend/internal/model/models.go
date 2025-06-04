@@ -148,16 +148,34 @@ type Notification struct {
 }
 
 type WSMessage struct {
-	Type    string `json:"type"`
-	From    string `json:"from"`
-	To      string `json:"receiver_id,omitempty"`
-	Content string `json:"content,omitempty"`
+	Type     string `json:"type"`
+	From     string `json:"from"`
+	FromName string `json:"from_name,omitempty"`
+	To       string `json:"receiver_id,omitempty"`
+	Content  string `json:"content,omitempty"`
 }
 
 type Client struct {
 	UserID string
 	Conn   *websocket.Conn
 	Send   chan WSMessage // individual send channel
+}
+
+type ChatMessage struct {
+	ID         int    `json:"id"`
+	SenderName string `json:"sender_name"`
+	SenderID   int    `json:"sender_id"`
+	ReceiverID int    `json:"receiver_id"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at,omitempty"`
+}
+
+type Chat struct {
+	IsActive bool          `json:"is_active"` // is there a follow relation between the users
+	Name     string        `json:"name"`
+	UserID   string        `json:"user_id"` // in case there are no messages
+	Messages []ChatMessage `json:"messages"`
 }
 
 var (
