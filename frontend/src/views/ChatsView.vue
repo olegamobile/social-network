@@ -88,7 +88,7 @@
                     <p class="text-nordic-light">Select a conversation or start a new one</p>
                 </div> -->
 
-                <ChatBox :chat="selectedChat" />
+                <ChatBox v-if="selectedChat" :chat="selectedChat" />
             </template>
         </TwoColumnLayout>
     </div>
