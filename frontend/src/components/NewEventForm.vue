@@ -32,7 +32,7 @@
 
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFormats } from '@/composables/useFormatting'
 

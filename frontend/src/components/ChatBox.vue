@@ -11,7 +11,7 @@
                 ]">
                     <p class="text-xs font-semibold mb-1">{{ msg.sender_name }}</p>
                     <p>{{ msg.content }}</p>
-                    <span class="text-xs opacity-70 block text-right">{{ formatTime(msg.created_at) }}</span>
+                    <span class="text-xs opacity-70 block text-right">{{ finnishTime(msg.created_at, 'medium', 'short') }}</span>
                 </div>
             </div>
             <div v-else class="h-full flex items-center justify-center">
@@ -53,6 +53,7 @@ import { useRoute } from 'vue-router'
 import { useWebSocketStore } from '@/stores/websocket'
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
+import { useFormats } from '@/composables/useFormatting'
 
 const props = defineProps({
     chat: {
@@ -72,6 +73,7 @@ const { isConnected } = storeToRefs(websocketStore)
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 const messagesContainer = ref(null);
+const { finnishTime } = useFormats();
 
 watch(() => websocketStore.message, (newMessage) => {
     if (newMessage && newMessage.type === `${props.groupString}chat_message` && props.chat) {
@@ -141,14 +143,6 @@ function sendMessage() {
 
     // Clear input
     newMessage.value = ''
-}
-
-function formatTime(isoString) {
-    const date = new Date(isoString)
-    return date.toLocaleString("fi-FI", {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-    }).replace("klo ", "")
 }
 
 function defaultChat() {
