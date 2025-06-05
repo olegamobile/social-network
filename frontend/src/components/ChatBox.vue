@@ -52,7 +52,6 @@ import { useRoute } from 'vue-router'
 import { useWebSocketStore } from '@/stores/websocket'
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
-import { useRoute } from 'vue-router'
 import { useFormats } from '@/composables/useFormatting'
 
 const props = defineProps({
@@ -73,7 +72,7 @@ const { isConnected } = storeToRefs(websocketStore)
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 const messagesContainer = ref(null);
-
+const { finnishTime } = useFormats();
 
 // Note: Ensure this watch block is aligned with the latest ChatBox.vue changes for deduplication.
 // It should primarily handle echoes for the senderconst { finnishTime } = useFormats();
