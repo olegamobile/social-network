@@ -44,7 +44,6 @@ import 'flatpickr/dist/flatpickr.css';
 const route = useRoute()
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const emit = defineEmits(['event-created'])
-const { currentTime } = useFormats()
 const { localDate, localTime } = useFormats();
 
 const timePickerConfig = reactive({
