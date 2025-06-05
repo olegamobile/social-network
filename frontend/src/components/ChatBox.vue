@@ -51,6 +51,7 @@ import { ref, watch, onMounted, nextTick } from 'vue'
 import { useWebSocketStore } from '@/stores/websocket'
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
     chat: {
@@ -69,9 +70,10 @@ const { isConnected } = storeToRefs(websocketStore)
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 const messagesContainer = ref(null);
+const route = useRoute()
 
 // Note: Ensure this watch block is aligned with the latest ChatBox.vue changes for deduplication.
-// It should primarily handle echoes for the sender and not add received messages.
+// It should primarily handle echoes for the sender
 watch(() => websocketStore.message, (newMsg) => {
     if (newMsg && newMsg.type === `${props.groupString}chat_message` && props.chat) {
 
@@ -89,8 +91,23 @@ watch(() => websocketStore.message, (newMsg) => {
             // you might have logic here to find and update/replace that local message.
             // For now, if messageAlreadyAdded is true, we simply return.
         }
-        // Removed receiver-side message adding from ChatBox.vue
-        // This is handled by ChatsView.vue now.
+
+        // private chat messages handled in ChatsView.vue, group chat messages in ChatBox.vue
+
+        if (!props.chat.messages) {
+            props.chat.messages = [];
+        }
+
+        // Check if message belongs to this groupchat
+        if (newMsg.type === 'groupchat_message' && props.groupString === 'group' && newMsg.receiver_id === route.params.id) {
+            props.chat.messages.push({
+                id: `${newMsg.from}_${Date.now()}`, // Unique ID for the message
+                content: newMsg.content,
+                sender_name: newMsg.from_name, // Use from_name from websocket message
+                sender_id: Number(newMsg.from),
+                created_at: new Date(newMsg.timestamp || Date.now()) // Use timestamp from WS or current
+            });
+        }
     }
 })
 
@@ -113,15 +130,17 @@ function sendMessage() {
         props.chat.messages = [message];
     }
 
-    websocketStore.send({
+    const wsMessage = {
         type: `${props.groupString}chat_message`,
         from: user.value.id,
         from_name: user.value.first_name,
-        receiver_id: props.chat.user_id || '0',
+        receiver_id: props.groupString ? route.params.id : props.chat.user_id || '0',
         content: newMessage.value,
         timestamp: Date.now(),
         id: msgId // Send the client-generated ID
-    });
+    }
+
+    websocketStore.send(wsMessage);
 
     newMessage.value = '';
 }
