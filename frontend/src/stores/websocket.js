@@ -36,7 +36,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
             try {
                 // Parse the incoming message
                 message.value = JSON.parse(event.data)
-                console.log('WebSocket message received:', message.value); // Generic log
+                //console.log('WebSocket message received:', message.value); // Generic log
 
                 // Handle 'new_notification'
                 if (message.value.type === 'new_notification') {
@@ -95,10 +95,6 @@ export const useWebSocketStore = defineStore('websocket', () => {
                         console.warn('Notification ID missing in notification_deleted message content:', deletedNotificationData);
                     }
                 }
-                // Potentially other message types here
-                // else {
-                //    console.log('Unhandled message type:', message.value.type);
-                // }
 
             } catch (error) {
                 console.error('Error parsing message envelope:', error, "Raw data:", event.data);
@@ -147,9 +143,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
             }, {})
 
             socket.value.send(JSON.stringify(processedData))
-
-            console.log("sending processed data:", JSON.stringify(processedData))
-
+            //console.log("sending processed data:", JSON.stringify(processedData))
             return true
         } catch (error) {
             console.error('Error sending message:', error)

@@ -35,7 +35,7 @@
                 </div>
 
                 <!-- Search bar -->
-                <div class="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end"
+                <!-- <div class="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end"
                     v-if="!isLoginPage && !isRegisterPage">
                     <div class="max-w-lg w-full lg:max-w-xs">
                         <label for="search-asocial" class="sr-only">Search</label>
@@ -48,7 +48,7 @@
                                 placeholder="Search Åsocial" type="search" />
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- notifications and profile link -->
                 <div class="hidden md:flex md:items-center md:ml-4 space-x-2" v-if="!isLoginPage && !isRegisterPage">
