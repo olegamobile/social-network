@@ -4,7 +4,6 @@ import (
 	"backend/internal/repository"
 	"backend/internal/service"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -39,7 +38,7 @@ func HandleGetGroupMessagesByGroupId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := service.ValidateSession(r)
+	_, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -52,7 +51,7 @@ func HandleGetGroupMessagesByGroupId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("The user and group Ids:", userID, groupId)
+	//fmt.Println("The user and group Ids:", userID, groupId)
 
 	chat, err := repository.GetGroupChat(groupId)
 	if err != nil {
