@@ -15,7 +15,7 @@
              focus:outline-none focus:ring-2 focus:ring-[var(--nordic-secondary-accent)] focus:border-[var(--nordic-secondary-accent)] resize-y"></textarea>
 
         <!-- datetime -->
-        <input v-model="form.event_datetime" type="datetime-local" required
+        <input v-model="form.event_datetime" type="datetime-local" :min="currentTime" required
             class="w-full px-4 py-2 border border-nordic-light rounded-md focus:outline-none focus:ring focus:ring-gray-200 text-nordic-dark" />
 
         <!-- submit button -->
@@ -32,18 +32,22 @@
 
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useFormats } from '@/composables/useFormatting'
 
 const route = useRoute()
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
 const emit = defineEmits(['event-created'])
+
 const form = ref({
     title: '',
     description: '',
     event_datetime: '',
     group_id: Number(route.params.id)
 });
+
+const { currentTime } = useFormats() 
 
 const createEvent = async () => {
     try {
@@ -67,7 +71,7 @@ const createEvent = async () => {
         } else {
             alert('Failed to create event. Are you logged in?')
         }
-        
+
         form.title = ''
         form.description = ''
         form.event_datetime = ''
