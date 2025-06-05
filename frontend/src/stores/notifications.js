@@ -47,12 +47,12 @@ export const useNotificationStore = defineStore('notifications', () => {
         if (!newNotification.is_read) {
             unreadCount.value++;
         }
-        console.log('New notification added locally, unread count:', unreadCount.value);
+        //console.log('New notification added locally, unread count:', unreadCount.value);
 
         try {
-            console.log('Refreshing all notifications to update pending statuses...');
+            //console.log('Refreshing all notifications to update pending statuses...');
             await fetchNotifications(); // Call fetchNotifications to refresh all
-            console.log('Notifications refreshed after new one arrived.');
+            //console.log('Notifications refreshed after new one arrived.');
         } catch (error) {
             console.error('Error refreshing notifications after new one arrived:', error);
             // Decide if any specific error handling is needed here for the fetchNotifications failure
