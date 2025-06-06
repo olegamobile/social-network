@@ -26,7 +26,7 @@ func setHandlers() {
 
 	http.HandleFunc("/api/events/create", middleware.WithCORS(handlers.HandleCreateEvent))
 	http.HandleFunc("/api/events/respond", middleware.WithCORS(handlers.HandleEventResponse))
-	http.HandleFunc("/api/events/", middleware.WithCORS(handlers.GetHandleEventByID))
+	http.HandleFunc("/api/events/", middleware.WithCORS(handlers.GetEventByID))
 	http.HandleFunc("/api/events/user", middleware.WithCORS(handlers.GetEventsByUserID))
 	http.HandleFunc("/api/events/group/", middleware.WithCORS(handlers.GetEventsByGroupID))
 

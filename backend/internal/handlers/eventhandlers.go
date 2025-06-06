@@ -69,7 +69,7 @@ func HandleEventResponse(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetHandleEventByID(w http.ResponseWriter, r *http.Request) {
+func GetEventByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -89,20 +89,9 @@ func GetHandleEventByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the user is a member of the group
-	event, err := repository.GetEventByID(eventID)
-	if err != nil {
-		http.Error(w, "Event not found", http.StatusNotFound)
-		return
-	}
-
-	isMember, err := repository.CheckUserGroupMembership(userID, event.GroupID)
-	if err != nil {
-		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
-		return
-	}
-	if !isMember {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
+	event, statusCode := service.GetEventByID(userID, eventID)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) {
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
@@ -151,20 +140,9 @@ func GetEventsByGroupID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the user is a member of the group
-	isMember, err := repository.CheckUserGroupMembership(userID, groupID)
-	if err != nil {
-		http.Error(w, "Failed to check group membership", http.StatusInternalServerError)
-		return
-	}
-	if !isMember {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
-		return
-	}
-
-	events, err := repository.GetEventsByGroup(groupID, userID)
-	if err != nil {
-		http.Error(w, "Failed to fetch events for group", http.StatusInternalServerError)
+	events, statusCode := service.GetEventsByGroupID(userID, groupID)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) {
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 

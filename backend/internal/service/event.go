@@ -61,3 +61,39 @@ func RespondToEvent(resp model.EventResponse, userID int) int {
 
 	return http.StatusOK
 }
+
+func GetEventByID(userID, eventID int) (model.Event, int) {
+	event, err := repository.GetEventByID(eventID)
+	if err != nil {
+		return event, http.StatusNotFound
+	}
+
+	// Check if the user is a member of the group
+	isMember, err := repository.CheckUserGroupMembership(userID, event.GroupID)
+	if err != nil {
+		return event, http.StatusInternalServerError
+	}
+	if !isMember {
+		return event, http.StatusForbidden
+	}
+
+	return event, http.StatusOK
+}
+
+func GetEventsByGroupID(userID, groupID int) ([]model.Event, int) {
+	// Check if the user is a member of the group
+	isMember, err := repository.CheckUserGroupMembership(userID, groupID)
+	if err != nil {
+		return nil, http.StatusInternalServerError
+	}
+	if !isMember {
+		return nil, http.StatusForbidden
+	}
+
+	events, err := repository.GetEventsByGroup(groupID, userID)
+	if err != nil {
+		return nil, http.StatusInternalServerError
+	}
+
+	return events, http.StatusOK
+}
