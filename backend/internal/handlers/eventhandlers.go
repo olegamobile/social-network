@@ -32,31 +32,11 @@ func HandleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event.CreatorID = userID
-	event.Creator, err = repository.GetUserById(userID, false)
+	event, err = service.CreateEvent(event, userID)
 	if err != nil {
-		fmt.Println("error getting creator at HandleCreateEvent:", err)
-		http.Error(w, "Failed to get user data", http.StatusInternalServerError)
+		http.Error(w, "Failed to create event", http.StatusInternalServerError)
 		return
 	}
-	group, err := repository.GetGroupById(event.GroupID)
-	if err != nil {
-		fmt.Println("error getting group at HandleCreateEvent:", err)
-		http.Error(w, "Failed to get group data", http.StatusInternalServerError)
-		return
-	}
-	event.Group = group.Title
-
-	fmt.Println("Event before creation:", event)
-
-	id, err := repository.CreateEvent(event)
-	if err != nil {
-		fmt.Println("error creating event at HandleCreateEvent:", err)
-		http.Error(w, "Could not create event", http.StatusInternalServerError)
-		return
-	}
-
-	event.ID = &id
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(event)
@@ -79,27 +59,10 @@ func HandleEventResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	resp.UserID = userID
 
-	if resp.Response != "going" && resp.Response != "not_going" && resp.Response != "pending" {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
-		return
-	}
-
-	oldResponse, err := repository.GetEventResponse(resp.EventID, resp.UserID)
-	if err != nil {
-		http.Error(w, "Could not get previous response", http.StatusInternalServerError)
-		return
-	}
-
-	if oldResponse == resp.Response { // remove old response when clicking same button
-		resp.Response = "pending"
-	}
-
-	err = repository.SaveEventResponse(resp.EventID, resp.UserID, resp.Response)
-	if err != nil {
-		fmt.Println("Saving event response failed:", err)
-		http.Error(w, "Could not save response", http.StatusInternalServerError)
+	statusCode := service.RespondToEvent(resp, userID)
+	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) {
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
@@ -152,13 +115,6 @@ func GetEventsByUserID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	// idStr := strings.TrimPrefix(r.URL.Path, "/api/events/user/")
-	// userID, err := strconv.Atoi(idStr)
-	// if err != nil {
-	// 	http.Error(w, "Invalid user ID", http.StatusBadRequest)
-	// 	return
-	// }
 
 	userID, err := service.ValidateSession(r)
 	if err != nil {
