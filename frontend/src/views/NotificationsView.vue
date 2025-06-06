@@ -9,7 +9,12 @@
                     Current ({{ unreadCount }})
                 </button>
                 <button @click="showCurrent = false" :class="{ active: !showCurrent }">
-                    Old ({{ notifications.length - unreadCount }})
+                    <div v-if="notifications && notifications.length > 0">
+                        Old ({{ notifications.length - unreadCount }})
+                    </div>
+                    <div v-else>
+                        Old (0)
+                    </div>
                 </button>
             </template>
 
