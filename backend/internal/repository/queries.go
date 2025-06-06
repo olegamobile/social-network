@@ -271,6 +271,7 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
         u.avatar_path,
         p.content,
         p.image_path,
+		p.privacy_level AS privacy,
         NULL AS group_id,
         NULL AS group_name,
         p.created_at AS created_at_sort,
@@ -323,6 +324,7 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
         u.avatar_path,
         gp.content,
         gp.image_path,
+		NULL AS privacy,
         gp.group_id,
         g.title AS group_name,
         gp.created_at AS created_at_sort,
@@ -362,6 +364,7 @@ func GetFeedPostsBefore(userID int, cursorTime time.Time, limit, lastPostId int)
 			&avatarUrl,
 			&post.Content,
 			&post.ImagePath,
+			&post.Privacy,
 			&post.GroupID,
 			&post.GroupName,
 			&post.CreatedAt,
@@ -397,6 +400,7 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 		p.image_path,
 		COUNT(c.id) AS comment_count,
 		'regular' AS post_type,
+		p.privacy_level AS privacy,
 		NULL AS group_id,
         NULL AS group_name
 	FROM posts p
@@ -450,6 +454,7 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
         gp.image_path,
     	COUNT(gc.id) AS comment_count,
     	'group' AS post_type,
+		NULL AS privacy,
         gp.group_id,
         g.title AS group_name
     FROM group_posts gp
@@ -473,7 +478,7 @@ func GetPostsByUserId(userId, targetId int) ([]model.Post, error) {
 		var p model.Post
 		var firstname, lastname string
 		var avatarUrl sql.NullString
-		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.ImagePath, &p.NumberOfComments, &p.PostType, &p.GroupID, &p.GroupName)
+		err := rows.Scan(&p.ID, &p.UserID, &firstname, &lastname, &avatarUrl, &p.Content, &p.CreatedAt, &p.ImagePath, &p.NumberOfComments, &p.PostType, &p.Privacy, &p.GroupID, &p.GroupName)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
