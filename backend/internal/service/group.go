@@ -108,8 +108,6 @@ func DeleteGroup(userID, targetID int) int {
 	return http.StatusOK
 }
 
-// newly moved logic
-
 func PostsByGroupId(userId, targetId int) ([]model.Post, error) {
 	viewGroup, err := repository.ViewFullGroupOrNot(userId, targetId)
 	if err != nil {
@@ -226,20 +224,17 @@ func GroupMembership(userID int, req model.GroupRequest) int {
 		gmId, statusCode = repository.GroupRequest(userID, req.TargetID) // 'approval_status' to pending, 'status' to enable
 		if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) {
 			fmt.Println("error code at HandleFollowAction:", statusCode)
-			//http.Error(w, http.StatusText(statusCode), statusCode)
 			return statusCode
 		}
 
 		adminID, err := repository.GetAdminIdByGroupId(req.TargetID)
 		if err != nil {
 			fmt.Println("error getting admin in HandleGroupMembership:", err)
-			//http.Error(w, "error getting admin id", http.StatusBadRequest)
 			return http.StatusBadRequest
 		}
 
 		_, err = repository.InsertNotification(userID, adminID, "group_join_request", gmId) // last id needs to be id at group members table
 		if err != nil {
-			//http.Error(w, "error inserting notification in HandleGroupMembership", http.StatusBadRequest)
 			return http.StatusBadRequest
 		}
 	case "leave":
@@ -248,7 +243,6 @@ func GroupMembership(userID int, req model.GroupRequest) int {
 		notificationID, err := repository.RemoveGroupRequestNotification(userID, req.TargetID)
 		if err != nil && err != sql.ErrNoRows {
 			log.Printf("Error removing group join request notification: %v", err)
-			//http.Error(w, "Failed to remove group join request notification", http.StatusInternalServerError)
 			return http.StatusInternalServerError
 		}
 
@@ -260,7 +254,6 @@ func GroupMembership(userID int, req model.GroupRequest) int {
 		statusCode = repository.LeaveGroup(userID, req.TargetID) // req.TargetID is groupID
 		if statusCode != http.StatusOK {
 			log.Printf("Error leaving group (cancelling request): status code %d for user %d, group %d", statusCode, userID, req.TargetID)
-			//http.Error(w, http.StatusText(statusCode), statusCode)
 			return statusCode
 		}
 
@@ -282,13 +275,11 @@ func GroupMembership(userID int, req model.GroupRequest) int {
 	case "delete":
 		statusCode = DeleteGroup(userID, req.TargetID)
 	default:
-		//http.Error(w, "Unknown action", http.StatusBadRequest)
 		statusCode = http.StatusBadRequest
 	}
 
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
 		fmt.Println("error code at HandleFollowAction:", statusCode)
-		//http.Error(w, http.StatusText(statusCode), statusCode)
 		return statusCode
 	}
 

@@ -61,7 +61,7 @@ func setHandlers() {
 	http.HandleFunc("/api/follow/requests/{id}/decline", middleware.WithCORS(handlers.HandleFollowRequestApprove))
 	http.HandleFunc("/api/suggest/users", middleware.WithCORS(handlers.GetSuggestedUsers))
 
-	http.HandleFunc("/api/notifications", middleware.WithCORS(handlers.GetNotifications))
+	http.HandleFunc("/api/notifications", middleware.WithCORS(handlers.HandleGetNotifications))
 	http.HandleFunc("/api/notifications/{id}", middleware.WithCORS(handlers.GetNotificationByID))
 	http.HandleFunc("/api/notifications/{id}/read", middleware.WithCORS(handlers.ReadNotification))
 	http.HandleFunc("/api/notifications/new", middleware.WithCORS(handlers.GetNewNotifications))
