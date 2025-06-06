@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -67,8 +66,6 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseMultipartForm(10 << 20) // 10MB limit
 	if err != nil {
-		fmt.Println("01", err)
-
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{"message": "Failed to parse form"})
@@ -87,8 +84,6 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	about := strings.TrimSpace(r.FormValue("about"))
 
 	if email == "" || password == "" || firstName == "" || lastName == "" || dob == "" {
-		fmt.Println("02 missing fields")
-
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{"message": "Missing required fields"})
@@ -252,7 +247,7 @@ func SearchUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
+func HandleGetFeedPosts(w http.ResponseWriter, r *http.Request) {
 	userId, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -262,29 +257,10 @@ func GetFeedPosts(w http.ResponseWriter, r *http.Request) {
 	cursor := r.URL.Query().Get("cursor")
 	limitStr := r.URL.Query().Get("limit")
 	lastPostIdStr := r.URL.Query().Get("last_post_id")
-	limit := 10
-	lastPostId := 0
-	if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
-		limit = l
-	}
-	if lpid, err := strconv.Atoi(lastPostIdStr); err == nil && lpid > 0 {
-		lastPostId = lpid
-	}
 
-	cursorTime := time.Now().UTC() // use current time by default
-
-	if cursor != "" {
-		t, err := time.Parse(time.RFC3339, cursor)
-		if err == nil {
-			cursorTime = t
-		}
-	}
-
-	cursorTime = cursorTime.Truncate(time.Second)
-
-	posts, err := repository.GetFeedPostsBefore(userId, cursorTime, limit, lastPostId)
+	posts, err := service.GetFeedPosts(cursor, limitStr, lastPostIdStr, userId)
 	if err != nil {
-		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
@@ -351,7 +327,6 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid viewers list", http.StatusBadRequest)
 			return
 		}
-		//fmt.Println("viewers:", viewers)
 	}
 
 	var imagePath *string
@@ -391,39 +366,29 @@ func HandleCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	PostIDstring := r.URL.Query().Get("post_id")
-	if PostIDstring == "" {
+	postIDstring := r.URL.Query().Get("post_id")
+	if postIDstring == "" {
 		fmt.Println("empty postId")
 		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
 		return
 	}
-	PostID, err := strconv.Atoi(PostIDstring)
-	if err != nil {
-		fmt.Println("can not convert postId")
-		return
-	}
 
-	Type := r.URL.Query().Get("type")
-	if Type == "" {
+	postType := r.URL.Query().Get("type")
+	if postType == "" {
 		fmt.Println("empty postId")
 		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
 		return
 	}
-	var comments []model.Comment
-	if Type == "regular" {
-		comments, err = repository.ReadAllCommentsForPost(PostID, userID)
-	} else if Type == "group" {
-		comments, err = repository.ReadAllCommentsForGroupPost(PostID, userID)
-	}
 
+	comments, err := service.CommentsForPost(postIDstring, postType, userID)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, "Failed to get comments", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comments)
-
 }
 
 func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
@@ -431,21 +396,17 @@ func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	UserID, err := service.ValidateSession(r)
+
+	userID, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	PostIDstring := r.URL.Query().Get("post_id")
-	if PostIDstring == "" {
+	postIDstring := r.URL.Query().Get("post_id")
+	if postIDstring == "" {
 		fmt.Println("empty postId")
 		json.NewEncoder(w).Encode([]model.User{}) // Return empty array for empty query
-		return
-	}
-	PostID, err := strconv.Atoi(PostIDstring)
-	if err != nil {
-		fmt.Println("can not convert postId")
 		return
 	}
 
@@ -463,15 +424,6 @@ func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
 	payload.Content = r.FormValue("content")
 	payload.Type = r.FormValue("type")
 
-	// if err != nil || payload.Content == "" || payload.Type == "" {
-	// 	fmt.Println("type is:", payload.Type)
-	// 	fmt.Println("content is:", payload.Content)
-	// 	fmt.Println("error in Create comment:", err)
-	// 	http.Error(w, "BadRequestError", http.StatusBadRequest)
-	// 	return
-	// }
-	fmt.Println("Received comment:", payload.Content, "Type:", payload.Type, "Post ID:", PostID)
-
 	var imagePath *string
 	file, header, err := r.FormFile("image")
 	if err == nil {
@@ -488,22 +440,16 @@ func HandleCreateCommentsForPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if payload.Type == "regular" {
-		err = repository.InsertComment(payload.Content, UserID, PostID, imagePath)
-	} else if payload.Type == "group" {
-		err = repository.InsertGroupComment(payload.Content, UserID, PostID, imagePath)
-	}
+	err = service.CreateCommentsForPost(userID, postIDstring, payload.Type, payload.Content, imagePath)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		http.Error(w, "Failed to create comment", http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 	})
-
 }
 
 func GetSuggestedUsers(w http.ResponseWriter, r *http.Request) {

@@ -22,7 +22,7 @@ func setHandlers() {
 	http.HandleFunc("/api/group/posts/", middleware.WithCORS(handlers.HandlePostsByGroupId))
 	http.HandleFunc("/api/group/members/", middleware.WithCORS(handlers.HandleMembersByGroupId))
 	http.HandleFunc("/api/group/events/", middleware.WithCORS(handlers.HandleEventsByGroupId))
-	http.HandleFunc("/api/homefeed", middleware.WithCORS(handlers.GetFeedPosts))
+	http.HandleFunc("/api/homefeed", middleware.WithCORS(handlers.HandleGetFeedPosts))
 
 	http.HandleFunc("/api/events/create", middleware.WithCORS(handlers.HandleCreateEvent))
 	http.HandleFunc("/api/events/respond", middleware.WithCORS(handlers.HandleEventResponse))
