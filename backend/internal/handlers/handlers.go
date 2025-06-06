@@ -56,7 +56,9 @@ func HandleMe(w http.ResponseWriter, r *http.Request) {
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Method not allowed"})
 		fmt.Println("00")
 		return
 	}
@@ -64,7 +66,10 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20) // 10MB limit
 	if err != nil {
 		fmt.Println("01", err)
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Failed to parse form"})
 		return
 	}
 
@@ -81,7 +86,10 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	if email == "" || password == "" || firstName == "" || lastName == "" || dob == "" {
 		fmt.Println("02 missing fields")
-		http.Error(w, "Missing required fields", http.StatusBadRequest)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Missing required fields"})
 		return
 	}
 
@@ -92,7 +100,9 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 		avatarPath, err = service.UploadAvatar(file, header)
 		if err != nil {
-			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"message": "Failed to save image"})
 			return
 		}
 	} else {
@@ -121,7 +131,9 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	errMsg, statusCode := service.RegisterUser(userInfo)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
-		http.Error(w, errMsg, statusCode)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(statusCode)
+		json.NewEncoder(w).Encode(map[string]string{"message": errMsg})
 		return
 	}
 
@@ -138,7 +150,10 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		http.Error(w, "Error parsing form", http.StatusBadRequest)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Error parsing form"})
 		return
 	}
 
@@ -160,7 +175,9 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 		updateData.AvatarPath, err = service.UploadAvatar(file, header)
 		if err != nil {
-			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to save image"})
 			return
 		}
 	} else {
@@ -174,11 +191,15 @@ func HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 
 	usr, errMsg, errStatus := service.UpdateUserProfile(userId, updateData)
 	if errMsg != "" {
-		http.Error(w, errMsg, errStatus)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(errStatus)
+		json.NewEncoder(w).Encode(map[string]string{"error": errMsg})
 		fmt.Println("Error 3", errMsg)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(usr)
 }
