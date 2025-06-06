@@ -4,7 +4,7 @@
 
         <!-- image -->
         <img v-if="post.image_path" :src="`${apiUrl}/${post.image_path}`" alt=""
-            class="w-fullrounded-md border border-[var(--nordic-border-light)]" />
+            class="w-full rounded-md border border-[var(--nordic-border-light)]" />
 
         <!-- text content -->
         <p class="post-content text-[var(--nordic-text-dark)]text-base">
