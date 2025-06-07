@@ -2,7 +2,7 @@
 
 -- Insert users (14 columns, all specified)
 INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth, avatar_path, nickname, about_me, is_public, created_at, updated_at, updated_by, status) VALUES
-('emma.bauer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Emma', 'Bauer', '1993-03-22', 'data/uploads/avatars/1747642156208195000.jpeg', 'EmB', 'Loves painting and coffee shops.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
+('emma.bauer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Emma', 'Bauer', '1993-03-22', 'data/uploads/avatars/1747642156208195000.jpeg', 'EmB', 'Loves painting and coffee shops.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('liam.muller@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Liam', 'Müller', '1987-09-14', 'data/uploads/avatars/1747642184916489000.webp', 'LiamM', 'Avid cyclist and tech enthusiast.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('sofia.vogel@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Sofia', 'Vogel', '1995-06-30', 'data/uploads/avatars/1747642206647198000.jpeg', 'Sofi', 'Enjoys yoga and travel.', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
 ('noah.fischer@example.com', '$2a$10$RhuX9T/SPdJ8vMxGvYcjaufLkseSRvBS5VHwFChHL4W4AwPRlS8bC', 'Noah', 'Fischer', '1990-12-05', 'data/uploads/avatars/1747642227982390000.jpeg', 'NoahF', 'Music lover and amateur chef.', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'enable'),
@@ -59,8 +59,8 @@ INSERT INTO follow_requests (follower_id, followed_id, approval_status, created_
 (7, 4, 'accepted', CURRENT_TIMESTAMP),
 (9, 6, 'declined', CURRENT_TIMESTAMP),
 (11, 8, 'pending', CURRENT_TIMESTAMP),
-(13, 5, 'accepted', CURRENT_TIMESTAMP),
-(1, 9, 'pending', CURRENT_TIMESTAMP),
+(13, 8, 'accepted', CURRENT_TIMESTAMP),
+(1, 13, 'pending', CURRENT_TIMESTAMP),
 (11, 13, 'accepted', CURRENT_TIMESTAMP),
 (3, 11, 'pending', CURRENT_TIMESTAMP);
 
@@ -602,8 +602,8 @@ INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_
 (4, 'follow_request', 8, NULL, NULL, NULL, 'Mia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
 (6, 'follow_request', 9, NULL, NULL, NULL, 'Lena wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'),    -- declined
 (8, 'follow_request', 10, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(5, 'follow_request', 11, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
-(9, 'follow_request', 12, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
+(8, 'follow_request', 11, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
+(13, 'follow_request', 12, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (13, 'follow_request', 13, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
 (11, 'follow_request', 14, NULL, NULL, NULL, 'Sofia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 -- Group invitation notifications (corrected to use group_invite_id)
