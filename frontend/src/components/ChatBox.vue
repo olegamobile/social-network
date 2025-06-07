@@ -4,13 +4,12 @@
         <div v-if="chat" ref="messagesContainer"
             class="messages-container mb-4 p-4 bg-gray-50 rounded-lg h-96 overflow-y-auto">
             <div v-if="chat.messages && chat.messages.length > 0">
-                <div v-for="msg in chat.messages" :key="msg.id" :class="[
-                    'mb-3 p-3 rounded-lg max-w-xs',
-                    msg.sender_id === user.id ? 'ml-auto bg-nordic-primary-accent text-white' : 'bg-gray-200'
-                ]">
+                <div v-for="msg in chat.messages" :key="msg.id"
+                    :class="['mb-3 p-3 rounded-lg max-w-xs', (user && msg.sender_id === user.id) ? 'ml-auto bg-nordic-primary-accent text-white' : 'bg-gray-200']">
                     <p class="text-xs font-semibold mb-1">{{ msg.sender_name }}</p>
                     <p class="break-words">{{ msg.content }}</p>
-                    <span class="text-xs opacity-70 block text-right">{{ finnishTime(msg.created_at, 'medium', 'short') }}</span>
+                    <span class="text-xs opacity-70 block text-right">{{ finnishTime(msg.created_at, 'medium', 'short')
+                        }}</span>
                 </div>
             </div>
             <div v-else class="h-full flex items-center justify-center">
