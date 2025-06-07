@@ -120,7 +120,7 @@ func FollowRequestApprove(userID int, data []string) int {
 	case "accept":
 		statusCode = repository.AcceptFollowRequest(userID, requestID)
 	case "decline":
-		statusCode = repository.AcceptFollowRequest(userID, requestID)
+		statusCode = repository.DeclineFollowRequest(userID, requestID)
 	default:
 		statusCode = http.StatusBadRequest
 	}
