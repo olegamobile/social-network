@@ -80,8 +80,7 @@ export const useNotificationStore = defineStore('notifications', () => {
      * @param {number} notificationId - The ID of the notification to mark as read.
      */
     async function markAsRead(notificationId) {
-
-        console.log("marking notification", notificationId, "as read")
+        //console.log("marking notification", notificationId, "as read")
 
         try {
             const response = await fetch(`${apiUrl}/api/notifications/${notificationId}/read`, { // Corrected API URL

@@ -14,8 +14,6 @@ func Membership(userId, groupId int) (string, error) {
 		return "", err
 	}
 
-	fmt.Println("Membership:", userId, adminId)
-
 	if userId == adminId {
 		return "admin", nil
 	}
