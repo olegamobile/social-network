@@ -44,6 +44,7 @@ func CreatePost(content, privacyLvl string, imagePath *string, userID int, viewe
 	post.Content = content
 	post.CreatedAt = createdAt
 	post.PostType = "regular"
+	post.Privacy = &privacyLvl
 	return post, http.StatusOK
 }
 
