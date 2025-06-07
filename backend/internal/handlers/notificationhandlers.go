@@ -13,6 +13,7 @@ import (
 func HandleGetNotifications(w http.ResponseWriter, r *http.Request) {
 	userID, err := service.ValidateSession(r)
 	if err != nil {
+		fmt.Println("not authorized at GetNotifications:", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}

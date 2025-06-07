@@ -76,6 +76,8 @@ async function approveFollowRequest(id, action) {
 }
 
 async function approveGroupRequest(groupID, senderID, action) {
+    //console.log(action, "to group request for group", groupID, "from user", senderID)
+
     try {
         const res = await fetch(`${apiUrl}/api/group/requests/${action}`, {
             method: 'POST',
