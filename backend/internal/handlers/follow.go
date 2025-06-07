@@ -247,7 +247,7 @@ func HandleFollowRequestApprove(w http.ResponseWriter, r *http.Request) {
 	case "accept":
 		statusCode = repository.AcceptFollowRequest(userID, requestID)
 	case "decline":
-		statusCode = repository.AcceptFollowRequest(userID, requestID)
+		statusCode = repository.DeclineFollowRequest(userID, requestID)
 	default:
 		http.Error(w, "Unknown action", http.StatusBadRequest)
 	}

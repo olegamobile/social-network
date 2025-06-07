@@ -80,12 +80,16 @@ export const useNotificationStore = defineStore('notifications', () => {
      * @param {number} notificationId - The ID of the notification to mark as read.
      */
     async function markAsRead(notificationId) {
+        //console.log("marking notification", notificationId, "as read")
+
         try {
             const response = await fetch(`${apiUrl}/api/notifications/${notificationId}/read`, { // Corrected API URL
                 method: 'POST',
                 credentials: 'include',
             });
+
             if (!response.ok) {
+                console.log("marking notification", notificationId, "as read failed miserably")
                 throw new Error(`Failed to mark notification ${notificationId} as read: ${response.statusText}`);
             }
 
@@ -100,6 +104,7 @@ export const useNotificationStore = defineStore('notifications', () => {
             //console.log(`Notification ${notificationId} marked as read. Unread count:`, unreadCount.value);
 
         } catch (error) {
+            console.log("Notification", notificationId, "as read failed at first hurdle:", error)
             console.error(`Error in markAsRead for notification ${notificationId}:`, error);
         }
     }
