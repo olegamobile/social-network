@@ -36,6 +36,7 @@ func GroupMembership(userId, targetId int) (string, int, error) {
 	WHERE gm.group_id = ? AND gm.user_id = ? AND gm.status = 'enable' AND g.status = 'enable'`, targetId, userId).Scan(&approval, &adminId)
 	if err != nil {
 		if err == sql.ErrNoRows { // No membership found
+			fmt.Println("no membership found for user", userId, "in group", targetId)
 			return approval, adminId, nil
 		}
 		return approval, adminId, err

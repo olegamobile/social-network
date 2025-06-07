@@ -519,6 +519,7 @@ func HandleGroupRequestApprove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if membership != "admin" {
+		fmt.Println("non-admin tried to approve group request: user", userID, "is", membership, "in group", groupID)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}

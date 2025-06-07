@@ -10,8 +10,11 @@ import (
 func Membership(userId, groupId int) (string, error) {
 	approval, adminId, err := repository.GroupMembership(userId, groupId)
 	if err != nil {
+		fmt.Println("error at Membership:", err)
 		return "", err
 	}
+
+	fmt.Println("Membership:", userId, adminId)
 
 	if userId == adminId {
 		return "admin", nil

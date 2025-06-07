@@ -128,7 +128,8 @@ INSERT INTO group_members (group_id, user_id, approval_status, created_at, updat
 (14, 10, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
 (15, 1, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
 (15, 4, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
-(15, 6, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable');
+(15, 6, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable'),
+(1, 1, 'accepted', CURRENT_TIMESTAMP, NULL, 'enable');
 
 -- Insert group invitations (8 columns)
 INSERT INTO group_invitations (group_id, user_id, inviter_id, approval_status, created_at, updated_by, status) VALUES
