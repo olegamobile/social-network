@@ -38,7 +38,7 @@ import FollowsInSidebar from '@/components/FollowsInSidebar.vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia';
 import GroupsInSidebar from '@/components/GroupsInSidebar.vue'
-import debounce from 'lodash.debounce';
+import throttle from 'lodash.throttle';
 
 const posts = ref([])
 const apiUrl = import.meta.env.VITE_API_URL || '/api'
@@ -112,7 +112,7 @@ async function _getHomeFeed() {
     }
 }
 
-const getHomeFeed = debounce(_getHomeFeed, 1000);
+const getHomeFeed = throttle (_getHomeFeed, 1000);
 
 onMounted(async () => {
     await getHomeFeed()
