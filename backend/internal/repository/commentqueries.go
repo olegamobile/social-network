@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/database"
 	"backend/internal/model"
+	"database/sql"
 	"fmt"
 )
 
@@ -44,6 +45,7 @@ ORDER BY c.created_at DESC;
 	for rows.Next() {
 		var comment model.Comment
 		var user model.User
+		var avatarUrl sql.NullString
 
 		err := rows.Scan(
 			&user.ID,
@@ -52,7 +54,8 @@ ORDER BY c.created_at DESC;
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.UpdatedBy,
-			&user.AvatarPath,
+			//&user.AvatarPath,
+			&avatarUrl,
 
 			&comment.ID,
 			&comment.PostId,
@@ -65,6 +68,12 @@ ORDER BY c.created_at DESC;
 		)
 		if err != nil {
 			return nil, err
+		}
+
+		if avatarUrl.Valid {
+			user.AvatarPath = avatarUrl.String
+		} else {
+			user.AvatarPath = ""
 		}
 
 		comment.User = user
