@@ -176,7 +176,7 @@ const loadComments = async () => {
         });
         comments.value = await res.json();
         // Update the count after loading
-        commentCount.value = comments.value.length;
+        commentCount.value = comments.value?.length || 0;
         //console.log("Image is: ", comments.)
     } catch (error) {
         comments.value = [];
