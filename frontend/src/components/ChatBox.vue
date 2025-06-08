@@ -90,18 +90,7 @@ const props = defineProps({
 })
 
 function onSelectEmoji(emoji) {
-    //console.log(emoji)
     newMessage.value += emoji.i
-    /*
-      // result
-      { 
-          i: "😚", 
-          n: ["kissing face"], 
-          r: "1f61a", // with skin tone
-          t: "neutral", // skin tone
-          u: "1f61a" // without tone
-      }
-      */
 }
 
 // Note: Ensure this watch block is aligned with the latest ChatBox.vue changes for deduplication.

@@ -76,7 +76,7 @@ import InvitedGroupsInSidebar from '@/components/InvitedGroupsInSidebar.vue'
 import AdminGroupsInSidebar from '@/components/AdminGroupsInSidebar.vue'
 import NewGroupForm from '@/components/NewGroupForm.vue'
 import { useArrayUtils } from '@/composables/useArrayUtils';
-import throttle from 'lodash.throttle';
+import debounce from 'lodash.debounce';
 
 const apiUrl = import.meta.env.VITE_API_URL
 const errorStore = useErrorStore()
@@ -150,8 +150,7 @@ async function fetchGroups() {
     }
 }
 
-
-const searchGroups = throttle(_searchGroups, 1000);
+const searchGroups = debounce(_searchGroups, 500);
 
 onMounted(() => {
     fetchGroups()

@@ -13,14 +13,13 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@tailwindcss/vite": "^4.1.7",
-    "lodash.throttle": "^4.1.1",
+    "lodash.debounce": "^4.0.8",
     "pinia": "^3.0.2",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1",
     "vue3-emoji-picker": "^1.1.8"
   },
   "devDependencies": {
-    "@types/lodash.throttle": "^4.1.9",
     "@vitejs/plugin-vue": "^5.2.3",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",

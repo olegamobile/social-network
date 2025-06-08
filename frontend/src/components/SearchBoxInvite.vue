@@ -15,13 +15,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import throttle from 'lodash.throttle'
+import debounce from 'lodash.debounce';
 
 const emit = defineEmits(['results'])
 
 const apiUrl = import.meta.env.VITE_API_URL
 const searchQuery = ref('')
-const searchUsers = throttle(_searchUsers, 1000)
+const searchUsers = debounce(_searchUsers, 500)
 const route = useRoute()
 
 async function _searchUsers() {
