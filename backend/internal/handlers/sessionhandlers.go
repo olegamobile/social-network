@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-const defaultAvatarPath = "data/default/avatardefault01.jpg"
+// const defaultAvatarPath = "data/default/avatardefault01.jpg"
+const defaultAvatarPath = "data/default/profile.svg"
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	user, statusCode := service.Login(w, r)
