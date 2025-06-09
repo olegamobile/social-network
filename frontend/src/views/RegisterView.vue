@@ -22,7 +22,7 @@
 
                     <div class="flex flex-col">
                         <label for="dob" class="ml-3 mb-1 text-nordic-light">Date of Birth</label>
-                        <input v-model="form.dob" type="date"  :max="localDate" required
+                        <input id="dob" v-model="form.dob" type="date"  :max="localDate" required
                             class="p-3 border border-nordic-light rounded-md focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent" />
                     </div>
 

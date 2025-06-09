@@ -70,7 +70,7 @@
                                 class="h-full w-full object-cover rounded-full border border-nordic-light" />
                             <i v-else class="fas fa-user"></i>
                         </div>
-                        <span class="ml-2">{{ user?.first_name }}</span>
+                        <span class="ml-2 break-all">{{ user?.first_name }}</span>
                     </router-link>
 
                     <button class="top-bar-button" @click="logout" data-title="Logout" aria-label="Logout">

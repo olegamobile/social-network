@@ -6,8 +6,8 @@
             <template #sidebar>
                 <div v-if="group">
                     <!-- name and description -->
-                    <h2 class="text-2xl font-bold mb-4">{{ group.title }}</h2>
-                    <p>{{ group.description }}</p>
+                    <h2 class="text-2xl font-bold mb-4 break-all">{{ group.title }}</h2>
+                    <p class="break-all">{{ group.description }}</p>
 
                     <!-- members only information -->
                     <div v-if="membershipStatus === 'accepted' || membershipStatus === 'admin'">
@@ -47,7 +47,7 @@
                     <img :src="`${apiUrl}/data/default/groupdefault01.jpg`" alt="Page Image"
                         class="w-full max-w-screen-lg mb-4 h-40 object-cover rounded" />
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <h1 v-if="group && group.title" class="text-white text-5xl font-extrabold text-center">
+                        <h1 v-if="group && group.title" class="text-white text-5xl font-extrabold text-center truncate">
                             {{ group.title }}
                         </h1>
                     </div>

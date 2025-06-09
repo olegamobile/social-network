@@ -6,8 +6,8 @@
             <div v-if="chat.messages && chat.messages.length > 0">
                 <div v-for="msg in chat.messages" :key="msg.id"
                     :class="['mb-3 p-3 rounded-lg max-w-xs', (user && msg.sender_id === user.id) ? 'ml-auto bg-nordic-primary-accent text-white' : 'bg-gray-200']">
-                    <p class="text-xs font-semibold mb-1">{{ msg.sender_name }}</p>
-                    <p class="break-words">{{ msg.content }}</p>
+                    <p class="text-xs font-semibold mb-1 break-all">{{ msg.sender_name }}</p>
+                    <p class="break-all">{{ msg.content }}</p>
                     <span class="text-xs opacity-70 block text-right">{{ finnishTime(msg.created_at, 'medium', 'short')
                         }}</span>
                 </div>
@@ -22,7 +22,7 @@
             <form @submit.prevent="sendMessage" class="flex flex-col gap-2">
                 <div class="flex gap-2">
                     <input id="message-input" v-model="newMessage" type="text" placeholder="Type a message..."
-                        class="flex-grow p-3 bg-[var(--nordic-secondary-bg)] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent"
+                        class="flex-grow p-3 bg-[var(--nordic-secondary-bg)] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent break-all"
                         :disabled="!isConnected" />
                     <button type="submit"
                         class="px-4 py-2 bg-nordic-primary-accent text-white rounded-lg hover:bg-nordic-dark transition-colors"

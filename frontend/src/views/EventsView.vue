@@ -9,7 +9,7 @@
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Upcoming Events</h3>
           <ul v-if="upcoming && upcoming.length > 0" class="space-y-2">
             <li v-for="event in upcoming" :key="event.id" @click="select(event)" :class="[
-              'cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150',
+              'cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 break-all',
               selectedEvent?.id === event.id ? 'text-nordic-primary-accent' : ''
             ]">
               {{ event.title }}
@@ -22,7 +22,7 @@
           <h4 class="text-xl font-semibold text-nordic-dark mb-3">Invited</h4>
           <ul v-if="invited.length > 0" class="space-y-2">
             <li v-for="event in invited" :key="event.id" @click="select(event)"
-              class="cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
+              class="cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 break-all">
               {{ event.title }}
             </li>
           </ul>
@@ -33,7 +33,7 @@
           <h4 class="text-xl font-semibold text-nordic-dark mb-3">Past</h4>
           <ul v-if="past.length > 0" class="space-y-2">
             <li v-for="event in past" :key="event.id" @click="select(event)"
-              class="cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
+              class="cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 break-all">
               {{ event.title }}
             </li>
           </ul>

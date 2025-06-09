@@ -8,7 +8,6 @@
 
 <script setup>
 import TopBar from '@/components/TopBar.vue'
-import TwoColumnLayout from '@/layouts/TwoColumnLayout.vue'
 
 // No actual 404 status, that should come from the server.
 </script>

@@ -20,9 +20,9 @@
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Suggested Users</h3>
           <ul v-if="users && users.length > 0" class="space-y-2">
             <li v-for="user in users" :key="user.id"
-              class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+              class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
               <RouterLink :to="`/profile/${user.id}`">
-                {{ user.first_name }} {{ user.last_name }}<span v-if="user.username"> - {{ user.username }}</span>
+                {{ user.first_name }} {{ user.last_name }}<span class="break-all" v-if="user.username"> - {{ user.username }}</span>
               </RouterLink>
             </li>
           </ul>

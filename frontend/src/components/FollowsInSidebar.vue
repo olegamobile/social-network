@@ -4,7 +4,7 @@
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Following</h3>
         <ul v-if="followedUsers && followedUsers.length > 0" class="space-y-2 mb-5">
             <li v-for="user in followedUsers" :key="user.id"
-                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
                 <RouterLink :to="`/profile/${user.id}`">
                     {{ user.first_name }} {{ user.last_name }}<span v-if="user.username"> - {{ user.username
                     }}</span>
@@ -19,7 +19,7 @@
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Followed by</h3>
         <ul v-if="followers && followers.length > 0" class="space-y-2 mb-5">
             <li v-for="user in followers" :key="user.id"
-                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
                 <RouterLink :to="`/profile/${user.id}`">
                     {{ user.first_name }} {{ user.last_name }}<span v-if="user.username"> - {{ user.username
                     }}</span>
