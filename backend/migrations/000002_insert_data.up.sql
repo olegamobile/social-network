@@ -602,7 +602,7 @@ INSERT INTO notifications (user_id, type, follow_req_id, group_invite_id, group_
 (4, 'follow_request', 8, NULL, NULL, NULL, 'Mia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
 (6, 'follow_request', 9, NULL, NULL, NULL, 'Lena wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'),    -- declined
 (8, 'follow_request', 10, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
-(8, 'follow_request', 11, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
+(8, 'follow_request', 11, NULL, NULL, NULL, 'Aziz wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
 (13, 'follow_request', 12, NULL, NULL, NULL, 'Emma wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
 (13, 'follow_request', 13, NULL, NULL, NULL, 'Amina wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'delete'), -- accepted
 (11, 'follow_request', 14, NULL, NULL, NULL, 'Sofia wants to follow you.', FALSE, CURRENT_TIMESTAMP, NULL, NULL, 'enable'),
