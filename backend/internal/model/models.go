@@ -23,8 +23,8 @@ type User struct {
 	Status     string     `json:"status"`
 	AvatarPath string     `json:"avatar_url"`
 	IsPublic   bool       `json:"is_public"`
+	IsAdmin    bool       `json:"is_admin"`
 }
-
 type Post struct {
 	ID               int     `json:"id"`
 	UserID           int     `json:"user_id"`
