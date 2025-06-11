@@ -2,7 +2,7 @@
     <li class="notification-item">
         <div class="flex justify-between space-x-1 items-center">
             <div class="flex-grow">
-                <router-link :to="'/profile/' + notification.sender_id" class="font-bold">{{ notification.sender_name
+                <router-link :to="'/profile/' + notification.sender_id" class="font-bold break-all">{{ notification.sender_name
                     }}</router-link>
             </div>
             <!-- Accept/Decline Buttons -->

@@ -24,7 +24,7 @@
                             'cursor-pointer text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 p-2 rounded-lg',
                             selectedChat && selectedChat.user_id === chat.user_id ? 'font-semibold text-nordic-primary-accent bg-gray-100' : ''
                         ]">
-                            <span>{{ chat.name }}</span>
+                            <span class="break-all">{{ chat.name }}</span>
                             <div class="text-sm text-gray-500 truncate" v-if="getLastMessage(chat)">
                                 {{ getLastMessage(chat).sender_name }}: {{ getLastMessage(chat).content }}
                             </div>
@@ -45,7 +45,7 @@
                     <ul v-if="followedUsers.length > 0" class="space-y-2">
                         <li v-for="user in followedUsers" :key="user.id">
                             <button @click="startChat(user)"
-                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
                                 {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
@@ -58,7 +58,7 @@
                     <ul v-if="followers.length > 0" class="space-y-2">
                         <li v-for="user in followers" :key="user.id">
                             <button @click="startChat(user)"
-                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+                                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
                                 {{ user.first_name }} {{ user.last_name }}
                             </button>
                         </li>
@@ -70,7 +70,7 @@
             <template #main>
                 <div v-if="selectedChat" class="mb-6">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-3xl font-bold text-nordic-dark">{{ selectedChat.name }}</h2>
+                        <h2 class="text-3xl font-bold text-nordic-dark break-all">{{ selectedChat.name }}</h2>
                         <button v-if="!isConnected" @click="connectWebSocket"
                             class="px-4 py-2 bg-nordic-primary-accent text-white rounded-lg hover:bg-nordic-dark transition-colors">
                             Reconnect

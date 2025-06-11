@@ -6,8 +6,8 @@
             <div v-if="chat.messages && chat.messages.length > 0">
                 <div v-for="msg in chat.messages" :key="msg.id"
                     :class="['mb-3 p-3 rounded-lg max-w-xs', (user && msg.sender_id === user.id) ? 'ml-auto bg-nordic-primary-accent text-white' : 'bg-gray-200']">
-                    <p class="text-xs font-semibold mb-1">{{ msg.sender_name }}</p>
-                    <p class="break-words">{{ msg.content }}</p>
+                    <p class="text-xs font-semibold mb-1 break-all">{{ msg.sender_name }}</p>
+                    <p class="break-all">{{ msg.content }}</p>
                     <span class="text-xs opacity-70 block text-right">{{ finnishTime(msg.created_at, 'medium', 'short')
                         }}</span>
                 </div>
@@ -17,16 +17,29 @@
             </div>
         </div>
 
+        <!-- message input -->
         <div v-if="chat && chat.is_active" class="message-input-container">
-            <form @submit.prevent="sendMessage" class="flex gap-2">
-                <input id="message-input" v-model="newMessage" type="text" placeholder="Type a message..."
-                    class="flex-grow p-3 bg-[var(--nordic-secondary-bg)] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent"
-                    :disabled="!isConnected" />
-                <button type="submit"
-                    class="px-4 py-2 bg-nordic-primary-accent text-white rounded-lg hover:bg-nordic-dark transition-colors"
-                    :disabled="!newMessage.trim() || !isConnected">
-                    Send
-                </button>
+            <form @submit.prevent="sendMessage" class="flex flex-col gap-2">
+                <div class="flex gap-2">
+                    <input id="message-input" v-model="newMessage" type="text" placeholder="Type a message..."
+                        class="flex-grow p-3 bg-[var(--nordic-secondary-bg)] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nordic-primary-accent break-all"
+                        :disabled="!isConnected" />
+                    <button type="submit"
+                        class="px-4 py-2 bg-nordic-primary-accent text-white rounded-lg hover:bg-nordic-dark transition-colors"
+                        :disabled="!newMessage.trim() || !isConnected">
+                        Send
+                    </button>
+                </div>
+                <div class="relative flex flex-col gap-2 mr-auto">
+                    <button type="button" @click="inputEmoji = !inputEmoji"
+                        class="px-4 py-2 bg-nordic-primary-accent text-white rounded-lg hover:bg-nordic-dark transition-colors">
+                        {{ inputEmoji ? 'Close Emojis' : 'Add Emojis' }}
+                    </button>
+
+                    <div v-if="inputEmoji" class="absolute top-full mt-2 z-10">
+                        <EmojiPicker :native="true" @select="onSelectEmoji" />
+                    </div>
+                </div>
             </form>
             <div v-if="!isConnected" class="text-red-500 text-sm mt-2">
                 Not connected to chat server. Please reconnect. {{ isConnected }}
@@ -52,6 +65,18 @@ import { useWebSocketStore } from '@/stores/websocket'
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
 import { useFormats } from '@/composables/useFormatting'
+import EmojiPicker from 'vue3-emoji-picker'
+import 'vue3-emoji-picker/css'
+
+const route = useRoute()
+const newMessage = ref('')
+const websocketStore = useWebSocketStore()
+const { isConnected } = storeToRefs(websocketStore)
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
+const messagesContainer = ref(null);
+const { finnishTime } = useFormats();
+const inputEmoji = ref(false)
 
 const props = defineProps({
     chat: {
@@ -64,14 +89,9 @@ const props = defineProps({
     }
 })
 
-const route = useRoute()
-const newMessage = ref('')
-const websocketStore = useWebSocketStore()
-const { isConnected } = storeToRefs(websocketStore)
-const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
-const messagesContainer = ref(null);
-const { finnishTime } = useFormats();
+function onSelectEmoji(emoji) {
+    newMessage.value += emoji.i
+}
 
 // Note: Ensure this watch block is aligned with the latest ChatBox.vue changes for deduplication.
 // It should primarily handle echoes for the senderconst { finnishTime } = useFormats();

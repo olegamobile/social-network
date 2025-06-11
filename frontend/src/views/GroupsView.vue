@@ -38,7 +38,7 @@
                     <h3 class="text-xl font-semibold text-nordic-dark mb-3">Search Results</h3>
                     <ul class="space-y-2">
                         <li v-for="group in searchResults" :key="group.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
                             <RouterLink :to="`/group/${group.id}`">{{ group.title }}</RouterLink>
                             <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
                         </li>
@@ -51,7 +51,7 @@
                     <h3 class="text-xl font-semibold text-nordic-dark mb-3">Suggested Groups</h3>
                     <ul v-if="suggestedGroups && suggestedGroups.length > 0" class="space-y-2">
                         <li v-for="group in suggestedGroups" :key="group.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150">
+                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 break-all">
                             <RouterLink :to="`/group/${group.id}`">{{ group.title }}</RouterLink>
                             <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
                         </li>
@@ -76,7 +76,7 @@ import InvitedGroupsInSidebar from '@/components/InvitedGroupsInSidebar.vue'
 import AdminGroupsInSidebar from '@/components/AdminGroupsInSidebar.vue'
 import NewGroupForm from '@/components/NewGroupForm.vue'
 import { useArrayUtils } from '@/composables/useArrayUtils';
-import throttle from 'lodash.throttle';
+import debounce from 'lodash.debounce';
 
 const apiUrl = import.meta.env.VITE_API_URL
 const errorStore = useErrorStore()
@@ -150,8 +150,7 @@ async function fetchGroups() {
     }
 }
 
-
-const searchGroups = throttle(_searchGroups, 1000);
+const searchGroups = debounce(_searchGroups, 500);
 
 onMounted(() => {
     fetchGroups()

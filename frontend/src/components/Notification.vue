@@ -6,26 +6,26 @@
         <div class="notification-content">
             <span class="notification-text">
                 <template v-if="notification.type === 'follow_request'">
-                    <router-link :to="'/profile/' + notification.sender_id" class="font-bold">{{
+                    <router-link :to="'/profile/' + notification.sender_id" class="font-bold break-all">{{
                         notification.sender_name }}</router-link> wants to follow you
                 </template>
                 <template v-else-if="notification.type === 'group_invitation'">
-                    <router-link :to="'/profile/' + notification.sender_id" class="font-bold">{{
+                    <router-link :to="'/profile/' + notification.sender_id" class="font-bold break-all">{{
                         notification.sender_name }}</router-link> invited you to join
-                    <router-link :to="'/group/' + notification.group_id" class="font-bold">{{
+                    <router-link :to="'/group/' + notification.group_id" class="font-bold break-all">{{
                         notification.group_title }}</router-link>
                 </template>
                 <template v-else-if="notification.type === 'group_join_request'">
-                    <router-link :to="'/profile/' + notification.sender_id" class="font-bold">{{
+                    <router-link :to="'/profile/' + notification.sender_id" class="font-bold break-all">{{
                         notification.sender_name }}</router-link> wants to join
-                    <router-link :to="'/group/' + notification.group_id" class="font-bold">{{
+                    <router-link :to="'/group/' + notification.group_id" class="font-bold break-all">{{
                         notification.group_title }}</router-link>
                 </template>
                 <template v-else-if="notification.type === 'event_creation'">
-                    New event: <router-link :to="'/events/' + notification.event_id" class="font-bold">{{
+                    New event: <router-link :to="'/events/' + notification.event_id" class="font-bold break-all">{{
                         notification.event_title }}</router-link>
                 </template>
-                <template v-else>
+                <template v-else class="break-all">
                     {{ notification.content }}
                 </template>
             </span>

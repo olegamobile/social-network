@@ -1,12 +1,12 @@
 <template>
     <div class="event-card">
         <div class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold text-nordic-dark mb-4">{{ event.title }}</h2>
+            <h2 class="text-2xl font-semibold text-nordic-dark mb-4 break-all">{{ event.title }}</h2>
             <div class="space-y-2">
 
                 <p v-if="event.creator">
                     <span class="font-semibold text-nordic-dark">Creator:</span>
-                    <RouterLink :to="`/profile/${event.creator_id}`" class="text-nordic-light ml-1">
+                    <RouterLink :to="`/profile/${event.creator_id}`" class="text-nordic-light ml-1 break-all">
                         {{ event.creator.first_name + ' ' + event.creator.last_name
                         }}
                     </RouterLink>
@@ -14,7 +14,7 @@
 
                 <p v-if="event.group">
                     <span class="font-semibold text-nordic-dark">Group:</span>
-                    <RouterLink :to="`/group/${event.group_id}`" class="text-nordic-light ml-1">
+                    <RouterLink :to="`/group/${event.group_id}`" class="text-nordic-light ml-1 break-all">
                         {{ event.group }}
                     </RouterLink>
                 </p>
@@ -24,7 +24,7 @@
                 </p>
                 <p>
                     <span class="font-semibold text-nordic-dark">Description:</span>
-                    <span class="text-nordic-light ml-1">{{ event.description }}</span>
+                    <span class="text-nordic-light ml-1 break-all">{{ event.description }}</span>
                 </p>
 
                 <br>
@@ -35,7 +35,7 @@
                 <ul v-if="event.going && event.going.length > 0">
                     <li v-for="user in event.going" :key="user.id"
                         class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                        <RouterLink :to="`/profile/${user.id}`" class="flex items-center gap-2">
+                        <RouterLink :to="`/profile/${user.id}`" class="flex items-center gap-2 break-all">
                             {{ user.first_name }} {{ user.last_name }}
                             <div v-if="user.avatar_url"
                                 class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1">
@@ -53,7 +53,7 @@
                 <ul v-if="event.not_going && event.not_going.length > 0">
                     <li v-for="user in event.not_going" :key="user.id"
                         class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                        <RouterLink :to="`/profile/${user.id}`" class="flex items-center gap-2">
+                        <RouterLink :to="`/profile/${user.id}`" class="flex items-center gap-2 break-all">
                             {{ user.first_name }} {{ user.last_name }}
                             <div v-if="user.avatar_url"
                                 class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1">
@@ -72,7 +72,7 @@
                 <ul v-if="event.no_response && event.no_response.length > 0">
                     <li v-for="user in event.no_response" :key="user.id"
                         class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
-                        <RouterLink :to="`/profile/${user.id}`" class="flex items-center gap-2">
+                        <RouterLink :to="`/profile/${user.id}`" class="flex items-center gap-2 break-all">
                             {{ user.first_name }} {{ user.last_name }}
                             <div v-if="user.avatar_url"
                                 class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1">

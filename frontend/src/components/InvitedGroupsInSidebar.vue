@@ -3,7 +3,7 @@
         <h3 class="text-xl font-semibold text-nordic-dark mb-3">Invitations Received</h3>
         <ul v-if="groups && groups.length > 0" class="space-y-2 mb-5">
             <li v-for="group in groups" :key="group.id"
-                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer">
+                class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
                 <RouterLink :to="`/group/${group.id}`">
                     {{ group.title }}
                 </RouterLink>

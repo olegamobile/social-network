@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import TopBar from '@/components/TopBar.vue'
@@ -38,13 +38,11 @@ const router = useRouter()
 const userStore = useUserStore()
 const apiUrl = import.meta.env.VITE_API_URL
 const errorStore = useErrorStore()
-const wsUrl = import.meta.env.VITE_WS_URL
 const wsStore = useWebSocketStore()
 const { user } = storeToRefs(userStore)
 
 
 async function login() {
-
     try {
         const res = await fetch(`${apiUrl}/api/login`, {
             method: 'POST',
@@ -58,27 +56,11 @@ async function login() {
             //console.log("data to store at login:", data.user)
             userStore.setUser(data.user)
 
-            /*             wsStore.connect(`${wsUrl}/ws`)   // main.js should take care of connecting
-                        watch(() => wsStore.message, (newMessage) => {
-                            if (newMessage?.type === 'welcome') {
-                                console.log('WebSocket authenticated successfully')
-                            }
-                        }) */
-
-
-            /*             type WSMessage struct {
-                Type    string `json:"type"`
-                From    string `json:"from"`
-                To      string `json:"receiver_id,omitempty"`
-                Content string `json:"content,omitempty"`
-            } */
-
-
             // Testing connection
             const nuMsg = {
                 type: "ping",
                 from: user.value.id,
-                from_name: user.value.first_name + ' ' + user.value.last_name          
+                from_name: user.value.first_name + ' ' + user.value.last_name
             }
             wsStore.send(nuMsg)
 
@@ -95,6 +77,5 @@ async function login() {
         router.push('/error')
         return
     }
-
 }
 </script>

@@ -112,9 +112,7 @@ async function _getHomeFeed() {
     }
 }
 
-
-// 🔁 Create a throttled version
-const getHomeFeed = throttle(_getHomeFeed, 1000);
+const getHomeFeed = throttle (_getHomeFeed, 1000);
 
 onMounted(async () => {
     await getHomeFeed()

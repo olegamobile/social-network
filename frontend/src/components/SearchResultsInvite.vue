@@ -3,7 +3,7 @@
         <h3 class="text-xl font-semibold text-[var(--nordic-text-dark)] mb-3">Search Results</h3>
         <ul class="space-y-2">
             <li v-for="user in results" :key="user.user.id"
-                class="text-[var(--nordic-text-light)] hover:text-[var(--nordic-primary-accent)] transition-colors duration-150">
+                class="text-[var(--nordic-text-light)] hover:text-[var(--nordic-primary-accent)] transition-colors duration-150  break-all">
 
                 <!-- invite button -->
                 <button @click="inviteUser(user.user.id)"

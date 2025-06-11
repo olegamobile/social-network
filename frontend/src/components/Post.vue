@@ -5,13 +5,13 @@
         <img v-if="post.image_path" :src="`${apiUrl}/${post.image_path}`" alt=""
             class="w-full rounded-md border border-[var(--nordic-border-light)]" />
 
-        <p class="post-content text-[var(--nordic-text-dark)]text-base">
+        <p class="post-content text-[var(--nordic-text-dark)]text-base break-all">
             {{ post.content }}
         </p>
 
         <small class="post-date flex items-center text-sm text-[var(--nordic-text-light)]">
             <RouterLink :to="`/profile/${post.user_id}`"
-                class="post-user flex items-center mr-1 hover:underline text-[var(--nordic-text-dark)]">
+                class="post-user flex items-center mr-1 hover:underline text-[var(--nordic-text-dark)] break-all">
                 <div v-if="post.avatar_url"
                     class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1 border border-[var(--nordic-border-light)]">
                     <img :src="`${apiUrl}/${post.avatar_url}`" alt="User Avatar" class="w-full h-full object-cover" />
@@ -21,7 +21,7 @@
             <span v-if="post.group_id" class="text-[var(--nordic-text-light)]">
                 in
                 <RouterLink :to="`/group/${post.group_id}`"
-                    class="text-[var(--nordic-primary-accent)] hover:underline mr-1">
+                    class="text-[var(--nordic-primary-accent)] hover:underline mr-1 break-all">
                     {{ post.group_name }}
                 </RouterLink>
             </span>
@@ -80,12 +80,12 @@
                 <li v-for="comment in comments" :key="comment.id" class="mt-1 border-t pt-1">
                     <img v-if="comment.image_path" :src="`${apiUrl}/${comment.image_path}`" alt=""
                         class="w-full rounded-md border border-[var(--nordic-border-light)]" />
-                    <p class="post-content text-[var(--nordic-text-dark)] text-base">
+                    <p class="post-content text-[var(--nordic-text-dark)] text-base break-all">
                         {{ comment.content }}
                     </p>
                     <small class="post-date flex items-center text-sm text-[var(--nordic-text-light)]">
                         <RouterLink :to="`/profile/${post.user_id}`"
-                            class="post-user flex items-center mr-1 hover:underline text-[var(--nordic-text-dark)]">
+                            class="post-user flex items-center mr-1 hover:underline text-[var(--nordic-text-dark)] break-all">
                             <div v-if="comment.user.avatar_url"
                                 class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1 border border-[var(--nordic-border-light)]">
                                 <img :src="`${apiUrl}/${comment.user.avatar_url}`" alt="User Avatar"
