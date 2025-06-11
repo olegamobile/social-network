@@ -184,10 +184,19 @@ func GetGroupPostsByGroupId(groupId int) ([]model.Post, error) {
 
 func GetGroupMembersByGroupId(groupId int) ([]model.User, error) {
 	rows, err := database.DB.Query(`
-	SELECT u.id, u.first_name, u.last_name, u.avatar_path
-	FROM users u
-	JOIN group_members gm ON u.id = gm.user_id
-	WHERE gm.group_id = ? AND gm.status = 'enable' AND u.status = 'enable' AND approval_status = 'accepted';`, groupId)
+SELECT 
+    u.id, 
+    u.first_name, 
+    u.last_name, 
+    u.avatar_path,
+    CASE WHEN u.id = g.creator_id THEN true ELSE false END AS is_admin
+FROM users u
+JOIN group_members gm ON u.id = gm.user_id
+JOIN groups g ON gm.group_id = g.id
+WHERE gm.group_id = ? 
+  AND gm.status = 'enable' 
+  AND u.status = 'enable' 
+  AND gm.approval_status = 'accepted';`, groupId)
 
 	if err != nil {
 		fmt.Println("rows error at GetGroupMembersByGroupId", err)
@@ -201,7 +210,7 @@ func GetGroupMembersByGroupId(groupId int) ([]model.User, error) {
 		var firstname, lastname string
 		var avatarUrl sql.NullString
 
-		err := rows.Scan(&u.ID, &firstname, &lastname, &avatarUrl)
+		err := rows.Scan(&u.ID, &firstname, &lastname, &avatarUrl, &u.IsAdmin)
 		if err != nil {
 			fmt.Println("scan error at GetPostsByUserId", err)
 			return nil, err
