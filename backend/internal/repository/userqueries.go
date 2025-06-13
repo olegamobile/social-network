@@ -131,14 +131,14 @@ func ViewFullProfileOrNot(userId, targetId int) (bool, error) {
 }
 
 // SearchUsers retrieves users whose username, first_name, or last_name match the query.
-func SearchUsers(query string) ([]model.User, error) {
+func SearchUsers(query string, userID int) ([]model.User, error) {
 	q := "%" + query + "%" // Add wildcards for LIKE clause
 	rows, err := database.DB.Query(`
 		SELECT id, nickname, email, first_name, last_name, date_of_birth, about_me, avatar_path, is_public
 		FROM users 
-		WHERE nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ?
+		WHERE (nickname LIKE ? OR first_name LIKE ? OR last_name LIKE ?) AND id <> ?
 		`,
-		q, q, q,
+		q, q, q, userID,
 	)
 	if err != nil {
 		fmt.Println("query error at SearchUsers:", err)

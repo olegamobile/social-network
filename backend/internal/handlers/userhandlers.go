@@ -36,7 +36,7 @@ func HandleUserByID(w http.ResponseWriter, r *http.Request) {
 
 // SearchUsers handles the user search request.
 func SearchUsers(w http.ResponseWriter, r *http.Request) {
-	_, err := service.ValidateSession(r)
+	userID, err := service.ValidateSession(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -48,11 +48,13 @@ func SearchUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := repository.SearchUsers(query)
+	users, err := repository.SearchUsers(query, userID)
 	if err != nil {
 		http.Error(w, "Error searching users", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
 
