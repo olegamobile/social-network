@@ -97,8 +97,8 @@ const register = async () => {
             firstName: form.value.firstName,
             lastName: form.value.lastName,
             dob: form.value.dob,
-            nickname: form.value.nickname || null,
-            about: form.value.about || null
+            nickname: form.value.nickname,
+            about: form.value.about
         };
 
         const formData = new FormData();
