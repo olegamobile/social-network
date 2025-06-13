@@ -337,7 +337,7 @@ func GroupInvitation(userID int, groupInvite model.GroupInvitation) int {
 }
 
 func GroupInvitationSearch(query, groupIdStr string, invitables []model.InvitableUser) ([]model.InvitableUser, int) {
-	users, err := repository.SearchUsers(query)
+	users, err := repository.SearchUsers(query, 0)
 	if err != nil {
 		return invitables, http.StatusInternalServerError
 	}
