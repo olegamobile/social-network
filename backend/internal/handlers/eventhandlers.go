@@ -116,6 +116,9 @@ func GetEventsByUserID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
 		return
 	}
+	for i := range len(events) {
+		events[i] = service.TrimTimeZone(events[i])
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)

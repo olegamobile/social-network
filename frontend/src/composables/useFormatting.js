@@ -18,7 +18,6 @@ export const useFormats = () => {
         }).replace("klo ", "");
     }
 
-
     const localDate = computed(() => {
         return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
     });

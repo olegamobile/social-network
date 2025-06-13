@@ -59,15 +59,17 @@ func HandleMe(w http.ResponseWriter, r *http.Request) {
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		fmt.Println("00")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Method not allowed"})
 		return
 	}
 
 	err := r.ParseMultipartForm(10 << 20) // 10MB limit
 	if err != nil {
-		fmt.Println("01", err)
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Failed to parse form"})
 		return
 	}
 
@@ -83,8 +85,9 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	about := strings.TrimSpace(r.FormValue("about"))
 
 	if email == "" || password == "" || firstName == "" || lastName == "" || dob == "" {
-		fmt.Println("02 missing fields")
-		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Missing required fields"})
 		return
 	}
 
@@ -95,7 +98,9 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 		avatarPath, err = service.UploadAvatar(file, header) // Use UploadAvatar from current package or service
 		if err != nil {
-			http.Error(w, "Failed to save image", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"message": "Failed to save image"})
 			return
 		}
 	} else {
@@ -133,7 +138,9 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	errMsg, statusCode := service.RegisterUser(userInfo)
 	if !(statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices) { // error code
-		http.Error(w, errMsg, statusCode)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(statusCode)
+		json.NewEncoder(w).Encode(map[string]string{"message": errMsg})
 		return
 	}
 

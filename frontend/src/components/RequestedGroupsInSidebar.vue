@@ -30,7 +30,6 @@ const groups = ref([]);
 
 async function getGroups() {
     try {
-        console.log(`${apiUrl}/api/groups/requested`)
         const res = await fetch(`${apiUrl}/api/groups/requested`, {
             credentials: 'include' // This sends the session cookie with the request
         });

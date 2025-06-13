@@ -144,7 +144,6 @@ const handlePostSubmitted = (newPost) => {
 }
 
 const handleEventCreated = (newEvent) => {
-    //console.log("new event:", newEvent)
     events.value.push(newEvent)
     showEventForm.value = false
 }
@@ -169,7 +168,6 @@ const groupButtonClass = computed(() => {
 function toggleChat() {
     chatOpen.value = !chatOpen.value
     getChat(route.params.id)
-    //console.log("Chat open:", chatOpen.value)
 }
 
 async function getChat(groupId) {        // Fetch and filter posts
@@ -183,7 +181,6 @@ async function getChat(groupId) {        // Fetch and filter posts
         }
 
         groupChat.value = await postsRes.json()
-        //console.log("chat call succeeded")
     } catch (error) {
         console.log("error fetching group chat:", error)
         errorStore.setError('Error', 'Something went wrong while loading group chat data.')
@@ -339,7 +336,9 @@ async function getEvents(groupId) {        // Fetch and filter posts
             throw new Error(`Failed to fetch posts: ${eventsRes.status}`)
         }
         const groupEvs = await eventsRes.json()
-        if (groupEvs) events.value = groupEvs
+        if (groupEvs) {
+            events.value = groupEvs
+        }
     } catch (error) {
         console.log("error fetching group events:", error)
         errorStore.setError('Error', 'Something went wrong while loading group events data.')

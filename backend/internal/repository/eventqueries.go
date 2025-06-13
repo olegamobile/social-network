@@ -289,5 +289,6 @@ func GetEventsByGroup(groupID, userID int) ([]model.Event, error) {
 
 		events = append(events, e)
 	}
+
 	return events, nil
 }

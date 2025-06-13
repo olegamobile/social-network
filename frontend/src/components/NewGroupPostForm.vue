@@ -14,7 +14,7 @@
         <!-- upload image -->
         <div class="space-y-2">
             <label class="block text-sm font-medium text-[var(--nordic-text-light)]">Image (Optional):</label>
-            <input type="file" @change="handleFileUpload" accept="image/*" class="block w-full text-sm text-[var(--nordic-text-light)]
+            <input type="file" @change="handleFileUpload" accept=".jpg, .jpeg, .gif, .png, .webp" class="block w-full text-sm text-[var(--nordic-text-light)]
                file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 
                file:text-sm file:font-semibold 
                file:bg-[var(--nordic-secondary-bg)] file:text-[var(--nordic-text-dark)] 
