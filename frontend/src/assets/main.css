@@ -64,3 +64,9 @@ body {
 .hover\:text-nordic-primary-accent:hover {
   color: var(--nordic-primary-accent);
 }
+
+.post-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fafafa;
+}

@@ -5,7 +5,7 @@
         <img v-if="post.image_path" :src="`${apiUrl}/${post.image_path}`" alt=""
             class="w-full rounded-md border border-[var(--nordic-border-light)]" />
 
-        <p class="post-content text-[var(--nordic-text-dark)]text-base break-all">
+        <p class="post-content text-nordic-dark text-base break-all">
             {{ post.content }}
         </p>
 
@@ -242,11 +242,6 @@ const submitComment = async () => {
 </script>
 
 <style scoped>
-.post-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fafafa;
-}
 
 .post-content {
     font-size: 1.1rem;

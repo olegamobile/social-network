@@ -28,33 +28,38 @@
                             <i class="fas fa-search text-nordic-light"></i>
                         </div>
                         <input id="search-groups" title="search"
-                            class="block w-full pl-10 pr-3 py-2 border border-nordic-light rounded-md leading-5 bg-white placeholder-nordic-light focus:outline-none focus:ring-2 focus:ring-nordic-secondary-accent focus:border-nordic-secondary-accent sm:text-sm"
+                            class="block w-full pl-10 pr-3 py-2 border border-nordic-light rounded-md leading-5 bg-white placeholder-nordic-light 
+                            focus:outline-none focus:ring-2 focus:ring-nordic-secondary-accent focus:border-nordic-secondary-accent sm:text-sm"
                             placeholder="Search groups..." type="search" v-model="searchQuery" @input="searchGroups">
                     </div>
                 </div>
 
                 <!-- search results -->
-                <div v-if="searchResults && searchResults.length > 0" class="mb-8">
+                <div v-if="searchResults && searchResults.length > 0" class="mb-8 w-full max-w-screen-sm">
                     <h3 class="text-xl font-semibold text-nordic-dark mb-3">Search Results</h3>
                     <ul class="space-y-2">
-                        <li v-for="group in searchResults" :key="group.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
-                            <RouterLink :to="`/group/${group.id}`">{{ group.title }}</RouterLink>
+                        <RouterLink :to="`/group/${group.id}`" v-for="group in searchResults" :key="group.id">
+                        <li class="post-card flex flex-col items-start gap-2 mb-4 p-4 bg-[var(--nordic-primary-bg)] 
+                            border border-[var(--nordic-border-light)] rounded-md shadow-sm cursor-pointer">
+                            {{ group.title }}
                             <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
                         </li>
+                        </RouterLink>
                     </ul>
                 </div>
                 <p v-else-if="searchInitiated" class="text-nordic-light italic mb-6">No groups found</p>
 
                 <!-- suggested groups -->
-                <div>
+                <div class="mb-8 w-full max-w-screen-sm">
                     <h3 class="text-xl font-semibold text-nordic-dark mb-3">Suggested Groups</h3>
                     <ul v-if="suggestedGroups && suggestedGroups.length > 0" class="space-y-2">
-                        <li v-for="group in suggestedGroups" :key="group.id"
-                            class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 break-all">
-                            <RouterLink :to="`/group/${group.id}`">{{ group.title }}</RouterLink>
+                        <RouterLink :to="`/group/${group.id}`" v-for="group in suggestedGroups" :key="group.id">
+                        <li class="post-card flex flex-col items-start gap-2 mb-4 p-4 bg-[var(--nordic-primary-bg)] 
+                            border border-[var(--nordic-border-light)] rounded-md shadow-sm cursor-pointer">
+                            {{ group.title }}
                             <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
                         </li>
+                        </RouterLink>
                     </ul>
                     <p v-else class="text-nordic-light italic">Not enough data for recommendations</p>
                 </div>
