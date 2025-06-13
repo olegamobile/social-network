@@ -30,7 +30,7 @@
 
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-nordic-light">Avatar/Image (Optional):</label>
-                <input type="file" @change="handleFileUpload" accept="image/*"
+                <input type="file" @change="handleFileUpload" accept=".jpg, .jpeg, .gif, .png, .webp"
                     class="block w-full text-sm text-nordic-light file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-nordic-light hover:file:bg-gray-200" />
 
                 <div v-if="form.avatarUrl" class="mt-2">
