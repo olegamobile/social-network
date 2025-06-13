@@ -58,7 +58,6 @@
 </template>
 
 <script setup>
-// (Your script section remains the same as the last corrected version)
 import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useWebSocketStore } from '@/stores/websocket'
@@ -183,7 +182,5 @@ onMounted(() => {
             messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
         }
     })
-
-    console.log("chat messages:", props.chat?.messages)
 })
 </script>
