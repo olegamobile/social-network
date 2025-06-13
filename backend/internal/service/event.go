@@ -5,7 +5,13 @@ import (
 	"backend/internal/repository"
 	"fmt"
 	"net/http"
+	"strings"
 )
+
+func TrimTimeZone(e model.Event) model.Event {
+	e.EventDate = strings.TrimSuffix(e.EventDate, "Z")
+	return e
+}
 
 func CreateEvent(event model.Event, userID int) (model.Event, error) {
 	var err error
@@ -31,6 +37,7 @@ func CreateEvent(event model.Event, userID int) (model.Event, error) {
 		return event, err
 	}
 	event.ID = &id
+	event = TrimTimeZone(event)
 
 	return event, nil
 }
@@ -76,6 +83,7 @@ func GetEventByID(userID, eventID int) (model.Event, int) {
 	if !isMember {
 		return event, http.StatusForbidden
 	}
+	event = TrimTimeZone(event)
 
 	return event, http.StatusOK
 }
@@ -93,6 +101,10 @@ func GetEventsByGroupID(userID, groupID int) ([]model.Event, int) {
 	events, err := repository.GetEventsByGroup(groupID, userID)
 	if err != nil {
 		return nil, http.StatusInternalServerError
+	}
+
+	for i := range len(events) {
+		events[i] = TrimTimeZone(events[i])
 	}
 
 	return events, http.StatusOK
