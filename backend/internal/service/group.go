@@ -160,6 +160,10 @@ func EventsByGroupId(userId, targetId int) ([]model.Event, error) {
 		}
 	}
 
+	for i := range len(events) {
+		events[i] = TrimTimeZone(events[i])
+	}
+
 	return events, err
 }
 

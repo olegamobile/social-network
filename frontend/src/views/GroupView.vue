@@ -144,7 +144,8 @@ const handlePostSubmitted = (newPost) => {
 }
 
 const handleEventCreated = (newEvent) => {
-    //console.log("new event:", newEvent)
+    console.log(newEvent.title)
+    console.log(newEvent.event_datetime)
     events.value.push(newEvent)
     showEventForm.value = false
 }
@@ -339,7 +340,11 @@ async function getEvents(groupId) {        // Fetch and filter posts
             throw new Error(`Failed to fetch posts: ${eventsRes.status}`)
         }
         const groupEvs = await eventsRes.json()
-        if (groupEvs) events.value = groupEvs
+        if (groupEvs) {
+            events.value = groupEvs
+            console.log(groupEvs[0].title)
+            console.log(groupEvs[0].event_datetime)
+        }
     } catch (error) {
         console.log("error fetching group events:", error)
         errorStore.setError('Error', 'Something went wrong while loading group events data.')
