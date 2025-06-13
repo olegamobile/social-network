@@ -92,7 +92,6 @@ const deleteAvatar = () => {
 
 const fetchProfile = async () => {
     try {
-        console.log(`${apiUrl}/api/me`)
         const response = await fetch(`${apiUrl}/api/me`, {
             credentials: 'include',
         });

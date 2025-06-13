@@ -5,20 +5,20 @@
         <img v-if="post.image_path" :src="`${apiUrl}/${post.image_path}`" alt=""
             class="w-full rounded-md border border-[var(--nordic-border-light)]" />
 
-        <p class="post-content text-[var(--nordic-text-dark)]text-base break-all">
+        <p class="post-content text-nordic-dark text-base break-all">
             {{ post.content }}
         </p>
 
-        <small class="post-date flex items-center text-sm text-[var(--nordic-text-light)]">
+        <small class="post-date flex items-center text-sm">
             <RouterLink :to="`/profile/${post.user_id}`"
-                class="post-user flex items-center mr-1 hover:underline text-[var(--nordic-text-dark)] break-all">
+                class="post-user flex items-center mr-1 hover:underline text-[var(--nordic-primary-accent)] break-all">
                 <div v-if="post.avatar_url"
                     class="post-user-avatar w-6 h-6 rounded-full overflow-hidden mr-1 border border-[var(--nordic-border-light)]">
                     <img :src="`${apiUrl}/${post.avatar_url}`" alt="User Avatar" class="w-full h-full object-cover" />
                 </div>
                 {{ post.username }}
             </RouterLink>
-            <span v-if="post.group_id" class="text-[var(--nordic-text-light)]">
+            <span v-if="post.group_id">
                 in
                 <RouterLink :to="`/group/${post.group_id}`"
                     class="text-[var(--nordic-primary-accent)] hover:underline mr-1 break-all">
@@ -32,7 +32,7 @@
             <div class="flex items-center">
                 <button @click="toggleComments" class="group relative flex items-center mr-4 p-1 rounded-md transition-colors duration-200"
                     :disabled="commentCount === 0"
-                    :class="{ 'text-gray-400 cursor-default': commentCount === 0, 'text-blue-500 hover:bg-blue-100': commentCount > 0 }">
+                    :class="{ 'text-[var(--nordic-border-light)] cursor-default': commentCount === 0, 'text-[var(--nordic-secondary-accent)] hover:bg-blue-100': commentCount > 0 }">
                     <font-awesome-icon :icon="showComments ? 'eye-slash' : 'comments'" class="text-xl" />
                     <span v-if="commentCount > 0" class="ml-1 text-sm font-semibold">{{ commentCount }}</span>
                     <span
@@ -41,7 +41,7 @@
                     </span>
                 </button>
 
-                <button @click="showNewCommentForm" class="group relative flex items-center p-1 rounded-md text-blue-500 hover:bg-blue-100 transition-colors duration-200">
+                <button @click="showNewCommentForm" class="group relative flex items-center p-1 rounded-md text-[var(--nordic-secondary-accent)] hover:bg-blue-100 transition-colors duration-200">
                     <font-awesome-icon :icon="newComment ? 'comment-slash' : 'comment-medical'" class="text-xl" />
                     <span
                         class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
@@ -242,11 +242,6 @@ const submitComment = async () => {
 </script>
 
 <style scoped>
-.post-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fafafa;
-}
 
 .post-content {
     font-size: 1.1rem;
@@ -258,7 +253,6 @@ const submitComment = async () => {
 }
 
 .post-user {
-    color: #0077cc;
     text-decoration: none;
     font-weight: bold;
 }

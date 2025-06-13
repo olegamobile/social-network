@@ -13,18 +13,30 @@
 
         <!-- search users -->
         <SearchBox @results="handleResults" />
-        <SearchResults :results="searchResults" :searchInitiated="searchInitiated" />
+        <SearchResults :results="searchResults" :searchInitiated="searchInitiated" :apiUrl="apiUrl"/>
 
         <!-- user suggestions -->
-        <div>
+        <div class="mb-8 w-full max-w-screen-sm">
           <h3 class="text-xl font-semibold text-nordic-dark mb-3">Suggested Users</h3>
           <ul v-if="users && users.length > 0" class="space-y-2">
-            <li v-for="user in users" :key="user.id"
-              class="text-nordic-light hover:text-nordic-primary-accent transition-colors duration-150 cursor-pointer break-all">
-              <RouterLink :to="`/profile/${user.id}`">
-                {{ user.first_name }} {{ user.last_name }}<span class="break-all" v-if="user.username"> - {{ user.username }}</span>
-              </RouterLink>
-            </li>
+            <RouterLink :to="`/profile/${user.id}`" v-for="user in users" :key="user.id" class="block">
+            <li class="post-card flex items-center gap-4 mb-4 p-4 bg-[var(--nordic-primary-bg)]
+                border border-[var(--nordic-border-light)] rounded-md shadow-sm cursor-pointer">
+                <!-- Avatar on the left -->
+                <div v-if="user.avatar_url" class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                  <img :src="`${apiUrl}/${user.avatar_url}`" alt="User avatar" class="w-full h-full object-cover"/>
+                </div>
+                <!-- Name and nickname on the right -->
+                <div class="flex flex-col">
+                  <span class="font-semibold">
+                    {{ user.first_name }} {{ user.last_name }}
+                  </span>
+                  <span class="text-gray-500 break-all" v-if="user.username">
+                    #{{ user.username }}
+                  </span>
+                </div>
+              </li>
+            </RouterLink>
           </ul>
           <p v-else class="text-nordic-light italic">No suggested users available.</p>
         </div>

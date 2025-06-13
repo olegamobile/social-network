@@ -148,7 +148,6 @@ async function respondToEvent(event_id, user_id, response) {
       selectedEvent.value = updated
     }
 
-    console.log("response changed succesfully")
   } catch (error) {
     errorStore.setError('Error Loading Events', error.message || 'An unexpected error occurred while trying to load events. Please try again later.');
     router.push('/error')
