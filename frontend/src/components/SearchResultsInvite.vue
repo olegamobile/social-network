@@ -11,7 +11,7 @@
                     class="w-40 bg-[var(--nordic-primary-accent)] text-white px-2 py-1 mr-4 rounded hover:bg-[var(--nordic-secondary-accent)] disabled:opacity-50 disabled:cursor-not-allowed">
                     <span v-if="user.membership === ''">Invite</span>
                     <span v-else-if="user.membership === 'invited'">Invited</span>
-                    <span v-else>Ininvitable</span>
+                    <span v-else>Unavailable</span>
                 </button>
 
                 <!-- link to profile -->
