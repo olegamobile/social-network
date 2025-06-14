@@ -164,7 +164,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
     function initWebSocket() {
         const userStore = useUserStore()
         if (userStore.isLoggedIn) {
-            const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080/ws'
+            const websocketUrl = import.meta.env.VITE_WS_URL+'/ws' || `ws://${window.location.host}/ws`
             connect(websocketUrl)
         }
     }
