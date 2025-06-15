@@ -5,30 +5,17 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    # ports: # Removed to restrict direct access
-    #   - "8080:8080" 
     env_file:
       - ./backend/config/.env
     environment:
-      PORT: 8080 # This is the internal port the Go app listens on
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost} # Updated
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    env_file:
-      - ./frontend/.env
-    environment:
-      VITE_WEBSOCKET_URL: "ws://localhost/ws"
-      VITE_API_URL: ${API_URL:-/api} # Updated to be relative to Nginx
+      PORT: 8080
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
 
   nginx:
     build:
-      context: ./nginx
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: nginx/Dockerfile
     ports:
-      - "80:80" # Expose Nginx on port 80
+      - "80:80"
     depends_on:
       - backend
-      - frontend
