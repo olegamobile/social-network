@@ -11,7 +11,7 @@
                 </div>
                 <!-- Name and nickname on the right -->
                 <div class="flex flex-col">
-                  <span class="font-semibold">
+                  <span class="font-semibold break-all">
                     {{ user.first_name }} {{ user.last_name }}
                   </span>
                   <span class="text-gray-500 break-all" v-if="user.username">

@@ -110,7 +110,7 @@ func main() {
 	}
 	defer database.Close()
 
-	//deleteUnusedImages()	// delete database and run backend once before commenting this back in
+	//deleteUnusedImages() // delete database and run backend once before commenting this back in
 
 	go service.StartBroadcastListener()
 
