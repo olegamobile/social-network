@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"backend/config"
 	"backend/internal/model"
 	"backend/internal/service"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -14,7 +14,11 @@ import (
 var Upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		origin := r.Header.Get("Origin")
-		return origin == config.FrontendURL // explicitly allow frontend origin
+		// Allow any localhost origin (with or without port)
+		if strings.HasPrefix(origin, "http://localhost") {
+			return true
+		}
+		return false
 	},
 }
 
