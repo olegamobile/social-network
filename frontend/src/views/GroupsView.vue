@@ -40,9 +40,9 @@
                     <ul class="space-y-2">
                         <RouterLink :to="`/group/${group.id}`" v-for="group in searchResults" :key="group.id">
                         <li class="post-card flex flex-col items-start gap-2 mb-4 p-4 bg-[var(--nordic-primary-bg)] 
-                            border border-[var(--nordic-border-light)] rounded-md shadow-sm cursor-pointer">
+                            border border-[var(--nordic-border-light)] rounded-md shadow-sm cursor-pointer break-all">
                             {{ group.title }}
-                            <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
+                            <span class="text-sm text-nordic-light block ml-1 break-all">{{ group.description }}</span>
                         </li>
                         </RouterLink>
                     </ul>
@@ -55,9 +55,9 @@
                     <ul v-if="suggestedGroups && suggestedGroups.length > 0" class="space-y-2">
                         <RouterLink :to="`/group/${group.id}`" v-for="group in suggestedGroups" :key="group.id">
                         <li class="post-card flex flex-col items-start gap-2 mb-4 p-4 bg-[var(--nordic-primary-bg)] 
-                            border border-[var(--nordic-border-light)] rounded-md shadow-sm cursor-pointer">
+                            border border-[var(--nordic-border-light)] rounded-md shadow-sm cursor-pointer break-all">
                             {{ group.title }}
-                            <span class="text-sm text-nordic-light block ml-1">{{ group.description }}</span>
+                            <span class="text-sm text-nordic-light block ml-1 break-all">{{ group.description }}</span>
                         </li>
                         </RouterLink>
                     </ul>
