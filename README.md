@@ -67,6 +67,7 @@ The frontend is developed using **Vue.js**, and the backend is written in **Go**
 ## Dockerized Setup
 
 Backend and frontend docker images are built using a docker-compose.yml file and a custom script (./dev.sh). 
+Using Nginx to handle and route all the requests.
 
 ### Backend
 - Uses Go to build and serve the API
@@ -98,15 +99,20 @@ nmp install
 npm run dev
 ```
 
+Navigate to
+
+Frontend: http://localhost:5173  
+Backend API: http://localhost:8080
+
 ### With Docker
 In the base directory
 ```
 ./dev.sh
 ```
 
-### Visit site
-Frontend: http://localhost:5173  
-Backend API: http://localhost:8080
+Navigate to
+http://localhost
+
 
 ## Contributors
 - [Markus Amberla](https://github.com/MarkusYPA)
