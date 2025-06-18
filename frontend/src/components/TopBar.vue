@@ -172,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
@@ -195,6 +195,20 @@ const isRegisterPage = computed(() => route.path === '/register');
 const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
+
+// onMounted(() => {
+/* watch(userStore.isLoggedIn, () => {
+    if (userStore.isLoggedIn) { // Good practice to only fetch if logged in
+        notificationStore.fetchNotifications(); // Added
+    }
+}); */
+
+/* watchEffect(() => {
+    if (userStore.isLoggedIn) { // Good practice to only fetch if logged in
+        notificationStore.fetchNotifications(); // Added
+    }
+}) */
+
 
 onMounted(() => {
     if (userStore.isLoggedIn) { // Good practice to only fetch if logged in

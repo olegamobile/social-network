@@ -113,42 +113,6 @@ export const useNotificationStore = defineStore('notifications', () => {
         }
     }
 
-    /**
-     * Marks all notifications as read on the backend and updates the store.
-     */
-    async function markAllAsRead() {
-        try {
-            // Backend should have an endpoint for this, e.g., /api/notifications/read-all
-            // For now, let's assume it might not exist and we'll mark them one by one if needed,
-            // or the user implements a dedicated backend endpoint.
-            // This is a placeholder for a more efficient backend call.
-
-            // Fallback: Iterate and mark read if backend doesn't support /read-all
-            // This is inefficient and primarily for demonstration if a bulk endpoint is missing.
-            // A real implementation should push for a backend /read-all endpoint.
-            let allMarked = true;
-            for (const notification of notifications.value) {
-                if (!notification.is_read) {
-                    // Temporarily, just call individual markAsRead
-                    // In a real app, this loop should be replaced by a single API call
-                    await markAsRead(notification.id);
-                }
-            }
-            // After all are processed, recount or set to 0
-            unreadCount.value = notifications.value.filter(n => !n.is_read).length;
-            if (unreadCount.value === 0) {
-                console.log('All notifications marked as read.');
-            } else {
-                console.warn('Mark all as read attempted, but some still unread. Unread count:', unreadCount.value);
-            }
-
-
-        } catch (error) {
-            console.error('Error in markAllAsRead:', error);
-        }
-    }
-
-
     // Return state and actions
     return {
         notifications,
@@ -158,7 +122,6 @@ export const useNotificationStore = defineStore('notifications', () => {
         setNotifications,
         setUnreadCount,
         markAsRead,
-        markAllAsRead,
         updateNotification, // Added
         removeNotification, // Added
     };
